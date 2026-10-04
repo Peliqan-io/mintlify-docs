@@ -193,6 +193,7 @@
       {
         "tab": "Connector Guides",
         "pages": [
+          "connectors",
           {
             "group": "Connectors A to F",
             "pages": [
@@ -313,8 +314,7 @@
               "zenvoices-getting-started-in-peliqan",
               "zoho-creator-getting-started-in-peliqan"
             ]
-          },
-          "connectors"
+          }
         ]
       }
     ]
