@@ -192,11 +192,10 @@
       },
       {
         "tab": "Connector Guides",
-        "groups": [
+        "pages": [
           {
             "group": "Connectors A to F",
             "pages": [
-              "connectors",
               "adminpulse-getting-started-in-peliqan",
               "adsolut-getting-started-in-peliqan",
               "afas-getting-started-in-peliqan",
@@ -314,7 +313,8 @@
               "zenvoices-getting-started-in-peliqan",
               "zoho-creator-getting-started-in-peliqan"
             ]
-          }
+          },
+          "connectors"
         ]
       }
     ]

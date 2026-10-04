@@ -103,15 +103,42 @@ Use this for e.g. Expert/M, Adsolut, Plenion etc.
 
 Source tab configured for SQL Server, single-schema scope, Windows Authentication
 
-| Field | What to put |
-| --- | --- |
-| Database type | `SQL Server` |
-| Server | Examples: `localhost`, `localhost\SQLEXPRESS` (named instance), or `10.0.0.5,1433` (IP + port) |
-| Port | Ignored when you use a `host\instance` name — SQL Server resolves the port itself in that case |
-| Authentication | SQL Server Authentication (recommended) or Windows Authentication |
-| Database name / Schema name | The single database + schema to sync (only shown in the default "single schema" scope — see below) |
+<table>
+  <colgroup>
+    <col width="258" />
+    <col width="443" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>What to put</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Database type</td>
+      <td>`SQL Server`</td>
+    </tr>
+    <tr>
+      <td>Server</td>
+      <td>Examples: `localhost`, `localhost\SQLEXPRESS` (named instance), or `10.0.0.5,1433` (IP + port)</td>
+    </tr>
+    <tr>
+      <td>Port</td>
+      <td>Ignored when you use a `host\instance` name — SQL Server resolves the port itself in that case</td>
+    </tr>
+    <tr>
+      <td>Authentication</td>
+      <td>SQL Server Authentication (recommended) or Windows Authentication</td>
+    </tr>
+    <tr>
+      <td>Database name / Schema name</td>
+      <td>The single database + schema to sync (only shown in the default "single schema" scope — see below)</td>
+    </tr>
+  </tbody>
+</table>
 
-**Important on Windows Authentication:** Test connection and Sync now run as *your* Windows user, so they'll work fine. Scheduled syncs run as the Windows Service account instead (LocalSystem by default), which usually has no SQL access at all. If you need scheduled syncs to work with Windows Auth, change the service's log-on account via `services.msc → Peliqan Satellite → Properties → Log On`. Otherwise, just use SQL Server Authentication for anything that needs to run unattended.
+**Important on Windows Authentication:** Test connection and Sync now run as _your_ Windows user, so they'll work fine. Scheduled syncs run as the Windows Service account instead (LocalSystem by default), which usually has no SQL access at all. If you need scheduled syncs to work with Windows Auth, change the service's log-on account via `services.msc → Peliqan Satellite → Properties → Log On`. Otherwise, just use SQL Server Authentication for anything that needs to run unattended.
 
 ## ODBC
 
@@ -143,12 +170,12 @@ Switch to **"Sync multiple databases, schemas and tables"** when you need the ag
 
 In this mode you get three **include keyword** fields (all optional, all comma-separated, all case-insensitive **substring** matches):
 
-- **DB include keywords** — leave blank to scan every database on the server; or list keywords to only include databases whose name *contains* one of them.
+- **DB include keywords** — leave blank to scan every database on the server; or list keywords to only include databases whose name _contains_ one of them.
 - **Schema include keywords** — same idea, scoped to schemas within each matched database.
 - **Table include keywords** — same idea, scoped to tables within each matched schema.
 
 <Warning>
-These are **substring** matches, not exact-match and not "starts with". A keyword like `invoice` will also match a table called `invoice_archive` or `old_invoices`. If you only want a specific, exact set of tables, list them all explicitly and double-check none of your other (unwanted) table names happens to contain one of them as a substring.
+  These are **substring** matches, not exact-match and not "starts with". A keyword like `invoice` will also match a table called `invoice_archive` or `old_invoices`. If you only want a specific, exact set of tables, list them all explicitly and double-check none of your other (unwanted) table names happens to contain one of them as a substring.
 </Warning>
 
 How this works, step by step:
@@ -229,7 +256,7 @@ Settings tab
 | --- | --- |
 | Sync frequency | Hourly, every N hours, daily, or weekly |
 | Sync start time (UTC) | Anchor time for daily/weekly schedules, in UTC, not converted from your local time |
-| Scheduled sync enabled | Turns the *scheduled* runs on/off. "Sync now" always works regardless of this setting. |
+| Scheduled sync enabled | Turns the _scheduled_ runs on/off. "Sync now" always works regardless of this setting. |
 | Push config.json to target | Writes a redacted copy of this pipeline's config to a `__config` table on the target, tagged with the pipeline's id and name, so you can audit what's configured for a given pipeline over time. Secrets (passwords, keys, connection strings) are always replaced with `***` before this is written. |
 | Push logs to target | Writes per-run log lines to a `__logs` table on the target |
 
@@ -249,7 +276,7 @@ Every run adds log lines as it progresses. Filter by free-text search or toggle 
 
 Manage pipelines tab with two active pipelines
 
-Each pipeline is one source configuration → to one target schema, with its own schedule and settings. Click **+ Add pipeline** to create a new one, or use the **⋮** menu on a row to rename, activate/deactivate, or delete it.
+Each pipeline is one source configuration → to one target schema, with its own schedule and settings. Click **\+ Add pipeline** to create a new one, or use the **⋮** menu on a row to rename, activate/deactivate, or delete it.
 
 - **Rename** and **Delete** are both blocked while that specific pipeline is actively syncing — stop it first.
 - **Active / Inactive** reuses the same "Scheduled sync enabled" flag from the Settings tab — it's the same switch, shown in two places for convenience.
@@ -258,9 +285,9 @@ Each pipeline is one source configuration → to one target schema, with its own
 ## Don't reuse the same schema/dataset across pipelines
 
 <Warning>
-Do not configure two or more pipelines to write to the same target server + database + schema (or BigQuery project + dataset), because they will silently overwrite each other's metadata and data. The Target tab warns you about this automatically: if another pipeline already uses the same target, you'll see:
+  Do not configure two or more pipelines to write to the same target server + database + schema (or BigQuery project + dataset), because they will silently overwrite each other's metadata and data. The Target tab warns you about this automatically: if another pipeline already uses the same target, you'll see:
 
-> **Warning: This target schema is already used in another pipeline. Set a unique schema for each pipeline!**
+  > **Warning: This target schema is already used in another pipeline. Set a unique schema for each pipeline!**
 </Warning>
 
 This is a warning only — it won't block you from saving — but treat it as something to fix immediately, not something to ignore. Give each pipeline its own schema/dataset.
