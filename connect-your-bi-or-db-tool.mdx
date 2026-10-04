@@ -1,0 +1,87 @@
+---
+title: "Connect your BI, DB tool or iPaaS"
+sidebarTitle: "BI / DB / iPaaS"
+description: "Connect Peliqan to BI tools, DB clients and iPaaS platforms using Postgres settings, and learn how to expose Peliqan SQL queries as views."
+---
+
+You can use your favorite BI tool (Metabase, Microsoft Power BI, Tableau, Qlik, Looker etc.) to visualise data after preparing it in Peliqan, and you can use a DB tool (BeeKeeper, DBeaver) to work with tables in your Peliqan data warehouse.
+
+Use these settings in your BI tool to connect to Peliqan:
+
+- **Connection type**: Postgres (default data warehouse type in Peliqan)
+- **Host**:
+  - db.eu.peliqan.io
+  - db.mydatacloud.com
+  - db.us.peliqan.io
+  - ... (check in your account under Connections > Data warehouse connection)
+- **Port**: 5432 (for Postgres)
+- **User name & password**: copy / paste from the **Data Warehouse** tile under My Connections in Peliqan (see above)
+- **Database name**: same as the user name
+- **SSL**: enabled
+
+## "Create as view" for SQL Queries
+
+In order to see SQL queries written in Peliqan inside your BI tool, you need to set the option "Create as view". Once this is done, you can consume those queries it in your BI tool.
+
+In the SQL editor, click on the Settings icon in the top right corner (gear icon) and enable "Create as view":
+
+![Enabling create as view](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8379fd06-1bce-473e-a85a-110354d2d023/create_as_view/w=1920,quality=90,fit=scale-down)
+
+## Connect your BI tool to Peliqan
+
+<CardGroup cols={2}>
+  <Card title="Microsoft Power BI" href="/connect-your-bi-or-db-tool/microsoft-power-bi">
+  </Card>
+
+  <Card title="Looker Studio" href="/connect-your-bi-or-db-tool/looker-studio">
+  </Card>
+
+  <Card title="Tableau" href="/connect-your-bi-or-db-tool/tableau">
+  </Card>
+
+  <Card title="Grafana" href="/connect-your-bi-or-db-tool/grafana">
+  </Card>
+
+  <Card title="Metabase" href="/connect-your-bi-or-db-tool/metabase">
+  </Card>
+
+  <Card title="AWS QuickSight" href="/connect-your-bi-or-db-tool/aws-quicksight">
+  </Card>
+
+  <Card title="Apache Superset" href="/connect-your-bi-or-db-tool/apache-superset">
+  </Card>
+
+  <Card title="Excel (ODBC)" href="/connect-your-bi-or-db-tool/excel-odbc">
+  </Card>
+
+  <Card title="Excel add-in" href="/excel-add-in">
+  </Card>
+
+  <Card title="Salesforce CRM Analytics" href="/connect-your-bi-or-db-tool/salesforce-crm-analytics">
+  </Card>
+</CardGroup>
+
+[SSL certificates for the Peliqan data warehouse](/connect-your-bi-or-db-tool/ssl-certificates-for-the-peliqan-data-warehouse)
+
+## Connect your DB tool to Peliqan
+
+<CardGroup cols={2}>
+  <Card title="DBeaver" href="/connect-your-bi-or-db-tool/dbeaver">
+  </Card>
+
+  <Card title="BeeKeeper Studio" href="/connect-your-bi-or-db-tool/beekeeper-studio">
+  </Card>
+</CardGroup>
+
+## Connect your iPaaS automation tool to Peliqan
+
+<CardGroup cols={2}>
+  <Card title="Peliqan and n8n" href="/connect-your-bi-or-db-tool/peliqan-and-n8n">
+  </Card>
+
+  <Card title="Peliqan and Make.com" href="/connect-your-bi-or-db-tool/peliqan-and-makecom">
+  </Card>
+
+  <Card title="Peliqan and MS Power Automate" href="/connect-your-bi-or-db-tool/peliqan-and-ms-power-automate">
+  </Card>
+</CardGroup>

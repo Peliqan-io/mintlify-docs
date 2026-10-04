@@ -1,0 +1,98 @@
+---
+title: "Handling deleted rows"
+sidebarTitle: "Deleted Rows"
+description: "Learn how to handle rows that were deleted in the source system but still remain in your data warehouse."
+---
+
+A regular ETL pipeline cannot detect if records were deleted in the source. This means that when a record is deleted in a source, it will remain in the DWH. Depending on how the API of the source works, there are various ways to handle rows that were deleted in the source.
+
+# Soft deletes
+
+Some APIs have a field "is deleted" or "is archived" or similar, which is set to True when a record is deleted. In this case you will find a column with the same name in the DWH. Filtering on this column allows you to exclude deleted rows.
+
+# API provides a list of deleted records
+
+In rare occasions, the API will have an endpoint to retrieve a list of deleted records. If this is the case, it's possible to delete records in the DWH based on the list from the API.
+
+The DWH will have a table of deleted row IDs. Use a scheduled Python script to delete rows based on this table.
+
+For example the [Exact Online connector](/connect-to-data/getting-started-with-exact-online-connector-in-peliqan) uses this method.
+
+# Webhooks
+
+Some platforms can send out Webhooks when specific events occur, such as deleting a record. In that case, you can set up Webhooks and send them to Peliqan. Peliqan will receive webhooks and store them in a table in the DWH. Use a Python script to delete records in the DWH based on incoming webhooks. More info:
+
+[Incoming webhooks](/incoming-webhooks)
+
+# Script to delete rows
+
+The following low-code Python script will delete rows in a table in the DWH, when the id is no longer in existence in the source SaaS application.
+
+<Accordion title="Click here to expand the Python script">
+  ```python
+  # This script will delete rows in the datawarehouse (DWH) that were deleted in the source.
+  # It will fetch a list of all IDs from the API and compare with the ids in the DWH.
+  # IDs that are no longer in existance (from the API) will be deleted in the DWH.
+  # Note that regular ETL pipelines do not delete rows that were deleted in the source.
+  
+  ############## Change these settings
+  connection_name = "Odoo"
+  dwh_schema_name = None    # optional, script will use connection name to get DWH schema name
+  table_name = "products"
+  pk = "id"
+  
+  # for safety, if there are more rows too delete, the script will stop.
+  # For example if fetching all rows from the API would fail, this script could potentially delete all rows in the DWH.
+  # Set to a higher number in production, e.g. 100 or 1000.
+  max_to_delete = 10
+  
+  ############## End of settings
+  
+  
+  if not dwh_schema_name:
+      dwh_schema_name = connection_name.replace(" ", "_").lower()
+  
+  # Fetch ids from the API
+  api = pq.connect(connection_name)
+  result = api.list(table_name)
+  ids_from_api = []
+  for item in result["detail"]:
+      ids_from_api.append(item[pk])
+  
+  # Fetch ids from the DWH
+  query = f"SELECT {pk} FROM {dwh_schema_name}.{table_name}"
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  rows = dbconn.fetch(pq.DW_NAME, query=query)
+  ids_from_dwh = []
+  for row in rows:
+      ids_from_dwh.append(row[pk])
+  
+  # Compare
+  ids_to_delete = set(ids_from_dwh) - set(ids_from_api)
+  
+  # Delete in DWH
+  st.text(f"IDs to delete in DWH:")
+  st.write(ids_to_delete)
+  if len(ids_to_delete)==0:
+      st.write("Nothing to delete in the DWH.")
+  elif len(ids_to_delete)>max_to_delete:
+      st.write("Stopping, too many IDs to delete (%s), max_to_delete=%s, perhaps something went wrong." % (len(ids_to_delete), max_to_delete))
+  else:
+      st.write("Deleting %s records in the DWH." % len(ids_to_delete))
+      for id_to_delete in ids_to_delete:
+          dbconn.delete(pq.DW_NAME, dwh_schema_name, table_name, id_to_delete)
+      st.write("Done !")
+  ```
+</Accordion>
+
+# Full Resync
+
+When you perform a Full Resync on a connection in Peliqan, the pipelines will be reset. All tables in the DWH will be made empty and all data will be re-synced. Doing a Full Resync can be used as a way to make sure that deleted rows are no longer in the DWH.
+
+It's also possible to schedule e.g. a weekly Full Resync using a Python script.
+
+Finally, you can contact [Peliqan Support](/contact-support), to put in place a custom connector that will automatically do a Full Sync for one or more given tables on each run (as opposed to using a regular incremental sync).
+
+<Note>
+  Note: this means the sync will take much longer to run, so the schedule will have to reduced.
+</Note>

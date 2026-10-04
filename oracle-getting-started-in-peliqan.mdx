@@ -1,0 +1,37 @@
+---
+title: "Oracle - Getting started in Peliqan"
+sidebarTitle: "Oracle"
+description: "Learn how to connect an Oracle database to Peliqan using a custom Python pipeline script with the oracledb library and a service name DSN."
+---
+
+In order to connect to an Oracle database in Peliqan, e.g. the database of a JDE instance (JD Edwards ERP), use a custom pipeline script. Example:
+
+```python
+import oracledb
+
+host = "my_host"
+port = 1234
+service_name = "mydb_name"
+user = "my_user"
+password = pq.get_secret("My Oracle DB password")
+
+dsn = f"{host}:{port}/{service_name}"
+conn = oracledb.connect(user=user, password=password, dsn=dsn, mode=oracledb.DEFAULT_AUTH)
+
+# List all tables
+query = """
+SELECT owner, table_name
+FROM all_tables
+ORDER BY table_name;
+"""
+
+query = query.strip().strip(";")
+
+cur = conn.cursor()
+cur.execute(query)
+data = cur.fetchall()
+st.table(data)
+
+cur.close()
+conn.close()
+```

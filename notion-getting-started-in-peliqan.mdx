@@ -1,0 +1,142 @@
+---
+title: "Notion - Getting started in Peliqan"
+sidebarTitle: "Notion"
+description: "Learn how to connect Notion to Peliqan using an internal integration, sync databases and pages to your data warehouse, and write back via Python."
+---
+
+_Notion is a single space where you can think, write, and plan. Capture thoughts, manage projects, or even run an entire company, by adding pages and databases in a collaborative workspace._
+
+This article provides an overview to get started with the **Notion** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect Notion
+
+Visit [notion.so/profile/integrations](https://www.notion.so/profile/integrations) and add an "Internal integration". Copy the integration secret.
+
+![Notion internal integration settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f7dee87d-f0f3-4ca5-a1c6-cb0a1952c526/Screenshot_2024-09-08_at_19.49.59/w=1920,quality=90,fit=scale-down)
+
+In Peliqan, go to Connections > Add Connection > Select Notion in the list, and paste your integration secret.
+
+Make sure to add your integration to a page or database in Notion in order for Peliqan to have access to it: open the page settings (icon with 3 dots in top right corner), select "Connect to" and select your integration from the list.
+
+![Notion page settings showing integration connection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2dc9cb7f-13bf-4a5e-b262-38dba02c378e/Screenshot_2024-09-08_at_19.34.11/w=1920,quality=90,fit=scale-down)
+
+## ELT pipeline for Notion databases
+
+When you connect Notion, Peliqan will automatically sync all Notion databases and their content to your data warehouse, for Notion databases to which Peliqan has access.
+
+Peliqan will create 3 types of tables in the data warehouse:
+
+- **Database_items**: all items of all Notion databases, combined in one table, including metadata
+- **_DBName_\_allfields** (e.g. `Contacts_allfields`, `Companies_allfields` etc.): one table per database, with all fields from Notion, including metadata
+- **_DBName_** (e.g. `Contacts`, `Companies`): one table per Notion database, with columns identical to Notion, for example name, city, country etc.
+
+## ELT pipeline for content of Notion pages
+
+In order to sync the content of all Notion pages to your data warehouse, you need to set up a custom pipeline using the below script. Schedule the script to run e.g. every hour.
+
+This content in the data warehouse is typically used to feed an AI Agent with RAG (Retrieval Augmented Generation), for example in n8n. [Click here for more info](/build-ai-agents-with-n8n-and-peliqan).
+
+<Accordion title="Custom pipeline to sync Notion pages">
+  ```python
+  # Fetches content of all pages of Notion
+  # Can be used in AI agents for ful text search (Text to SQL) and RAG (store contents of all Notion pages in a Vector Store)
+  
+  connection_name = "Notion Peliqan"
+  schema_name = connection_name.lower()
+  
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  notion_api = pq.connect(connection_name)
+  
+  bookmarks = pq.get_state()
+  if not bookmarks:
+      bookmarks = {
+          "pages": "2000-01-01",
+          "database_items": "2000-01-01"
+      }
+  
+  def process_pages(pages):
+      bookmark = None
+      types = []
+      i = 0
+      max_pages = 10000
+      for page in pages:
+          title = page["title"]
+          id = page["id"]
+          st.text(f"{i}. {title} (id: {id})")
+          blocks = notion_api.get('page_content', page_id=id)
+  
+          if isinstance(blocks, dict) and "status_code" in blocks and int(blocks["status_code"]) == 404:
+              st.warning(f"Page id {id} not found")
+              continue
+              
+          if isinstance(blocks, dict): # page with only one block
+              blocks = [blocks]
+          
+          page_content = ""
+          for block in blocks:
+      
+              content = ""
+              type = block["type"]
+              if type not in types:
+                  types.append(type)
+      
+              prefix = ""
+              if type == "heading_1":
+                  prefix = "# "
+              elif type == "heading_2":
+                  prefix = "## "
+              elif type == "heading_3":
+                  prefix = "### "
+              elif type == "bulleted_list_item":
+                  prefix = "- "
+              elif type == "numbered_list_item":
+                  prefix = "1. "
+              elif type == "divider":
+                  prefix = "---"
+              rich_texts = block.get(type, {}).get("rich_text", [])
+              for rich_text in rich_texts:
+                  content += prefix + rich_text["plain_text"]
+              page_content += content + "\n"
+  
+          record = {
+              'id': id, 
+              'title': title, 
+              'content': page_content,
+              '_source_url': page["url"]
+          }
+          dbconn.write(schema_name, 'pages_content', records=[record], pk = 'id')
+          bookmark = page['_sdc_batched_at'] # Make sure pages are fetched using ORDER BY _sdc_batched_at
+          i += 1
+          if i > max_pages:
+              break
+      
+      st.write("Block types processed:")
+      st.write(types)
+      return bookmark
+  
+  bookmark = bookmarks["pages"]
+  query = f"SELECT id, properties_name_title_0_plain_text AS title, url, _sdc_batched_at FROM \"{schema_name}\".pages WHERE _sdc_batched_at > '{bookmark}' ORDER BY _sdc_batched_at"
+  pages = dbconn.fetch(pq.DW_NAME, query = query)
+  st.write(f"Processing {len(pages)} Notion pages created or updated after {bookmark}")
+  bookmarks["pages"] = process_pages(pages)
+  
+  pq.set_state(bookmarks)
+  ```
+</Accordion>
+
+## Writeback: interact with Notion using low-code Python
+
+In order to fetch page content from Notion, or interact with pages, use data apps (low-code Python scripts) in Peliqan.
+
+Example to add a comment to a page in Notion:
+
+```python
+notion_api = pq.connect('Notion')
+
+comment = {
+    'text': "This is my comment",
+    'page_id': "d34e5461-cd39-4fe0-a767-f37cdadfb01e",
+}
+result = notion_api.add('comment', comment)
+st.json(result) # show the response of Notion
+```

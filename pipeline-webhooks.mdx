@@ -1,0 +1,286 @@
+---
+title: "Pipeline webhooks"
+sidebarTitle: "Pipeline Webhooks"
+description: "You can configure webhooks from ELT pipelines running in Peliqan, to receive events when pipelines completed, failed etc."
+---
+
+You can configure webhooks from ELT pipelines running in Peliqan, to receive events when pipelines completed, failed etc. This is useful in combination with [embedding](/whitelabel/embedding) and the [Partner API](/whitelabel/partner-api-embed-api), to integrate Peliqan's ELT connectivity into your own platform.
+
+# Configuration
+
+Navigate to **Settings > API Token & Webhooks > Outbound Webhooks** to set up your endpoint to receive webhook events from Peliqan pipelines.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c00c9e20-959e-4ffc-a8c5-841150fb22d5/image/w=1920,quality=90,fit=scale-down)
+
+| Field | Description |
+| --- | --- |
+| **Webhook URL** | Your HTTPS endpoint. Must be publicly reachable. |
+| **Signing Secret** | Random string you generate - used to sign every request with HMAC-SHA256. Optional but strongly recommended. |
+
+Generate a strong secret:
+
+```bash
+openssl rand -hex 32
+```
+
+> **Subscriptions:** Event subscriptions default to **all events**. You can restrict to a specific subset as well in the UI
+
+# Event Types
+
+### Connection Events
+
+Fired when data connections are created or deleted.
+
+These use a slightly different payload shape - see the [Payload](#payload) section below.
+
+| Event type | When it fires |
+| --- | --- |
+| `connection_added` | A new data connection has been created on the account. |
+| `connection_removed` | A data connection has been deleted from the account. |
+
+### Pipeline Events
+
+Fired by Peliqan's pipeline runner as a sync progresses from start to a terminal state.
+
+| Event type | Run status | When it fires |
+| --- | --- | --- |
+| `pipeline_run_started` | `RUNNING` | The Peliqan worker picks up the run and execution begins. Fires once per run, before any data is fetched. |
+| `pipeline_run_completed` | `COMPLETED` | All enabled streams synced to the destination without any row-level errors. |
+| `pipeline_run_completed_with_errors` | `COMPLETED_WITH_ERRORS` | Sync finished but at least one stream had row-level write failures. Data was partially synced - other streams may be complete. |
+| `pipeline_run_internal_error` | `INTERNAL_ERROR` | Peliqan's own task runner crashed - unhandled exception inside the pipeline orchestrator, not inside the connector. |
+| `pipeline_run_error` | `ERROR` | The Singer tap/connector process exited with a non-zero code or raised an exception during execution. |
+| `pipeline_run_remote_error` | `REMOTE_ERROR` | The remote data source returned an error - e.g. database connection refused, credentials rejected, or the source API returned a 5xx. |
+| `pipeline_run_killed` | `KILLED` | A user manually cancelled the run via the UI or API. |
+| `pipeline_run_killed_for_system_upgrade` | `KILLED_FOR_SYSTEM_UPGRADE` | Peliqan stopped the run automatically to perform a rolling system upgrade. Safe to re-trigger; no data corruption occurs. |
+| `pipeline_run_timeout` | `TIMEOUT` | The run exceeded the maximum execution duration configured for the connector. The process was force-terminated. |
+| `pipeline_run_rate_limited` | `RATE_LIMITED` | The source API returned an HTTP 429 or a connector-specific rate limit that cannot be retried within the allowed window. |
+| `pipeline_run_no_streams` | `NO_STREAMS` | The connector found no streams/tables to sync - either none are enabled on the connection, or discovery returned an empty catalog. |
+| `pipeline_run_failed` | _(unexpected)_ | Catch-all for any terminal status not covered above. Should not occur in normal operation. |
+
+**Typical event sequence for a normal scheduled run:** `pipeline_run_started` > `pipeline_run_completed`
+
+# Payload
+
+Every webhook event sends a JSON body with the following shape:
+
+```json
+{
+    "account_id": 123,
+    "external_account_id": "your-customer-id",
+    "event_type": "pipeline_run_completed",
+    "timestamp": "2026-03-13T05:40:00.000Z",
+    "connection_id": 42,
+    "run_id": 8872,
+    "run_status": "COMPLETED",
+    "run_source": "SCHEDULER",
+    "metadata": {}
+}
+```
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `account_id` | `integer` | Peliqan account ID |
+| `external_account_id` | `string` | Your identifier for the account; `""` if not set |
+| `event_type` | `string` | See event types above |
+| `timestamp` | `string` | ISO-8601 UTC - time the event was dispatched by Peliqan |
+| `connection_id` | `integer or null` | Connector/data-source ID |
+| `run_id` | `integer or null` | Pipeline run ID |
+| `run_status` | `string or null` | Exact `PipelineRuns.status` value at the time the event fired |
+| `run_source` | `string or null` | `MANUAL`, `SCHEDULER`, `SCRIPT`, or `SALTEDGE_REFRESH` |
+| `metadata` | `object` | `{}` for pipeline events; `{"connectortype": {...}}` for connector-specific events |
+
+# HTTP Headers
+
+Every request includes the following headers:
+
+```text
+Content-Type: application/json
+User-Agent: Peliqan-Webhooks/1.0
+X-Peliqan-Event: pipeline_run_completed
+X-Peliqan-Timestamp: 1741839600
+X-Peliqan-Signature: sha256=3d9e2f1a...   (only when a secret is configured)
+```
+
+# Signature Verification
+
+When a signing secret is configured, Peliqan computes:
+
+```text
+HMAC-SHA256(secret, "{unix_timestamp}.{canonical_json}")
+```
+
+`canonical_json` is the body serialized with **keys sorted alphabetically**, compact (no extra whitespace). The timestamp is included in the signed string for replay protection - reject requests where `X-Peliqan-Timestamp` is more than **300 seconds** old.
+
+<Accordion title="Example code to verify the signing secret (click to expand)">
+  ### Python
+
+  ```python
+  import hashlib, hmac, json, time
+  
+  def verify(body_bytes, secret, ts_header, sig_header, max_age=300):
+      try:
+          ts = int(ts_header)
+      except (ValueError, TypeError):
+          return False, "invalid timestamp"
+  
+      if abs(time.time() - ts) > max_age:
+          return False, "request too old"
+  
+      payload = json.loads(body_bytes)
+      canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+      expected = "sha256=" + hmac.new(
+          secret.encode(), f"{ts}.{canonical}".encode(), hashlib.sha256
+      ).hexdigest()
+  
+      if hmac.compare_digest(expected, sig_header):
+          return True, "ok"
+      return False, "signature mismatch"
+  ```
+
+  ### Node.js
+
+  ```javascript
+  const crypto = require("crypto")
+  
+  function verify(rawBody, secret, tsHeader, sigHeader, maxAge = 300) {
+      const ts = parseInt(tsHeader, 10)
+      if (isNaN(ts)) return false
+      if (Math.abs(Date.now() / 1000 - ts) > maxAge) return false
+  
+      const payload = JSON.parse(rawBody)
+      const canonical = JSON.stringify(sortKeys(payload))
+      const expected = "sha256=" + crypto
+          .createHmac("sha256", secret)
+          .update(`${ts}.${canonical}`, "utf8")
+          .digest("hex")
+  
+      const a = Buffer.from(expected), b = Buffer.from(sigHeader)
+      return a.length === b.length && crypto.timingSafeEqual(a, b)
+  }
+  
+  function sortKeys(v) {
+      if (Array.isArray(v)) return v.map(sortKeys)
+      if (v && typeof v === "object")
+          return Object.keys(v).sort().reduce((a, k) => { a[k] = sortKeys(v[k]); return a }, {})
+      return v
+  }
+  ```
+</Accordion>
+
+# Response & Retry
+
+Your endpoint must return a **2xx status code** within **10 seconds**. Any non-2xx response or network error (connection refused, DNS failure, TLS error, timeout) is treated as a failure.
+
+Each event gets **up to 4 delivery attempts** with exponential backoff:
+
+| Attempt | Delay |
+| --- | --- |
+| 1st | Immediate |
+| 2nd | 1 s |
+| 3rd | 2 s |
+| 4th (final) | 4 s |
+
+All 4 attempts use the same `WebhookCall` log row - the `attempt` counter increments on each retry so you can see the full history in **Settings > Webhooks > Call Log**.
+
+If all 4 attempts fail, the event is permanently marked failed and the account's **consecutive failure counter** increments by 1.
+
+**Auto-disable:** After **5 consecutive events** each exhausting all retries, Peliqan:
+
+1. Sets `webhook_disabled_at` on the account - all further webhook dispatches are skipped immediately (no HTTP calls made)
+2. Sends an alert email to the account's configured alert recipients
+3. Preserves your URL and secret - nothing is cleared
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c9937b23-bb49-4b75-974c-182f1ca21183/image/w=1920,quality=90,fit=scale-down)
+
+Re-enable via **Settings > API Token & Webhooks > Outbound Webhooks > Re-enable**. Any single successful delivery resets the consecutive failure counter to `0`.
+
+> **SSRF protection:** In production, Peliqan uses the `advocate` library to block webhook URLs that resolve to private or reserved IP ranges (RFC 1918, loopback, link-local, etc.). These are rejected immediately without a network call and logged as "Blocked - the webhook URL points to a private or reserved IP address".
+
+> **Call log retention:** The most recent **500** `WebhookCall` records are kept per account. Older entries are trimmed automatically after each delivery.
+
+# Idempotency
+
+Retries and the occasional duplicate delivery mean your endpoint may receive the same event more than once.
+
+| Scenario | Deduplication key |
+| --- | --- |
+| Pipeline events | `(run_id, event_type)` |
+| SaltEdge events (`run_id` is `null`) | `(metadata.saltedge.connection_id, event_type, timestamp)` |
+
+Use these keys to deduplicate or perform idempotent upserts on your side.
+
+## Example: Simple Webhook Endpoint (Python)
+
+**How to test**
+
+1. Create a webhook endpoint in Peliqan
+2. Update the URL and secret in the **Settings > API Token & Webhooks > Outbound Webhook**
+3. Trigger an event (e.g., run a pipeline)
+4. Check logs to confirm:
+
+- Signature verification passes
+- Event payload is received correctly
+
+<Accordion title="Python code (click to expand)">
+  ```python
+  # Here is some example Python code to get you started.
+  # Check the Data activation library section for useful code snippets and supported functions.
+  # The handler function is mandatory. This is the entry point for an API script's execution.
+  
+  import json
+  from urllib.parse import parse_qs
+  import json
+  import hmac
+  import hashlib
+  import time
+  
+  # same secret configured in Settings > API Token & Webhooks > Outbound Webhook
+  WEBHOOK_SECRET = "mysecret"  
+  
+  def verify_signature(secret, timestamp, signature, body, max_age=300):
+      try:
+          ts = int(timestamp)
+      except:
+          return False, "invalid timestamp"
+  
+      # Prevent replay attacks
+      if abs(time.time() - ts) > max_age:
+          return False, "request too old"
+  
+      payload = json.loads(body) if body else {}
+      canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+  
+      expected_signature = "sha256=" + hmac.new(
+          secret.encode(),
+          f"{ts}.{canonical}".encode(),
+          hashlib.sha256
+      ).hexdigest()
+  
+      if hmac.compare_digest(expected_signature, signature):
+          return True, "ok"
+      return False, "signature mismatch"
+  
+  def handler(request):
+      headers = request.get("headers", {})
+      body = request.get("data", "")
+  
+      # Read headers
+      timestamp = headers.get("X-Peliqan-Timestamp")
+      signature = headers.get("X-Peliqan-Signature")
+  
+      # Verify signature
+      if signature:
+          valid, reason = verify_signature(WEBHOOK_SECRET, timestamp, signature, body)
+          if not valid:
+              return {"error": reason}, 401
+  
+      # Parse event
+      event = json.loads(body) if body else {}
+      print("Received event:", json.dumps(event, indent=2))
+  
+      return {
+          "status": "ok",
+          "event_type": event.get("event_type")
+      }, 200
+  ```
+</Accordion>

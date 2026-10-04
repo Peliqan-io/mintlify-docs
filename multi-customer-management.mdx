@@ -1,0 +1,43 @@
+---
+title: "Multi-customer management"
+sidebarTitle: "Multi-customer"
+description: "If you are a SaaS company or a consultancy company and you use Peliqan to manage end-customer projects, you can use the multi-customer or multi-tenant features in Peliqan."
+---
+
+If you are a SaaS company or a consultancy company and you use Peliqan to manage end-customer projects, you can use the "multi-customer" or "multi-tenant" features in Peliqan to manage your end-customers.
+
+Make sure to create a new account (tenant) in Peliqan for each end-customer. This is important for data isolation requirements.
+
+## Service models
+
+Peliqan supports 2 service models, depending on your business model:
+
+**Full service model**
+
+**Self-service model**
+
+| Scenario | Each end-customer is different, e.g. your Customer Success team performs custom data onboarding services. | Customers activate one or more data syncs (or other) in a self-service manner, inside your SaaS platform or portal. | | Volume | Low volume | High volume | | Embedding | No embedding or limited read-only embedding. | Deep interactive embedding. | | Creation of new end-customer accounts | Manual by your customer success team. | Automated via embedded frame or via Peliqan's REST API. |
+
+## Managing end-customers
+
+Your Master account (also called "Partner account") allows you to manage your templates and your end-customer accounts. Go to **Admin > Customers** to manage your end-customer accounts.
+
+Make sure that end-customer accounts are created under your own Peliqan subdomain, e.g. [https://acme.peliqan.io](https://acme.peliqan.io) if your company is called ACME.
+
+This will ensure that end-customer accounts are linked and appear in your Partner account.
+
+More info:
+
+[Manage sub accounts](/manage-sub-accounts)
+
+## Invite end-customer to add a connection
+
+For end-customers where your Customer Success Team takes care of setting up e.g. a data sync or performing a data import (full-service model), you will need to get access to one or more sources of your end-customer. For example you might need access to their CRM to import the data into your system.
+
+Go into the end-customer account. Go to Connections, and add a connection, e.g. Hubspot (CRM). Click on the "Invite" button. This will send an email to your end-customer, asking them to provide credentials or authorize access (for an oAuth flow). Once the end-customer has done this, you will receive a confirmation email that this has been done.
+
+See **Invite** button in the bottom left corner when adding a connection:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/92d9cde1-c33f-4dff-a9d6-e41db4417571/add_connection_invite/w=1920,quality=90,fit=scale-down)
+
+Note that the end-customer does not require a login to Peliqan. They will receive a unique link in the email that they can click. This will open a webpage where they can enter their credentials (e.g. an API key) securely or it will start an oAuth flow where they login and authorize access.

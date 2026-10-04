@@ -1,0 +1,47 @@
+---
+title: "Send alert to MS Teams"
+sidebarTitle: "MS Teams Alerts"
+description: "Configure a Peliqan data app to send scheduled alerts to MS Teams based on query results. Use built-in templates to notify channels."
+---
+
+The first step to activation is often to get real time alert on your data.
+
+In the Peliqan Data App templates you'll find an example data app that sends alerts to MS Teams on a schedule based on a peliqan query that evaluates if there is the query returns data or if there are new data to alert on.
+
+## Data to alert on
+
+The start of your alert flow is defining what data you want to alert on. In the Peliqan platform you can easily use the query module to define the relevant data. You can combine, transform and filter cross data sources.
+
+We advise to limit the amount of columns to include to not overcomplicate your alert message:
+
+![Example query that can be used for an alerting flow.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e1fa4191-a9ac-4503-9296-ee894a8a30a9/image/w=1920,quality=90,fit=scale-down)
+
+Example query that can be used for an alerting flow.
+
+<Note>
+  Use a date column if you want to only send alerts on items since the last run.
+</Note>
+
+## Data App Flow
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/71fb2b30-ff04-4dad-b93c-b60828194204/image/w=1920,quality=90,fit=scale-down)
+
+We have the following main steps in this data app:
+
+- **Start**: containing some context variables and state handler. State is used if a date is provided.
+- **Configuration:** add here your alert configuration, the query to look at and if we need to take a data into account. Also the MS Teams connection name and channel name is required.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/70d52224-1517-4e1e-8230-b8f65cea4d75/image/w=1920,quality=90,fit=scale-down)
+
+- **Validate Connection :** We will verify in this block if the provided MSTeams channel can be found and used.
+- **Fetch Data:** In this block we fetch the data based on the configuration
+  - If no data is found, the script will stop
+  - if a data column is provided in the configuration step, the data will be limited to all rows that have a date higher than last run. This logic can be changed based on your use case, for example to only show data with a data of last 24hours.
+- **Format Message**: In this block the message is constructed. This can be altered based on your requirements.
+- **Send Alert To MS Teams:** This block will send the MS Teams message
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/07c9df0f-707c-45c9-a005-814c944fb047/image/w=1920,quality=90,fit=scale-down)
+
+The result of this template will look like this (dummy data):
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0f3abfd8-622a-47f0-aa71-0edf79841805/image/w=1920,quality=90,fit=scale-down)

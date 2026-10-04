@@ -1,0 +1,91 @@
+---
+title: "Visma Bouwsoft - Getting started in Peliqan"
+sidebarTitle: "Visma Bouwsoft"
+description: "Connect Visma Bouwsoft to Peliqan using OAuth authorization. Get a Request ID from Peliqan support, authenticate with Bouwsoft, and sync your construction company data to Peliqan."
+---
+
+_A leading provider of SaaS-based administrative software for the construction industry, offering comprehensive tools to streamline project management. The platform delivers solutions for CRM, cost estimation, billing, analytics, documentation, collaboration, invoicing, quoting, and other essential business functions. Website :_ [https://www.bouwsoft.be/nl](https://www.bouwsoft.be/nl)
+
+This article provides an overview to get started with the **Visma Bouwsoft** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Contents
+
+- [Contents](#contents)
+- [Visma Bouwsoft Data Pipeline](#visma-bouwsoft-data-pipeline)
+  - [Before you connect](#before-you-connect)
+  - [Approving Grant to Peliqan App](#approving-grant-to-peliqan-app)
+  - [Connect Visma Bouwsoft](#connect-visma-bouwsoft)
+- [Visma Bouwsoft data sync to a data warehouse](#visma-bouwsoft-data-sync-to-a-data-warehouse)
+- [Visma Bouwsoft writeback](#visma-bouwsoft-writeback)
+
+## Visma Bouwsoft Data Pipeline
+
+### Before you connect
+
+- You need a Request ID
+- Click the below link to get a Request ID and Request URL
+
+[Click here to get a Request ID.](https://app.eu.peliqan.io/apps/N2NWeE84bUZpV28zTUlSVXVoaklQRWV6Q1REYXB5RTdCcDJKcGtROEN5UFd6bVFaQmpoWnNBbms1dlpzbDJIZg==/?embed=true)
+
+<Warning>
+  Request URL and Request ID is only valid for 15 minutes. Make sure to grant access for Peliqan immediately after clicking the above link.
+</Warning>
+
+### Approving Grant to Peliqan App
+
+- Once you receive the _Request Url_ through the above link, Open the Request URL in browser.
+- You will be redirected to Bouwsoft.
+- On the Authentication window, Please provide your account Username and Password and login to your account.
+
+![Bouwsoft authentication window](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/24f6e1c8-61c2-469f-8c4f-c29e21a9762f/image/w=1920,quality=90,fit=scale-down)
+
+- After successful authentication, please provide a unique device name (e.g. "Peliqan"). Click on **Grant Access.**
+
+![Bouwsoft grant access screen](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/504bc852-d1ba-4d33-b58d-f46a8c79611b/image/w=1920,quality=90,fit=scale-down)
+
+- Now the Grant has been accessed to our app to access your data on your behalf.
+
+### Connect Visma Bouwsoft
+
+Connect Visma Bouwsoft through the Peliqan Connectivity module:
+
+Configuration options:
+
+- Client Nr : Client Number present in Bouwsoft Username
+- Request ID : Provided by Peliqan Support Team
+- Start Date : Date to start sync from in YYYY-MM-DD fromat.
+
+Once filled click on **Save** to initiate the data sync.
+
+## Visma Bouwsoft data sync to a data warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync Visma Bouwsoft data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+## Visma Bouwsoft writeback
+
+Example script to create Orders and OrderLines in Peliqan using a low-code Python script:
+
+```python
+visma_bouwsoft_api = pq.connect('Visma Bouwsoft')
+
+# Add OrderLine to Order
+OrderLine = {
+    'orderid': 2483,
+    'price_unit': 5.67,
+    'quantity1': 15
+}
+result = visma_bouwsoft_api.add('OrderLine', OrderLine)
+st.json(result)
+
+
+# Create Order
+Order = {
+    'type': "FAKTUUR",
+    'address_id': 0,
+    'company_id': 2,
+}
+result = visma_bouwsoft_api.add('Order', Order)
+st.json(result)
+```

@@ -1,0 +1,56 @@
+---
+title: "Data enrichment"
+sidebarTitle: "Data Enrichment"
+description: "Enrich leads and customer data in Peliqan using 3rd party APIs like Clearbit, Hunter, weather, and geocoding. Use raw API calls for custom enrichment."
+---
+
+Enrich data (for example leads or customers) with 3rd party data providers such as Clearbit, Hunter and others.
+
+Peliqan offers a range of connectors to data enrichment APIs:
+
+- Company data (Clearbit, Hunter etc.)
+- Weather API
+- Geocoding API
+- Currency conversion API
+
+Data enrichment can be used to enrich your data in your data warehouse, or even directly in your SaaS business applications (CRM, ERP etc.). For example you can clean up your customer data, add marketing information (company size, sector) and much more.
+
+Data enrichment is also used for Machine Learning, in order to have enriched training data. Weather data is a good example. When you want to predict product sales, weather could be an important factor. Here's an example using the weather API to get historic weather data or weather predictions:
+
+![Weather data for ML predictions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ffe62885-7c37-4889-b4dd-2a25b4eae808/weather_data_for_ML_predictions/w=1920,quality=90,fit=scale-down)
+
+The next step after getting a prediction, is to write that back into your data warehouse, e.g. using `dw.update()`.
+
+## Data enrichment with "raw" API Calls
+
+This example shows how to make "raw" API calls in your Python code, in case there is no connector available in Peliqan for the API that you want to use for your data enrichment.
+
+```python
+import requests
+import time
+
+dbconn = pq.dbconnect(pq.DW_NAME)
+df = dbconn.fetch(pq.DW_NAME, 'crm', 'companies', df=True)
+st.dataframe(df)
+
+for index, row in df.iterrows():
+  st.text("Processing %s" % row["name"])
+
+  if not row["country"]:
+    url = "https://companyenrichment.abstractapi.com/v1/?api_key=...&domain=%s" % row["domain"]
+    result = requests.get(url)
+    if "country" in result.json():
+      country = result.json()["country"]
+      st.text("Updating country: %s" % country)
+
+      update_response = pq.update_cell(
+         table_name = "companies", 
+         field_name = "country", 
+         row_id = row["id"],  # must be value from primary key column
+         value = country)
+    
+    time.sleep(2) #avoid rate limiting
+
+if st.button("Rerun"):
+  st.experimental_rerun()
+```

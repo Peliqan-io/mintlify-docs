@@ -1,0 +1,270 @@
+---
+title: "Github - Getting started in Peliqan"
+sidebarTitle: "GitHub"
+description: "Connect GitHub to Peliqan, sync file contents to your data warehouse, and use Python scripts for writeback, CI/CD, and automated commits between Peliqan and GitHub."
+---
+
+This article provides an overview to get started with the Github connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+# Contents
+
+- [Contents](#contents)
+- [Connect](#connect)
+- [Explore & Combine](#explore--combine)
+- [Sync file contents to the datawarehouse](#sync-file-contents-to-the-datawarehouse)
+- [Writeback (Python scripts)](#writeback-python-scripts)
+  - [Write file to Github (commit)](#write-file-to-github-commit)
+  - [Read file from Github](#read-file-from-github)
+- [Peliqan CI/CD using Github](#peliqan-cicd-using-github)
+  - [Example: pull Python script update from Github into Peliqan](#example-pull-python-script-update-from-github-into-peliqan)
+  - [Example: pull data model (query) update from Github into Peliqan](#example-pull-data-model-query-update-from-github-into-peliqan)
+  - [Example: commit Python script from Peliqan to Github](#example-commit-python-script-from-peliqan-to-github)
+  - [Example: commit data model (query) from Peliqan to Github](#example-commit-data-model-query-from-peliqan-to-github)
+
+# Connect
+
+In peliqan, go to Connections, click on Add new. Find **Github** in the list and select it. Click on the Connect button. This will open Github and allow you to authorize access for Peliqan. Once that is done, you will return to Peliqan.
+
+![GitHub connection screen](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/980ed47f-f3f3-4189-bd4a-e88f3a71ea4d/Screenshot_2024-06-12_at_11.03.04/w=1920,quality=90,fit=scale-down)
+
+# Explore & Combine
+
+Explore your Github tables in the Peliqan "Explore" section, including files, commits, PRs and issues.
+
+# Sync file contents to the datawarehouse
+
+Use below custom pipeline script to sync the file contents of all files in your Github repo to the Peliqan data warehouse.
+
+<Accordion title="Click to expand script">
+  ```python
+  import base64
+  
+  github_schema_name = "github"
+  github_owner_name = "my_github_username"
+  github_repo_name = "my_repo"
+  
+  BATCH_SIZE = 1000
+  MAX_FILE_SIZE = 1000000
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  github_api = pq.connect("Github")
+  
+  bookmark = pq.get_state()
+  if not bookmark:
+      bookmark = "1970-01-01 00:00:00"
+  bookmark = "1970-01-01 00:00:00"
+  
+  count_query = f"""
+      SELECT COUNT(*) as count
+      FROM "{github_schema_name}".files
+      WHERE type='blob' AND size<{MAX_FILE_SIZE} AND _sdc_batched_at > '{bookmark}'
+  """
+  total_count = dbconn.fetch(pq.DW_NAME, query=count_query)[0]["count"]
+  
+  processed = 0
+  latest_batched_at = bookmark
+  
+  for offset in range(0, total_count, BATCH_SIZE):
+      query = f"""
+          SELECT path, sha, url, size, type, _sdc_batched_at
+          FROM "{github_schema_name}".files
+          WHERE type='blob' AND size<{MAX_FILE_SIZE} AND _sdc_batched_at > '{bookmark}'
+          ORDER BY _sdc_batched_at
+          LIMIT {BATCH_SIZE} OFFSET {offset}
+      """
+      files = dbconn.fetch(pq.DW_NAME, query=query)
+      new_records = []
+  
+      for file in files:
+          st.write("Downloading file: " + file["path"])
+          file_content_resp = github_api.get("file", path = file["path"], repo = github_repo_name, owner = github_owner_name)
+  
+          content = file_content_resp.get("content")
+          if file_content_resp.get("encoding") == "base64":
+              content = base64.b64decode(content).decode("utf-8")
+  
+          record = {
+              "path": file["path"],
+              "sha": file["sha"],
+              "content": content,
+              "size": file["size"],
+              "url": file["url"]
+          }
+          new_records.append(record)
+  
+          # Update batch bookmark
+          if file["_sdc_batched_at"] > latest_batched_at:
+              latest_batched_at = file["_sdc_batched_at"]
+  
+      if new_records:
+          result = dbconn.write(github_schema_name, "files_content", records=new_records, pk="path")
+          if result["status"] != "success":
+              st.warning("Could not write to DWH")
+              st.write(result)
+              exit()
+          processed += len(new_records)
+          st.info(f"Wrote batch of {len(new_records)} files (total processed: {processed})")
+          pq.set_state(latest_batched_at)
+  
+  st.success(f"Processed {processed} files.")
+  ```
+</Accordion>
+
+# Writeback (Python scripts)
+
+Below are examples of how to read and write from and to Github from Peliqan Python scripts (data apps).
+
+## Write file to Github (commit)
+
+Here's an example to commit files to Github from a script in Peliqan:
+
+<Note>
+  Note that in order to update an existing file, you need the SHA. Use file_get() to retrieve the SHA of the file first, and include it when updating the file.
+</Note>
+
+```python
+import base64, json
+
+github_api = pq.connect('Github')
+
+content = { "test_key": "test content" }
+content_string = json.dumps(content)
+base64_content = base64.b64encode(bytes(content_string, 'utf-8')).decode('utf-8')
+
+file = {
+    "path": "test_folder/test_file.json",
+    "repo": "my_repo",
+    "owner": "my_github_username",
+    "message": "This is a commit from Peliqan script",
+    "base64_content": base64_content,
+    "committer_name": "John",
+    "committer_email": "john@peliqan.io"
+}
+
+get_file = github_api.get('file', file)
+
+if 'sha' in get_file:
+    st.text("Updating file")
+    file['sha'] = get_file['sha']
+    result = github_api.update('file', file)
+else:
+    st.text("Adding new file")
+    result = github_api.add('file', file)
+
+st.text(result["status"])
+```
+
+## Read file from Github
+
+```python
+import base64
+
+github_api = pq.connect('Github')
+file = {
+    "owner": "ownername",
+    "repo": "reponame",
+    "path": "my_script.py",
+}
+result = github_api.get('file', file)
+content = base64.b64decode(result["content"]).decode("utf-8")
+st.write(content)
+```
+
+# Peliqan CI/CD using Github
+
+Using the Github connector, you can build CI/CD pipelines that e.g. push updates of data models (queries) and Python scripts from Peliqan to Github, and that pull in updates from Github into Peliqan.
+
+### Example: pull Python script update from Github into Peliqan
+
+```python
+import base64
+
+github_api = pq.connect('Github')
+file = {
+    "owner": "ownername",
+    "repo": "reponame",
+    "path": "my_script.py",
+}
+result = github_api.get('file', file)
+content = base64.b64decode(result["content"]).decode("utf-8")
+
+# Update script in Peliqan
+script_meta_data = pq.update_script(script_id = 123, raw_script = content)
+st.json(script_meta_data)
+```
+
+### Example: pull data model (query) update from Github into Peliqan
+
+```python
+import base64
+
+github_api = pq.connect('Github')
+file = {
+    "owner": "ownername",
+    "repo": "reponame",
+    "path": "my_data_model.sql",
+}
+result = github_api.get('file', file)
+content = base64.b64decode(result["content"]).decode("utf-8")
+
+# Update query (data model) in Peliqan
+table_meta_data = pq.update_table(table_id = 123, query = content)
+st.json(table_meta_data)
+```
+
+### Example: commit Python script from Peliqan to Github
+
+```python
+import base64, json
+
+github_api = pq.connect('Github')
+
+script_meta_data = pq.get_script(script_id = 853)
+content = script_meta_data["raw_script"]
+base64_content = base64.b64encode(bytes(content, 'utf-8')).decode('utf-8')
+
+file = {
+    "owner": "ownername",
+    "repo": "reponame",
+    "path": "my_script.py",
+    "message": "This is a commit from a Peliqan script",
+    "base64_content": base64_content,
+    "committer_name": "John Doe",
+    "committer_email": "john@acme.com"
+}
+
+get_file = github_api.get('file', file)
+if 'sha' in get_file:
+    file['sha'] = get_file['sha']
+    result = github_api.update('file', file)
+else:
+    result = github_api.add('file', file)
+```
+
+### Example: commit data model (query) from Peliqan to Github
+
+```python
+import base64, json
+
+github_api = pq.connect('Github')
+
+query_meta_data = pq.get_table(table_id = 123)
+content = query_meta_data["query"]
+base64_content = base64.b64encode(bytes(content, 'utf-8')).decode('utf-8')
+
+file = {
+    "owner": "ownername",
+    "repo": "reponame",
+    "path": "my_datamodel.sql",
+    "message": "This is a commit from a Peliqan data model",
+    "base64_content": base64_content,
+    "committer_name": "John Doe",
+    "committer_email": "john@acme.com"
+}
+
+get_file = github_api.get('file', file)
+if 'sha' in get_file:
+    file['sha'] = get_file['sha']
+    result = github_api.update('file', file)
+else:
+    result = github_api.add('file', file)
+```

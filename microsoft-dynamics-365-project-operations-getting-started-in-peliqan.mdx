@@ -1,0 +1,502 @@
+---
+title: "MS Dynamics 365 F&O - Getting started in Peliqan"
+sidebarTitle: "Dynamics 365 F&O"
+description: "Connect Microsoft Dynamics 365 Finance & Operations to Peliqan by creating an Azure app, associating it with your environment, and syncing data with custom pipelines for bulk export."
+---
+
+This article provides an overview to get started with the **Microsoft Dynamics 365 F&O** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Content
+
+- [Before Connecting Dynamics 365 F&O in Peliqan](#before-connecting-dynamics-365-fo-in-peliqan)
+  - [Create an App in Azure](#create-an-app-in-azure)
+  - [Associate App User with Dynamics environment](#associate-app-user-with-dynamics-environment)
+- [Add a connection in Peliqan to Microsoft Dynamics 365 F&O](#add-a-connection-in-peliqan-to-microsoft-dynamics-365-fo)
+- [Entity explorer](#entity-explorer)
+- [Bulk export](#bulk-export)
+- [Need further help](#need-further-help)
+
+## Before Connecting Dynamics 365 F&O in Peliqan
+
+### Create an App in Azure
+
+In order to connect Dynamics F&O in Peliqan, you have to create an app in Azure Portal. This is a so called "private" app. After entering all the details in Peliqan (client id, client secret, tenant id) etc. Peliqan will start syncing your data.
+
+1. **Login to Azure Portal Account and click on App Registrations (or search for App Registrations):**
+
+![Azure App Registrations](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/59e561e7-80a7-4a56-aeea-73983d34d02d/Untitled/w=1920,quality=90,fit=scale-down)
+
+2. **Click on New Registration to register a single tenant application:**
+
+![Azure New Registration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9b71bd18-7bdf-42bd-bb6b-0894dd46073c/Untitled/w=1920,quality=90,fit=scale-down)
+
+3. **Provide details and click on Register:**
+
+![Azure Register App](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d74154cd-493f-449f-8f4f-1ede74648d0d/Untitled/w=1920,quality=90,fit=scale-down)
+
+4. **On Overview, make sure to copy ClientId and TenantId:**
+
+![Azure App Overview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4ff99a66-5352-45a1-b347-965f74c66227/Untitled/w=1920,quality=90,fit=scale-down)
+
+5. **To enable OAuth, click on Authentication > Add Platform > Click on Web:**
+
+![Azure Authentication Platform](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/858b33ca-414e-44bc-a990-828c733db33e/Untitled/w=1920,quality=90,fit=scale-down)
+
+6. **A configure Web window will open, add following Redirect URL: [https://oauth.peliqan.io](https://oauth.peliqan.io) To save click the button "Configure" at the bottom:**
+
+![Azure Redirect URL](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a9b55ac2-d001-4c98-906e-97611f83fe95/Screenshot_2023-10-23_at_4.13.32_PM/w=1920,quality=90,fit=scale-down)
+
+7. **Add Permissions: select API Permissions > Add a permission > Dynamics ERP**
+
+![Azure Dynamics ERP Permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3d0dfe83-58c5-4b64-8dc9-b2552d1b2858/image/w=1920,quality=90,fit=scale-down)
+
+8. **Add Delegated permissions and Applications permissions as below:**
+
+![Azure Delegated Permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/96e1545f-42bc-4141-b186-0ca4cb4e8484/image/w=1920,quality=90,fit=scale-down)
+
+![Azure Application Permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f5749c27-fdf4-421f-8d8e-88df1dda1dc0/image/w=1920,quality=90,fit=scale-down)
+
+9. **Grant Admin consent to the App:**
+
+![Azure Grant Admin Consent](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0497dd89-7621-4553-8539-f109568bd540/image/w=1920,quality=90,fit=scale-down)
+
+![Azure Admin Consent Granted](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/26a25067-1913-42d1-82e6-7bf53f77cdb6/image/w=1920,quality=90,fit=scale-down)
+
+10. **Get Client Secret: In left pane, click Certificates & Secrets > Client Secret > New Client Secret and provide details to get the client secret. Click on the Add button:**
+
+NOTE: Client secret is only visible when created, make sure to copy and save it for future use. For the Peliqan Connection, you will need to provide the **client secret.**
+
+![Azure New Client Secret](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3f0aba50-2fec-45e7-bdd8-7528e9b8f857/Screenshot_2023-10-23_at_4.36.24_PM/w=1920,quality=90,fit=scale-down)
+
+![Azure Client Secret Value](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1486e477-3b33-48ba-ab05-4d299a59f174/Screenshot_2023-10-23_at_4.38.34_PM/w=1920,quality=90,fit=scale-down)
+
+### Associate App User with Dynamics environment
+
+You have to associate the App we created with the Dynamics F&O Instance.
+
+1. Login to Admin Power Platform [https://admin.powerplatform.microsoft.com/environments](https://admin.powerplatform.microsoft.com/environments) to see all Environments.
+2. Select the environment in which the F&O instance has been created.
+3. Make sure to copy **Environment URL** as it will be used to connect to the environment in Peliqan.
+
+![Power Platform Environment URL](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d1b56d3f-c468-4404-ba9b-27c6beb28c72/image/w=1920,quality=90,fit=scale-down)
+
+4. On the right pane under _Access_, click on **S2S apps** (Server to Server apps) to see all Application Users.
+
+![Power Platform S2S Apps](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/76b24b11-c4b2-499d-9752-3a5fe9fa98e7/image/w=1920,quality=90,fit=scale-down)
+
+5. Create a New App User by clicking on **New App User > Add an app**
+
+- Select the "private" App you have created in Azure
+- Provide Business Unit same as in Environment URL
+- Provide Security Roles as **System Administrator.**
+- Click on **Create**
+
+![Power Platform New App User](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3d406a52-e49b-4033-b72f-dba1ffac70e2/image/w=1920,quality=90,fit=scale-down)
+
+## Add a connection in Peliqan to Microsoft Dynamics 365 F&O
+
+In Peliqan, go to "Connections", click on "Add new" and search for Dynamics F&O:
+
+![Dynamics F&O connection in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c0967d14-e5ce-413d-981e-62f55707e330/image/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- Client ID: Client ID (App ID) of the Private App from Microsoft Azure Portal
+- Client Secret: Client secret of the Private App
+- Tenant ID: Tenant Id of the Private App
+- Resource URL: Resource URL of the F&O Instance
+- (Optional) select tables to sync under 'Advanced'
+
+![Dynamics F&O connection configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8ac82de6-ac48-4c9b-83d2-58b0cb02f423/image/w=1920,quality=90,fit=scale-down)
+
+Click on the button **Connect Dynamics 365 Finance and Operations(AX)** to initiate the oAuth Flow and Authorize access. Once the connection is added, the data pipeline will automatically be created and data will start syncing to your data warehouse.
+
+## Entity explorer
+
+You can use the below data app in Peliqan to browse all your entities in F&O and find their primary keys. This is need to add extra entities to the pipeline for syncing.
+
+<Accordion title="Click to expand script">
+  ```python
+  # Entity browser for Microsoft Dynamics 365 F&O (Finance & Operations).
+  # Use this to find entity names and their primary keys, to add additional entities to the pipeline.
+  # Contact support@peliqan.io for questions.
+  
+  dynamicsax_api = pq.connect('MS Dynamics 365 Finance and Operations (AX)')
+  
+  reload = False
+  
+  def load_entities():
+      st.text("Loading all entities from Dynamics F&O, this will take a minute or so.")
+      entities = dynamicsax_api.get('entities')
+      all_entities = []
+      for entity in entities:
+          entity_name = entity["@Name"]
+          pks = entity.get("Key",{}).get("PropertyRef", [])
+          if not isinstance(pks, list):
+              pks = [pks]
+              
+          all_pks = []
+          for pk in pks:
+              pk_name = pk["@Name"]
+              all_pks.append(pk_name)
+          
+          all_entities.append(
+              {
+                  "name": entity_name,
+                  "primary keys": ", ".join(all_pks)
+              }
+          )
+      all_entities = sorted(all_entities, key=lambda x: x["name"])
+      return all_entities
+  
+  all_entities = pq.get_state()
+  if not all_entities or reload:
+      all_entities = load_entities()
+      pq.set_state(all_entities)
+  #st.table(all_entities)
+  
+  search = st.text_input("Search (matches on start of entity name only):")
+  if search:
+      filtered_entities = [e for e in all_entities if e["name"].lower().startswith(search.lower())]
+      selected_entity = st.selectbox("Entities (start typing to filter)", options = filtered_entities, format_func=lambda x: x["name"])
+      if selected_entity:
+          st.subheader("Entity name")
+          st.write(selected_entity["name"])
+          st.subheader("Entity primary keys")
+          st.write(selected_entity["primary keys"])
+  ```
+</Accordion>
+
+## Bulk export
+
+For large datasets, you can use a custom pipeline in Peliqan to do scheduled bulk exports, using a DMF (Data Management Framework) Export Project defined in Dynamics F&O. See below script which implements a custom pipeline.
+
+<Accordion title="Click to expand script">
+  ```python
+  # Bulk export from Microsoft Dynamics 365 F&O Finance & Operations, and import into the Peliqan data warehouse.
+  # This script will fetch all entities from Dynamics F&O with their PKs on the first run (metadata).
+  #
+  # Create a DMF Export project in F&O first (DMF = Data Management Framework).
+  # Use Source data format "XML-Element".
+  #
+  # Use list_projects() to find correct name of Export DMF Project in Dynamics F&O.
+  # Set correct project name and legal entity below:
+  
+  export_project_name = "My export 2"
+  legal_entity_name = "DAT"
+  export_format = "XML" # or "CSV"
+  export_schema = "dynamics f&o bulk export"
+  
+  ###########################
+  
+  import time
+  import zipfile
+  import io
+  import os
+  import requests
+  import pandas as pd
+  import re
+  import xml.etree.ElementTree as ET
+  from typing import Iterator, Dict, List
+  
+  
+  dynamicsax_api = pq.connect('MS Dynamics 365 Finance and Operations (AX)')
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  
+  extract_dir = f"/etc/shared_temp/dynamics_exported_data_{pq.INTERFACE_ID}"
+  reload_entities_from_api = False
+  start_new_export_run = True # Set to false to import already downloaded files
+  
+  
+  def main():
+      st.title("Microsoft Dynamics 365 F&O Bulk Export")
+  
+      if start_new_export_run:
+          execution_id = start_export_run(export_project_name, legal_entity_name)
+      
+          execution_status = ""
+          while not "Succeeded" in execution_status: # "Succeeded" or "PartiallySucceeded"
+              time.sleep(10)
+              execution_status = get_export_run_status(execution_id)
+      
+          export_url = get_export_url(execution_id)
+          download_files(export_url)
+  
+      if export_format == "CSV":
+          import_data_csv()
+      elif export_format == "XML":
+          import_data_xml()
+      else:
+          st.warning("Unknown export format")
+  
+  def load_entities_pks():
+      pks_all_entities = pq.get_state()
+      if not pks_all_entities or reload_entities_from_api:
+          st.text("Loading and caching all entities with their PKs from Dynamics F&O, this will take a minute or so.")
+          
+          def make_plural(word):
+              match = re.search(r"(.*?)(V[1-4])$", word) # Special case: entities ending with V1, V2, V3, V4
+              if match:
+                  base, version = match.groups()
+                  return make_plural(base) + version
+              lower_word = word.lower()
+              if lower_word == "person":
+                  return "people"
+              if lower_word.endswith(("s", "sh", "ch", "x", "z")):
+                  return word + "es"
+              if lower_word.endswith("y") and len(word) > 1 and word[-2].lower() not in "aeiou":
+                  return word[:-1] + "ies"
+              if lower_word.endswith("f"):
+                  return word[:-1] + "ves"
+              if lower_word.endswith("fe"):
+                  return word[:-2] + "ves"
+              return word + "s"
+      
+          entities = dynamicsax_api.get('entities')
+          pks_all_entities = {}
+          for entity in entities:
+              entity_name = entity["@Name"]
+              entity_name_plural = make_plural(entity_name)
+              pks = entity.get("Key",{}).get("PropertyRef", [])
+              if not isinstance(pks, list):
+                  pks = [pks]
+              all_pks = []
+              for pk in pks:
+                  pk_name = pk["@Name"]
+                  if pk_name.upper() not in ["DATAAREAID"]:
+                      all_pks.append(pk_name.upper())
+              pks_all_entities[entity_name_plural.lower()] = all_pks
+          pq.set_state(pks_all_entities)
+      
+      return pks_all_entities
+  
+  
+  def list_projects():
+      projects = dynamicsax_api.get('dmfprojects')
+      export_projects = []
+      for project in projects:
+          if project["OperationType"] == "Export":
+              export_projects.append(project["Name"])
+      st.table(export_projects)
+  
+  
+  def start_export_run(export_project_name, legal_entity_name):
+      params = {
+          'reExecute': False,
+          'executionId': "",
+          'packageName': "MyExportPackage.zip",
+          'legalEntityId': legal_entity_name,
+          'definitionGroupId': export_project_name
+      }
+      result = dynamicsax_api.add('exportrun', params)
+      if result["status"] == "success":
+          
+          execution_id = result["detail"]["value"]
+          st.write(f"Export run started, execution id: {execution_id}")
+          return execution_id
+      else:
+          st.warning("Could not start export run")
+          st.json(result)
+          exit()
+  
+  
+  def get_export_run_status(execution_id):
+      params = {
+          'executionId': execution_id
+      }
+      execution_status = dynamicsax_api.get('exportstatus', params)
+      st.write(f"Execution status: {execution_status}")
+      return execution_status
+  
+  
+  def get_export_url(execution_id):
+      params = {
+          'executionId': execution_id
+      }
+      export_url = dynamicsax_api.get('exportdownloadurl', params)
+      st.text(f"Export URL: {export_url}")
+      return export_url
+  
+  
+  def download_files(url):
+      os.makedirs(extract_dir, exist_ok=True)
+      
+      response = requests.get(url)
+      response.raise_for_status()
+      
+      with zipfile.ZipFile(io.BytesIO(response.content)) as zf:
+          zf.extractall(extract_dir)
+      
+      st.write(f"Files extracted to: {os.path.abspath(extract_dir)}")
+  
+  
+  def import_data_csv():
+      pks_all_entities = load_entities_pks()
+      for filename in os.listdir(extract_dir):
+          st.subheader(f"File: {filename}")
+          file_path = os.path.join(extract_dir, filename)
+          if filename.lower().endswith(".csv"):
+              df = pd.read_csv(file_path)
+              st.write(df.head())
+              if len(df)>0:
+                  entity_name_plural = filename.replace(".csv", "").replace(" ", "") # e.g. CustomersV3
+                  table_name = filename.replace(".csv", "").lower().replace(" ", "_")
+                  if entity_name_plural.lower() in pks_all_entities:
+                      pks = pks_all_entities[entity_name_plural.lower()]
+                      st.info(f"Importing data from file: entity name {entity_name_plural}, PKs: {pks}")
+                      result = dbconn.write(export_schema, table_name, records = df, pk = pks)
+                      status = result["status"]
+                      if status.lower() != "success":
+                          st.error("Error writing to DWH")
+                          st.write(result)
+                  else:
+                      st.error(f"Cannot find PKs of entity {entity_name_plural}, skipping import of this file.")
+              else:
+                  st.warning(f"No data in file, skipping.")
+          else:
+              st.warning(f"Not a CSV data file, skipping.")
+          os.remove(file_path)
+  
+  
+  def read_xml_in_chunks(file_path: str, chunk_size: int = 1000) -> Iterator[List[Dict]]:
+      # Processes all direct children of the Document root tag.
+      context = ET.iterparse(file_path, events=('start', 'end'))
+      chunk = []
+      depth = 0
+      current_record = None
+      for event, elem in context:
+          if event == 'start':
+              depth += 1
+              # Depth 2 means direct child of Document (depth 1)
+              if depth == 2:
+                  current_record = elem
+          elif event == 'end':
+              # Process complete records (direct children of Document)
+              if depth == 2 and current_record is not None:
+                  # Convert XML element to dictionary
+                  row_dict = {}
+                  # Add attributes if any
+                  if elem.attrib:
+                      row_dict.update(elem.attrib)
+                  # Add child elements
+                  for child in elem:
+                      if child.text and child.text.strip():
+                          row_dict[child.tag] = child.text.strip()
+                      elif len(child) > 0:
+                          # Handle nested elements
+                          for nested in child:
+                              if nested.text and nested.text.strip():
+                                  row_dict[f"{child.tag}_{nested.tag}"] = nested.text.strip()
+                  
+                  # Add direct text if element has no children
+                  if len(elem) == 0 and elem.text and elem.text.strip():
+                      row_dict['value'] = elem.text.strip()
+                  if row_dict:  # Only add non-empty records
+                      chunk.append(row_dict)
+                  # Clear element to free memory
+                  elem.clear()
+                  current_record = None
+                  # Yield chunk when it reaches the desired size
+                  if len(chunk) >= chunk_size:
+                      yield chunk
+                      chunk = []
+              depth -= 1
+      # Yield remaining records
+      if chunk:
+          yield chunk
+      # Clean up
+      del context
+  
+  
+  def import_data_xml():
+      chunk_size = 1000
+      pks_all_entities = load_entities_pks()
+      
+      for filename in os.listdir(extract_dir):
+          st.subheader(f"File: {filename}")
+          file_path = os.path.join(extract_dir, filename)
+  
+          if filename == "Manifest.xml" or filename == "PackageHeader.xml":
+              pass  
+          elif filename.lower().endswith(".xml"):
+              try:
+                  # Process first chunk to show preview
+                  total_records = 0
+                  
+                  entity_name_plural = filename.replace(".xml", "").replace(" ", "")
+                  table_name = filename.replace(".xml", "").lower().replace(" ", "_")
+                  
+                  if entity_name_plural.lower() not in pks_all_entities:
+                      st.error(f"Cannot find PKs of entity {entity_name_plural}, skipping import of this file.")
+                      continue
+                  
+                  pks = pks_all_entities[entity_name_plural.lower()]
+                  st.info(f"Importing data from file: entity name {entity_name_plural}, PKs: {pks}")
+                  
+                  # Process file in chunks
+                  for chunk_idx, chunk in enumerate(read_xml_in_chunks(file_path, chunk_size)):
+                      if chunk_idx == 0:
+                          # Show preview of first chunk
+                          st.write(f"Preview (first {min(5, len(chunk))} records):")
+                          st.write(chunk[:5])
+                      
+                      total_records += len(chunk)
+                      
+                      # Convert chunk to DataFrame for writing
+                      df_chunk = pd.DataFrame(chunk)
+                      result = dbconn.write(export_schema, table_name, records=df_chunk, pk=pks)
+                      
+                      status = result["status"]
+                      if status.lower() != "success":
+                          st.error(f"Error writing chunk {chunk_idx + 1} to DWH")
+                          st.write(result)
+                          break
+                      
+                      # Show progress
+                      st.write(f"Processed chunk {chunk_idx + 1}: {len(chunk)} records")
+                  
+                  if total_records == 0:
+                      st.warning(f"No data in file, skipping.")
+                  else:
+                      st.success(f"Successfully imported {total_records} total records")
+                      
+              except ET.ParseError as e:
+                  st.error(f"Error parsing XML file: {e}")
+              except Exception as e:
+                  st.error(f"Error processing file: {e}")
+          else:
+              st.warning(f"Not an XML data file, skipping.")
+          
+          try:
+              os.remove(file_path)
+          except Exception as e:
+              st.warning(f"Could not remove file: {e}")
+  
+  
+  main()
+  ```
+</Accordion>
+
+Make sure to create a DMF Export Project in Dynamics F&O first. In Dynamics F&O, go to **Data Management > Export** and create a new project:
+
+![Dynamics F&O DMF Export project](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b18c0423-5789-4b73-87eb-f0941055c7ba/Dynamics_FO_DMF_Export_project/w=1920,quality=90,fit=scale-down)
+
+Add one or more entities for export, choose **XML-Element** as data format for each entity.
+
+Make sure **Skip staging** is checked for each entity (otherwise export will be 10x slower).
+
+<Note>
+  There's a bug in Dynamics F&O where **Skip staging** is not checked, even when the toggle is enabled when adding an entity. Double check if the check is there in the list of entities (see screenshot example below).
+</Note>
+
+Example:
+
+![Dynamics F&O Skip Staging check](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1a93a4b2-597f-4239-a93f-ef5fd135a791/Screenshot_2025-11-05_at_11.37.25/w=1920,quality=90,fit=scale-down)
+
+Note, entities can be added in bulk by using the "Add multiple" menu item. Select for example an Application Module such as "Customers" or "Accounts Payable", and next select all included entities by clicking the checkbox in the column header. Once all entities are selected, make sure target data format is set to **XML-Element** and Skip staging = Yes. Click "Add selected":
+
+![Dynamics F&O Add Multiple Entities](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b30f18d0-103d-4e26-836d-e01f8c94fe49/Screenshot_2025-11-04_at_15.32.40/w=1920,quality=90,fit=scale-down)
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](/).

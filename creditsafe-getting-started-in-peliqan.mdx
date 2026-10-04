@@ -1,0 +1,51 @@
+---
+title: "CreditSafe - Getting started in Peliqan"
+sidebarTitle: "CreditSafe"
+description: "Learn how to connect CreditSafe to Peliqan to fetch company credit reports and director information using data activation features."
+---
+
+Creditsafe is a global company that provides credit reports and financial information of businesses. It is a leading provider of business credit checking and risk intelligence. The products include Business credit reports, Risk Tracker monitoring, Creditsafe ratings, Credit approval systems, Creditsafe 3D portfolio management tool, business marketing data, data cleaning services, European marketing data, and trade payment data. Website: [https://www.creditsafe.com/gb/en.html](https://www.creditsafe.com/gb/en.html)
+
+This article provides an overview to get started with the **CreditSafe** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Content
+
+- [CreditSafe Data Pipeline](#creditsafe-data-pipeline)
+- [Data Activation](#data-activation)
+- [Fetching Companies using VAT Number](#fetching-companies-using-vat-number)
+- [Fetching People/Directors using Company ID](#fetching-peopledirectors-using-company-id)
+- [Need further help](#need-further-help)
+
+## CreditSafe Data Pipeline
+
+### Connect
+
+Connect CreditSafe through the Peliqan Connectivity module:
+
+![CreditSafe connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e821007a-63ae-42fb-9875-45af5476a552/image/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- Username for CreditSafe Account
+- Password
+- (Optional) table selection via 'Advanced'
+
+Once filled, click **Save**. For now, Peliqan only provides Writeback endpoints accessed through data-app connectivity.
+
+## Data Activation
+
+### Fetching Companies using VAT Number
+
+_get_companies_ function in CreditSafe allows to fetch company(s) using VAT Number. If Vat No. is BE 0784.446.918, then country value passed would be **BE** and Vat No. is passed removing all '.' (dots) i.e. **0784446918**
+
+![CreditSafe get_companies](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2f97fa6a-8945-4078-8ace-fddab02b7b3f/image/w=1920,quality=90,fit=scale-down)
+
+### Fetching People/Directors using Company ID
+
+_get_peoples_ function allows to fetch all director(s) of a company by using **company_id** and **country.**
+
+![CreditSafe get_peoples](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8a07dee1-d19d-4335-8a4d-2409ac75da5b/image/w=1920,quality=90,fit=scale-down)
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](/).

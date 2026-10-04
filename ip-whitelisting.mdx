@@ -1,0 +1,89 @@
+---
+title: "IP whitelisting"
+sidebarTitle: "IP Whitelisting"
+description: "You can restrict access to your data warehouse, database or API by whitelisting IP addresses from Peliqan."
+---
+
+You can restrict access to your data warehouse, database or API by whitelisting following IP addresses from Peliqan:
+
+<table>
+  <colgroup>
+    <col width="281" />
+    <col width="301" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Region</th>
+      <th>IP addresses from Peliqan to whitelist</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Europe</td>
+      <td>3.74.207.151 and <br />52.28.10.115 and <br />52.28.176.5</td>
+    </tr>
+    <tr>
+      <td>USA</td>
+      <td>98.83.88.220</td>
+    </tr>
+    <tr>
+      <td>Peliqan test environment (\*)</td>
+      <td>81.83.30.43</td>
+    </tr>
+    <tr>
+      <td>APAC</td>
+      <td>Contact support</td>
+    </tr>
+    <tr>
+      <td>Private instance</td>
+      <td>Contact support</td>
+    </tr>
+  </tbody>
+</table>
+
+_(\*) Optional: include the Peliqan test environment in your whitelisted IP addresses, regardless of the production region you are using, in order to allow the Peliqan Support Team to troubleshoot connectivity (e.g. for on-prem VPN connections)._
+
+### IP Whitelisting for MySQL
+
+For MySQL, make sure to also add below hostnames as Access Hosts for your MySQL user (next to the above IP address):
+
+<table>
+  <colgroup>
+    <col width="260" />
+    <col width="574" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Region</th>
+      <th>IP addresses from Peliqan to whitelist</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Europe</td>
+      <td>`user@ec2-3-74-207-151.eu-central-1.compute.amazonaws.com `<br />`user@ec2-52-28-10-115.eu-central-1.compute.amazonaws.com` <br />`user@ec2-52-28-176-5.eu-central-1.compute.amazonaws.com`</td>
+    </tr>
+    <tr>
+      <td>USA</td>
+      <td>`user@ec2-98-83-88-220.eu-central-1.compute.amazonaws.com`</td>
+    </tr>
+    <tr>
+      <td>Peliqan test environment (\*)</td>
+      <td>`user@ec2-81-83-30-43.eu-central-1.compute.amazonaws.com`</td>
+    </tr>
+    <tr>
+      <td>APAC</td>
+      <td>Contact support</td>
+    </tr>
+    <tr>
+      <td>Private instance</td>
+      <td>Contact support</td>
+    </tr>
+  </tbody>
+</table>
+
+_(\*) Optional: include the Peliqan test environment in your whitelisted IP addresses, regardless of the production region you are using, in order to allow the Peliqan Support Team to troubleshoot connectivity (e.g. for on-prem VPN connections)._
+
+More info on connecting MySQL:
+
+<img src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/76145f19-bd48-429b-9ed0-c1dc0ab8a3e5/mysql/w=1920,quality=90,fit=scale-down" alt="MySQL - Getting started in Peliqan" />[MySQL - Getting started in Peliqan](/mysql-getting-started-in-peliqan)

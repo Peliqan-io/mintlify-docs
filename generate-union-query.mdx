@@ -1,0 +1,49 @@
+---
+title: "Generate Union Query"
+description: "Step-by-step guide to Peliqan's built-in union data app template for merging multi-connection datasets such as accounting data across companies into unified tables and views."
+sidebarTitle: "Union Query Template"
+---
+
+A common use case we see is the combining (union) of data from multiple connections of the same platform.
+
+An example is an accounting firm that needs to build BI dashboarding over different legal companies, each having their own accounting done in a separate accounting system e.g. PowerOffice.
+
+In the Peliqan Data App templates you'll find an example app that unions data an makes it available for further analysis and BI. This article gives more details on how to implement and adapt to your needs.
+
+![Data lineage view of a generated union query over 7 PowerOffice connections.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6d90e6e9-c1b5-496a-a6d8-c7cf4b48acd5/image/w=1920,quality=90,fit=scale-down)
+
+Data lineage view of a generated union query over 7 PowerOffice connections.
+
+## Activating the template
+
+In the data app templates, select 'union connection data', open and and run the app:
+
+![Streamlit modal to select the connection type, the connections and the tables to union.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a2713f2b-0346-4068-80f5-bdd3d2ff7f84/image/w=1920,quality=90,fit=scale-down)
+
+Streamlit modal to select the connection type, the connections and the tables to union.
+
+The data app will generate for each selected table and connection a union query in Peliqan in a new folder (schema) "union\_\<connectiontype>" and also activate this query as 'view' in your data warehouse for BI systems to connect to.
+
+![Screenshot of a new schema and its generated union queries in the Peliqan UI.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/68e3087b-2431-45c3-82aa-0529fac72f29/image/w=1920,quality=90,fit=scale-down)
+
+Once 'generate queries' is selected, you will see the script executing an showing per table the actual query you can easily copy for customization.
+
+## Data App
+
+The data app has 4 main blocks:
+
+- **Start**: database connections and helper functions. The critical one is 'generate_sql_union' that is responsible for the actual SQL creation.
+- **Select Connection**: Streamlit component to show the connection type, connection and table selection.
+- **Create Union Tables**: script to generate a union query per table and save/update it as Peliqan query and view.
+- **Refresh data:** Refreshes the query definitions and schemas in Peliqan.
+
+![Screenshot showing the data app blocks in the Peliqan interface.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/edb5ba51-bc4b-4fa1-89c8-531a70d3f452/image/w=1920,quality=90,fit=scale-down)
+
+**Key components in the script:**
+
+- Each union table will have an additional field 'source' showing the source name. By default this is the connection name, but you can alter this in the 'get_source_name' function. As example you will find for PowerOffice connections that the legalname is used.
+
+![Screenshot highlighting the source field and get_source_name customization in the script.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0e3c5db8-7943-4848-8bfc-3a764f90b2f3/image/w=1920,quality=90,fit=scale-down)
+
+- We will ensure all sources have the same columns and add a 'null' column if needed. Also data types will be cast to ensure a correct union statement.
+- Add for 'id', 'code' and 'no' column pk and fk fields containing the source_name and the key. This is useful when the source system uses readable Id's as this implies multiple records with the same id can be found in the union result table.

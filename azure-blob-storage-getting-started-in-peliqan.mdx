@@ -1,0 +1,39 @@
+---
+title: "Azure blob storage - Getting started in Peliqan"
+sidebarTitle: "Azure Blob Storage"
+description: "Learn how to connect Azure Blob Storage to Peliqan using a SAS token and list or download files using Python scripts."
+---
+
+This article provides an overview to get started with the **Azure blob storage** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Authentication
+
+Create a SAS token (SAS = Shared Access Signature) on the blob container in Azure, of type "User delegation key".
+
+In Azure go to Storage accounts > choose an account > Data Storage > Containers > choose a container.
+
+Left menu under Settings > Shared access tokens.
+
+- Signing method: User delegation key
+- Permissions: select Read AND List
+- Expiry: choose date in the future
+
+Click on "Generate SAS token and URL". Copy the Blob SAS token.
+
+![Azure Blob Storage SAS token settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c3c779ad-91a5-42fc-877a-a65d66b57049/Azure_blob_storage_container_SAS_token_-_user_delegation/w=1920,quality=90,fit=scale-down)
+
+![Azure Blob Storage generated token](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/54fc2cb3-48f0-4c04-884e-41f2ebaedd7b/Screenshot_2025-09-03_at_21.46.44/w=1920,quality=90,fit=scale-down)
+
+## Handling files
+
+Example custom pipeline script to list files (blobs) in a container and download a file:
+
+```python
+azure_blob_storage_api = pq.connect('Azure blob storage')
+
+result = azure_blob_storage_api.get('files')
+st.json(result)
+
+file_contents = azure_blob_storage_api.get('downloadfile', path = "myfolder/myfile.csv")
+st.write(file_contents)
+```

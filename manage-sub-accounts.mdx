@@ -1,0 +1,83 @@
+---
+title: "Manage sub accounts"
+sidebarTitle: "Manage Sub Accounts"
+description: "Peliqan can be used by service providers, SaaS companies, consultants and ISV's to handle data projects from their end-customers. For each end-customer, a sub account is created under the Peliqan partner account."
+---
+
+Peliqan can be used by service providers, SaaS companies, consultants and ISV's to handle data projects from their end-customers. For each end-customer, a sub account is created under the Peliqan partner account.
+
+<Note>
+  [Contact](https://peliqan.io/contact) your Peliqan account manager to set up a white-label environment for your business.
+</Note>
+
+## Partner settings
+
+In your Partner account, go to Admin > Partner Settings.
+
+You can configure the connectors that are available to your customers (e.g. when using [embedding](/whitelabel/embedding)) and you can configure the whitelabeling of the platform into your own brand.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6441c91f-91c3-4c5c-8fd6-7cd3626a4b6e/manage_whitelabel/w=1920,quality=90,fit=scale-down)
+
+## Manage sub accounts
+
+In your Partner account, go to Admin > Customers.
+
+Click the edit icon next to a sub account, to update the sub account details such as the license, expiry date etc.
+
+## Logging in to sub accounts
+
+Use the "Login as" button to login into the sub account.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/474d3be7-bffd-461e-9c42-4dfdf0bbbd59/manage_sub_accounts/w=1920,quality=90,fit=scale-down)
+
+<Note>
+  Every user in the partner account has access to the sub accounts via the "Login as" button, except if Support access is disabled inside the sub account.
+
+  Every user in the partner account can create new sub accounts.
+
+  After logging in to the sub account with the "Login as" feature, the user will be an Account Admin in the sub account (full access to all features in the sub account).
+
+  If you want users to have access to only a selection of sub accounts, create a user in each sub account separately. Note that logins (email addresses) have to be unique. A typical pattern is to use [john.doe+subaccount1@acme.com](mailto:john.doe+subaccount1@acme.com), [john.doe+subaccount2@acme.com](mailto:john.doe+subaccount2@acme.com) etc.
+
+  When using the "Login as" feature, a new user is automatically created in the sub account, with username `support+sub_account_name+sub_account_id@domain.com` (e.g. your whitelabel domain or peliqan.io), for example for customer ACME from MySaaS.com this will become `support+acme+123@mysaas.com`.
+
+  For more information on creating users and roles, see:
+
+  [Permissions](/permissions)
+</Note>
+
+## Create new sub accounts
+
+### From the partner account
+
+In your Partner account, go to Admin > Customers > button "Add customer".
+
+### Self-service sign-up
+
+You can allow your customers to sign-up on your whitelabel data cloud.
+
+In your Partner account, go to Admin > Partner Settings > Whitelabel > toggle "Signup Enabled".
+
+### Automated creation of sub accounts
+
+You can use the Peliqan Partner REST API to automate the provisioning of sub accounts, or you can use pq functions, inside Peliqan. More info:
+
+[Partner API](/whitelabel/partner-api-embed-api)
+
+[pq Functions for partners](/pq-functions-for-partners)
+
+## Hydration of sub accounts
+
+"Hydration" means delivering assets in sub accounts. Hydration can be done using the Partner API or by using Peliqan's pq functions to handle sub accounts.
+
+More info:
+
+[Partner API](/whitelabel/partner-api-embed-api)
+
+You can install Peliqan's Data App to publish scripts in sub accounts. This is useful if you have built your own solutions on top of Peliqan (e.g. your own Data Apps) and you want to make them available in selected sub accounts.
+
+In your Partner account, go to the Build section, go to Data App templates and install this template:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9f858906-c983-4106-9b5e-cff88c9790a4/screenshot_2026-02-01_at_12.08.11/w=1920,quality=90,fit=scale-down)
+
+In this app, you can flag a selection of your scripts (from the Partner account) as "Templates". For each template, you can publish it into selected sub accounts.

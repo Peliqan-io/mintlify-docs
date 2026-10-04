@@ -1,0 +1,340 @@
+---
+title: "Whatsapp - Getting started in Peliqan"
+sidebarTitle: "Whatsapp"
+description: "Send WhatsApp messages and build chatbots in Peliqan using WABA templates, text messages, and webhooks. Set up a Meta app and connect to Peliqan for bidirectional messaging."
+---
+
+The Whatsapp connector can be used to send automated messages to users using Whatsapp, and to receive messages from users. You can send messages based on templates and free text messages. You can also use Whatsapp Flows, which allows sending structured screens with forms, request the location of a user etc.
+
+## Setting up Whatsapp For Business (WABA)
+
+### Create a Facebook (Meta) app
+
+Go to the Facebook (Meta) developers portal, create a Business Account and add an app:
+
+[https://developers.facebook.com](https://developers.facebook.com)
+
+### Configure Whatsapp for your Facebook (Meta) app
+
+Go into the details of your app.
+
+In the left pane under "Whatsapp" > Quick start, configure Whatsapp for your app:
+
+- Add a phone number (can be mobile number or land line)
+- Add the Webhook URL (see below under "Receiving messages")
+- Configure a System User with a token (see below)
+
+Now add a connection in Peliqan for Whatsapp and add your WABA id and access token.
+
+### Find your WABA id
+
+To find the ID of a WhatsApp Business Account (WABA):
+
+Go to [**Business Manager**](https://business.facebook.com/) > **Business Settings** > **Accounts** > **WhatsApp Business Accounts**.
+
+### Create a token
+
+Go to Meta [**Business Manager**](https://business.facebook.com/) **\> Business Settings > Users > System users**.
+
+- Add a System User
+- Assign permissions to your app
+- Generate a new token that does not expire, enable the permissions for Whatsapp: `whatsapp_business_management`, `whatsapp_business_messaging`
+
+## Sending messages to Whatsapp users
+
+<Note>
+  You can only send a message to a new user using a template. A free text message can only be sent after you have received a response from a user or when a user has sent a message to you first. Whatsapp wants to avoid that spam is sent to users.
+</Note>
+
+### Sending a template message
+
+Create a template first in your Whatsapp app:
+
+In your Meta app under the section Whatsapp (left pane) > Quickstart. In the center pane under Whatsapp Business, click on "Message templates". Add a message template.
+
+Example of sending a template-based message in a Peliqan low-code Python script:
+
+```python
+# Get your "from" phone number id
+whatsapp_api = pq.connect('Whatsapp')
+phonenumbers = whatsapp_api.list('phonenumbers')
+st.json(phonenumbers) # Show result
+
+templatemessage = {
+    "to": "+32498776655",
+    "langcode": "en_US",
+    "template_name": "hello_world", # Create your template first
+    "from_phonenumber_id": "263567523509780" # From above lookup
+}
+result = whatsapp_api.add('templatemessage', templatemessage)
+st.json(result)
+```
+
+<Accordion title="Example code to send a template message with dynamic content and a Whatsapp flow (click to expand)">
+  ```python
+  def sendTemplateMessageWithDynamicContent():
+      message = {
+          "to": "+32498776655",
+          "type": "template",
+          "template": {
+              "name": "my_template_name",
+              "language": {
+                  "code": "en"
+              },
+              "components": [
+                  {
+                      "type": "body",
+                      "parameters": [
+                          {
+                              "text": "Hi there John Doe",
+                              "type": "text"
+                          }
+                      ]
+                  }
+              ]
+          },
+          "messaging_product": "whatsapp",
+          "from_phonenumber_id": "263567523509790"
+      }
+      result = whatsapp_api.add('message', message)
+      st.json(result)
+      
+  def sendWhatsappFlow():
+      message = {
+          "from_phonenumber_id": "263567523509790",
+          "messaging_product": "whatsapp",
+          "to": "+32498776655",
+          "recipient_type": "individual",
+          "type": "interactive",
+          "interactive": {
+              "type": "flow",
+              "header": {
+                  "type": "text",
+                  "text": "Not shown in draft mode"
+              },
+              "body": {
+                  "text": "Not shown in draft mode"
+              },
+              "footer": {
+                  "text": "Not shown in draft mode"
+              },
+              "action": {
+                  "name": "flow",
+                  "parameters": {
+                      "flow_message_version": "3",
+                      "flow_action": "navigate",
+                      "flow_token": "123",
+                      "flow_id": "2344349045774215",
+                      "flow_cta": "Not shown in draft mode",
+                      "mode": "draft",
+                      "flow_action_payload": {
+                          "screen": "WELCOME_SCREEN",
+                          "data": {
+                              "welcome_text": "Hi John, here are your orders!",
+                              "all_orders": [
+                                  {
+                                      "id": "1",
+                                      "title": "Order 123"
+                                  },
+                                  {
+                                      "id": "2",
+                                      "title": "Order 456"
+                                  }
+                              ]
+                          }
+                      }
+                  }
+              }
+          }
+      }
+      result = whatsapp_api.add('message', message)
+      st.json(result)
+  ```
+</Accordion>
+
+### Sending a text message
+
+Example of sending a text message in a Peliqan low-code Python script:
+
+```python
+whatsapp_api = pq.connect('Whatsapp')
+text = "Hi there"
+textmessage = {
+    'to': "+32498776655",
+    'text': text.replace('"', "'").replace("\n", ""),
+    'from_phonenumber_id': "263567523509790" # See above for details
+}
+result = whatsapp_api.add('textmessage', textmessage)
+st.json(result)
+```
+
+## Receiving messages from Whatsapp users
+
+Whatsapp (Facebook) will send webhook events for each message from a user.
+
+There are 2 ways to process incoming webhooks in Peliqan:
+
+- Using the Peliqan Webhook queue table (batch)
+- Using an API handler script (realtime)
+
+### Using the webhook queue (batch)
+
+This approach allows you to process incoming Whatsapp messages (webhooks) in batch. Incoming webhooks are stored in a table in the Peliqan data warehouse. More info:
+
+[Incoming webhooks](/incoming-webhooks)
+
+Configure your Peliqan Account webhook URL for your Whatsapp app.
+
+You can find your Webhook URL in Peliqan under **Admin > Settings > Account webhook**:
+
+![Peliqan account webhook URL settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3d80264c-9266-4a42-8fe8-45c107cd10e2/Screenshot_2024-04-12_at_08.45.15/w=1920,quality=90,fit=scale-down)
+
+Add this URL for your app under Whatsapp > Configuration > Webhook > Callback URL:
+
+![Whatsapp webhook callback URL configuration in Meta](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d602a8a9-2f09-4713-b230-6acf8d25c458/Screenshot_2024-04-12_at_08.47.56/w=1920,quality=90,fit=scale-down)
+
+Note that a new webhook requires a verification from Meta, but this is built-in into Peliqan and will automatically be performed !
+
+Now when a user sends you a message or replies to your message, an incoming webhook event will be stored in your account. You can find these events in the following table in your Peliqan Data Warehouse: `webhook.incoming_webhooks`.
+
+You can configure a scheduled script that runs e.g. every 5 minutes to process new incoming messages incrementally and send responses back to the user in Whatsapp.
+
+<Accordion title='Example script that will process webhooks incrementally, by storing a "state" (click here to expand)'>
+  ```python
+  # This script can be scheduled to run e.g. every 5 minutes
+  # It will process incoming webhook events incrementally from the queue
+  # and for incoming Whatsapp messages it will send a reply
+  whatsapp_api = pq.connect('Whatsapp')
+  dw = pq.dbconnect(pq.DW_NAME)
+  
+  def getIncomingMessagesIncremental():
+      incoming_messages = []
+      id = pq.get_state()
+      if not id:
+          id = 1
+      webhooks = dw.fetch(pq.DW_NAME, query = f"SELECT * FROM webhook.incoming_webhooks WHERE id > %s ORDER BY id" % id)
+      for webhook in webhooks:
+          for entry in webhook["payload"].get("entry", []):
+              for change in entry.get("changes", []):
+                  if change.get("field")=="messages":
+                      for message in change.get("value", {}).get("messages", []):
+                          message_from = message.get("from")
+                          message_text = message.get("text", {}).get("body")
+                          incoming_messages.append({"from": message_from, "text": message_text})
+      if webhooks:
+          pq.set_state(webhooks[-1]["id"])
+      return incoming_messages
+  
+  def sendTextMessage(to, text):
+      textmessage = {
+          'to': to,
+          'text': text,
+          'from_phonenumber_id': "263567523509790",
+      }
+      whatsapp_api.add('textmessage', textmessage)
+  
+  incoming_messages = getIncomingMessagesIncremental()
+  if incoming_messages:
+      for incoming_message in incoming_messages:
+  	    sendTextMessage(incoming_message["from"], 'Thank you! You wrote:' + incoming_message["text"])
+  ```
+</Accordion>
+
+## Using webhook queue (realtime)
+
+This approach allows you to process incoming Whatsapp messages in real-time using an API handler script in Peliqan. More info:
+
+[Publish APIs](/publish-apis)
+
+Add a script of type "API handler" to handle incoming API calls (webhooks) from Whatsapp.
+
+<Accordion title="Example code for a real-time chatbot in Whatsapp using OpenAI ChatGPT (click to expand)">
+  ```python
+  # This script implements a real-time chatbot in Whatsapp, using OpenAI ChatGPT.
+  # 
+  # Add this script as an API handler in Peliqan.
+  # Configure an API endpoint linked to this script (method GET, change to POST after verification, see below).
+  # Configure your API endpoint as Callback URL in your Whatsapp in Facebook developer portal.
+  # Make sure to add an OpenAI and Whatsapp connection in your Peliqan account first.
+  import json
+  
+  whatsapp_api = pq.connect('Whatsapp')
+  openai_api = pq.connect('OpenAI')
+  
+  def sendTextMessage(to, text):
+      textmessage = {
+          'to': to,
+          'text': text.replace('"', "'").replace("\n", ""),
+          'from_phonenumber_id': "263567523509790"
+      }
+      result = whatsapp_api.add('textmessage', textmessage)
+      print("Result of sending message to Whatsapp:", result)
+  
+  def getMessages(data):
+      incoming_messages = []
+      for entry in data.get("entry", []):
+          for change in entry.get("changes", []):
+              if change.get("field")=="messages":
+                  for message in change.get("value", {}).get("messages", []):
+                      message_from = message.get("from")
+                      message_text = message.get("text", {}).get("body")
+                      incoming_messages.append({"from": message_from, "text": message_text})
+      return incoming_messages
+  
+  def askAI(messages):
+      messages_to_ai = []
+      for message in messages:
+          messages_to_ai.append({"role": "user", "content": message})
+          
+      request = {
+          "model": "gpt-3.5-turbo",
+          "messages": messages_to_ai,
+          "temperature": 0.7
+      }    
+      llm_answer = openai_api.get('completion_raw', request)
+      
+      message = llm_answer["choices"][0]["message"]
+      answer_content = message["content"]
+      print("AI answer:", answer_content)
+      return answer_content
+  
+  def handler(request):
+      query_string = request['query_string']
+      data_str = request['data']
+      print("Payload received from Whatsapp:", data_str)
+  
+      # Send challenge in response in first API call from Whatsapp (Facebook) to verify Callback URL.
+      # Make sure the API handler is configured as a public endpoint with method GET.
+      # After verification, change the method to POST.
+      from urllib.parse import parse_qs
+      query_string_dict = parse_qs(query_string)
+      if "hub.challenge" in query_string_dict:
+          challenge = query_string_dict['hub.challenge'][0]
+          print("Sent challenge in response to verify new Callback URL in Whatsapp configuration.")
+          return challenge
+      
+      else:
+          data = json.loads(data_str)
+          messages = getMessages(data)
+          
+          for message in messages:
+              #sendTextMessage(message["from"], 'Thanks for your message ! You wrote: ' + message["text"])
+              answer = askAI([message["text"]])
+              sendTextMessage(message["from"], answer)
+          return "ok"
+  ```
+</Accordion>
+
+Configure a public API endpoint with method `GET`. Example:
+
+![Peliqan API endpoint configuration for Whatsapp](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/68a60b75-2a49-475c-8927-07bbc1a715fe/Screenshot_2025-01-26_at_21.36.37/w=1920,quality=90,fit=scale-down)
+
+In the Whatsapp configuration, enter the detail of your API endpoint as Callback URL.
+
+Click on "Verify and Save". Facebook will now make an API call to your script to get the URL verified.
+
+The script will send the "challenge" in the response.
+
+Once the verification is done, change your API endpoint method from `GET` to `POST`.
+
+From now on, when you send a Whatsapp message, the script will send out a Whatsapp message and echo back your message.

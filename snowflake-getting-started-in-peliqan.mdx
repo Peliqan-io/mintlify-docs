@@ -1,0 +1,82 @@
+---
+title: "Snowflake - Getting started in Peliqan"
+sidebarTitle: "Snowflake"
+description: "Learn how to connect Snowflake to Peliqan as a data source or target warehouse, configure roles and keys, and set up secure key-pair authentication."
+---
+
+**_Snowflake_** _is a cloud-based data warehouse platform designed for high performance, scalability, and ease of use. Snowflake separates compute and storage, allowing users to scale each independently and pay only for what they use. It supports structured and semi-structured data (like JSON, Avro, Parquet). Snowflake is used for analytics, data integration, and building data applications._
+
+This page describes how to use Snowflake in Peliqan as a data source and/or how to configure Snowflake as a target (external data warehouse) so that Peliqan can be used as ELT to sync data from your sources into Snowflake.
+
+## Connect Snowflake
+
+Under Connections, search for Snowflake and add a connection. Fill out all the details:
+
+![Snowflake connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6624b8fe-7a39-4df6-8129-3ad942303350/Screenshot_2025-08-07_at_12.45.15/w=1920,quality=90,fit=scale-down)
+
+Subdomain.region: enter your account name plus region, e.g. `xx12345.eu-central-1`.
+
+**Snowflake user role**
+
+Peliqan will use the default role of the configured user. Make sure the default role of your Snowflake user has permissions to list databases (show databases). The default role should not be 'public'.
+
+- List all roles of current user: `SELECT CURRENT_AVAILABLE_ROLES();`
+- See default role of user: `DESCRIBE USER my_user;`
+- Set default role of user: `ALTER USER my_user SET DEFAULT_ROLE = my_role;`
+
+## Configure Snowflake as target
+
+Make sure to enter a "Target database" if you want to use your Snowflake DWH as a target in Peliqan.
+
+Run following SQL queries in Snowflake to set up a role, user and database, that can be used in Peliqan:
+
+```sql
+/* switch to a role that can create new roles and databases */
+USE ROLE ACCOUNTADMIN;
+
+CREATE ROLE peliqan_demo_role;
+GRANT CREATE DATABASE ON ACCOUNT TO ROLE peliqan_demo_role;
+GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE peliqan_demo_role;
+
+/* grant yourself the new role so you can use it */
+GRANT ROLE peliqan_demo_role TO USER your_current_user;
+
+/* create database under the role so that the role owns the DB */
+USE ROLE peliqan_demo_role;
+CREATE DATABASE peliqan_demo_db;
+
+/* switch to a role that can create users */
+USE ROLE ACCOUNTADMIN;
+
+CREATE USER peliqan_demo_user 
+    PASSWORD = 'xxxxxxxxx' 
+    DEFAULT_ROLE = peliqan_demo_role 
+    DEFAULT_WAREHOUSE = COMPUTE_WH;
+
+GRANT ROLE peliqan_demo_role TO USER peliqan_demo_user;
+```
+
+Create a public/private key for the user with a pass phrase (note down the pass phrase, you'll need to enter it in Peliqan):
+
+`openssl genrsa 2048 | openssl pkcs8 -topk8 -v2 des3 -inform PEM -out rsa_key.p8`
+
+Show the public key (use it below): `openssl pkey -in rsa_key.p8 -pubout -outform DER | openssl base64 -A; echo`
+
+Add the public key to the user in Snowflake:
+
+```sql
+ALTER USER peliqan_demo_user SET RSA_PUBLIC_KEY = 'xxxxx';
+```
+
+When adding the connection in Peliqan, enter the **pass phrase,** and paste the contents of the **private key** in file `rsa_key.p8`. Example:
+
+![Snowflake connection form showing key-pair authentication](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0eb54879-124d-440c-b0e2-a1c7c4bf5d3f/Screenshot_2025-08-07_at_12.53.32/w=1920,quality=90,fit=scale-down)
+
+**More info**
+
+The **_role_** of the user needs to **_own_** the database, so that the user has the permissions to create a `FILE FORMAT`, under the schema it created.
+
+Please note that:
+
+- Users cannot own a database directly, therefore we create a role to own the new database
+- Permissions to create `FILE FORMAT` can only be granted on an existing schema (not on future schemas that will be created by Peliqan), therefore you have to make sure the user (via the role) owns the DB.

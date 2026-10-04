@@ -1,0 +1,361 @@
+---
+title: "Google Sheets - Getting started in Peliqan"
+sidebarTitle: "Google Sheets"
+description: "Learn how to connect Google Sheets to Peliqan, sync data to your warehouse, and use low-code Python scripts for read, write, update, and batch operations."
+---
+
+This article provides an overview to get started with the **Google Sheets** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Contents
+
+- [Connect](#connect)
+- [Explore & Combine](#explore--combine)
+- [Troubleshooting](#troubleshooting)
+  - [Rate limits](#rate-limits)
+  - [Missing tables](#missing-tables)
+- [Activate](#activate)
+  - [Write data: update rows](#write-data-update-rows)
+  - [Write data to a sheet: add rows](#write-data-to-a-sheet-add-rows)
+  - [Insert empty rows](#insert-empty-rows)
+  - [Write data from a table into a sheet](#write-data-from-a-table-into-a-sheet)
+  - [Write data from a table into a sheet, with a header row](#write-data-from-a-table-into-a-sheet-with-a-header-row)
+  - [Write data from a table into a sheet (no data frame)](#write-data-from-a-table-into-a-sheet-no-data-frame)
+  - [Update one cell](#update-one-cell)
+  - [Clear cells](#clear-cells)
+  - [Read the values of a sheet](#read-the-values-of-a-sheet)
+  - [Write data in batch](#write-data-in-batch)
+  - [Create a new Google Sheet file (spreadsheet)](#create-a-new-google-sheet-file-spreadsheet)
+  - [Get details of a spreadsheet](#get-details-of-a-spreadsheet)
+- [Tips & Trick](#tips--trick)
+- [Build reports in Google Sheets](#build-reports-in-google-sheets)
+
+## Connect
+
+In peliqan, go to Connections, click on Add new. Find **Google Sheets** in the list and select it. Click on the Connect button. This will open Google Sheets and allow you to authorize access for Peliqan. Copy the id of the Google Sheet file from the URL and paste it in the connect form.
+
+Once the authorization is done, you will return to Peliqan.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/980ed47f-f3f3-4189-bd4a-e88f3a71ea4d/Screenshot_2024-06-12_at_11.03.04/w=1920,quality=90,fit=scale-down)
+
+## Explore & Combine
+
+Wait a few minutes for the data to start syncing. Now you can view your **Google Sheets** data in tables in Peliqan's built-in data warehouse (or in your own DWH if you connected e.g. SQL Server, Snowflake, Redshift or BigQuery).
+
+Select "Explore" in the left navigation pane, expand "Data warehouse" in the left tree and click on Google Sheets. All tables from Google Sheets will now be shown.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/70ab68c5-261f-47f2-a9d1-1fc6b1af5709/gridview/w=1920,quality=90,fit=scale-down)
+
+You can explore the data in the gridview, and you can write SQL queries to transform the data and to combine the data from **Google Sheets** with data from other sources.
+
+## Troubleshooting
+
+### Rate limits
+
+If you add multiple Google Sheet connections and the pipelines run at the same time, they might hit the rate limits of the Google Sheets API. In that case, you can use a Python script to schedule the Google Sheets pipelines one after the other, and disable the Scheduler on the connection card itself. Example script:
+
+```python
+pq.run_pipeline(connection_name = 'Google Sheets 1', is_async = False, timeout=3600)
+pq.run_pipeline(connection_name = 'Google Sheets 2', is_async = False, timeout=3600)
+```
+
+### Missing tables
+
+When you add a new sheet to your Google Sheets file, after the connection in Peliqan was added, the new sheet will not automatically be added as a table.
+
+In order for the sheet to become available in the data warehouse, perform a "Full resync" on your Google Sheet connection.
+
+## Activate
+
+Here are example low-code Python scripts in Peliqan to work with Google Sheets.
+
+### Write data: update rows
+
+Write a range of values, starting on an existing row & column. Keep in mind that this will overwrite existing cell values, it will not insert new rows.
+
+```python
+Sheets = pq.connect("Google Sheets Writeback")
+
+data = [
+  ["abc", "def"],
+  [123, 456]
+]
+
+result = google_sheets.update("rows", 
+	spreadsheet_id = "1dKg7m8AIq0-mtkKcGmbpZv2UC3i9RqZVzZ7fs4pDA2s", 
+	sheet = "Sheet1", 
+	row = 2,             # start row
+	column = "A",        # start column
+	values = data)
+
+st.json(result)
+```
+
+### Write data to a sheet: add rows
+
+Append rows at the end of sheet (this will append after the last row that is not empty):
+
+```python
+Sheets = pq.connect("Google Sheets Writeback")
+
+data = [
+  ["abc", "def"],
+  [123, 456]
+]
+
+result = google_sheets.add("rows", 
+	spreadsheet_id = "1dKg7m8AIq0-mtkKcGmbpZv2UC3i9RqZVzZ7fs4pDA2s", 
+	sheet = "Sheet1",
+	values = data)
+
+st.json(result)
+```
+
+### Insert empty rows
+
+The above function "Update rows" will overwrite existing cell values. You can insert empty rows first. The following example will insert 6 empty rows, starting at row 4:
+
+```python
+Sheets = pq.connect("Google Sheets Writeback")
+
+result = Sheets.add('empty_rows', 
+	spreadsheet_id = "1dKg7m8AIq0-mtkKcGmbpZv2UC3i9RqZVzZ7fs4pDA2s", 
+	sheet_id = 0,
+	start_row = 4, 
+	end_row = 10)
+
+# Note: sheet_id of the first default sheet (Sheet1) is always 0.
+# If you want to write into another sheet, get the sheet_id first.
+# Example to get the sheet_id of the second sheet:
+
+spreadsheet_details = Sheets.get('spreadsheet', spreadsheet_id = spreadsheet_id)
+sheet_id = spreadsheet_details["sheets"][1]["properties"]["sheetId"]
+```
+
+<Note>
+  See below for a comprehensive example that inserts empty rows first and then writes cell values.
+</Note>
+
+### Write data from a table into a sheet
+
+New rows will be automatically added if needed, existing rows will be overwritten.
+
+The start row (row = 4 in the below example) must exist !
+
+```python
+# connect to your Peliqan data warehouse
+dw = pq.dbconnect(pq.DW_NAME)
+
+# fetch a table as data frame (DF)
+# replace missing values with an empty string
+df = dw.fetch(pq.DW_NAME, "invoices", df=True, fillna_with='')
+
+# convert DF to a list, needed for Google Sheets
+rows = df.values.tolist()
+
+Sheets = pq.connect("Google Sheets Writeback")
+
+Sheets.update("rows", 
+	spreadsheet_id = "1dKg7m8AIq0-mtkKcGmbpZv2UC3i9RqZVzZ7fs4pDA2s", 
+	sheet = "Sheet1",
+	row = 4, 
+	column = "A", 
+	values = rows)
+```
+
+### Write data from a table into a sheet, with a header row
+
+```python
+dw = pq.dbconnect(pq.DW_NAME)
+df = dw.fetch(pq.DW_NAME, "invoices", df=True)
+rows = df.values.tolist()
+
+column_names = df.columns.tolist()
+rows_with_header = [column_names] + rows
+
+Sheets = pq.connect("Google Sheets Writeback")
+
+Sheets.update("rows", 
+	spreadsheet_id = "1dKg7m8AIq0-mtkKcGmbpZv2UC3i9RqZVzZ7fs4pDA2s", 
+	sheet = "Sheet1",
+	row = 4, 
+	column = "A", 
+	values = rows_with_header)
+```
+
+### Write data from a table into a sheet (no data frame)
+
+```python
+dw = pq.dbconnect(pq.DW_NAME)
+data = dw.fetch(pq.DW_NAME, "invoices", df=False)
+rows = [list(d.values()) for d in data]
+
+Sheets = pq.connect("Google Sheets Writeback")
+
+Sheets.update("rows", 
+	spreadsheet_id = "1dKg7m8AIq0-mtkKcGmbpZv2UC3i9RqZVzZ7fs4pDA2s", 
+	sheet = "Sheet1",
+	row = 4, 
+	column = "A", 
+	values = rows)
+```
+
+In the above code snippet, `data` is a list of objects, and the `rows` are a list of lists. Example:
+
+```json
+data = [
+  {"name": "John", "city": "NY"},
+  {"name": "Anne", "city": "Paris"}
+]
+
+rows = [
+  ["John", "NY"],
+  ["Anne", "Paris"]
+]
+```
+
+### Update one cell
+
+```python
+Sheets = pq.connect("Google Sheets Writeback")
+
+# Update one cell
+Sheets.update("cell", 
+   spreadsheet_id = "...",
+   sheet = "sheet1", 
+   row = 15, 
+   column = "B", 
+   value = "Added from Peliqan" )
+```
+
+### Clear cells
+
+Clear an entire sheet:
+
+```python
+Sheets = pq.connect("Google Sheets Writeback")
+
+result = Sheets.delete('sheet_values',
+   spreadsheet_id = "...",
+   sheet = "Sheet1")
+```
+
+Clear a range of cells in a sheet:
+
+```python
+Sheets = pq.connect("Google Sheets Writeback")
+
+result = Sheets.delete('sheet_range_values',
+   spreadsheet_id = "...",
+   sheet = "Sheet1",
+   range = "A1:Z20000") #the range can be larger than the existing sheet
+```
+
+<Note>
+  Clearing a sheet before writing data is a good practice to make sure no "old" data remains on the sheet, e.g. when the new data has less rows then what was previously written to the same sheet.
+</Note>
+
+### Read the values of a sheet
+
+Read the full contents (values) of one sheet:
+
+```python
+Sheets = pq.connect('Google Sheets Writeback')
+result = Sheets.get('sheet_values', spreadsheet_id = "...", sheet = "Sheet1")
+st.json(result)
+rows = result['values']
+```
+
+Example result for `rows` (list of lists):
+
+```json
+[
+  ["Name", "City" ...],
+  ["John", "NY"   ...],
+  ["Anne", "DC"   ...]
+  ...
+]
+```
+
+Example script to convert the rows to a list of dicts (objects), assuming the first row in the Google Sheet is a header row:
+
+```python
+headers = rows.pop(0)
+rowsObj = []
+for row in rows:
+    rowObj = {}
+    for i, cell in enumerate(row):
+        rowObj[headers[i]] = cell
+    rowsObj.append(rowObj)
+```
+
+Example result for rowsObj (list of objects):
+
+```json
+[
+  {"Name": "John", "City": "NY"},
+  {"Name": "Anne", "City": "DC"}
+]
+```
+
+### Write data in batch
+
+When the amount of rows is too high (e.g. 100K rows) to write in one statement, you can append rows in batch:
+
+```python
+Sheets = pq.connect("Google Sheets Writeback")
+
+dbconn = pq.dbconnect(pq.DW_NAME) 
+df = dbconn.fetch('db_name', 'schema_name', 'table_name', df=True)
+
+rows = df.values.tolist() 
+
+def batch(rows):
+    batch_size = 1000
+    for i in range(0, len(rows), batch_size):
+        yield rows[i:i + batch_size]
+
+for batch in batch(rows):
+    st.json(batch)
+    Sheets.add("rows", 
+        spreadsheet_id = "...", 
+        sheet = "Sheet1",
+        values = batch)
+```
+
+### Create a new Google Sheet file (spreadsheet)
+
+```python
+Sheets = pq.connect("Google Sheets Writeback")
+
+result = Sheets.add("spreadsheet", name = "My new spreadsheet")
+new_file_id = result["detail"]["spreadsheetId"]
+```
+
+### Get details of a spreadsheet
+
+Use this to e.g. get a list of sheets and find the sheet id of a specific sheet:
+
+```python
+Sheets = pq.connect('Google Sheets Writeback')
+result = Sheets.get('spreadsheet', spreadsheet_id = "...")
+st.json(result)
+```
+
+## Tips & Trick
+
+Convert a column number into the Google sheet column name (e.g. column 27 is AA):
+
+```python
+def int_to_col_name(n):
+    col_str = ""
+    while n > 0:
+        n, remainder = divmod(n - 1, 26)
+        col_str = chr(65 + remainder) + col_str
+    return col_str
+```
+
+## Build reports in Google Sheets
+
+See the section "Write to Google Sheets" under Reporting:
+
+[Write to Google Sheets](https://help.peliqan.io/low-code-python-data-apps/reporting/write-to-google-sheets)

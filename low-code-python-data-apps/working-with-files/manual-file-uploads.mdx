@@ -1,0 +1,78 @@
+---
+title: Manual file upload & download
+sidebarTitle: File Upload
+description: Streamlit apps in Peliqan can import Excel files into tables, upload files to AWS S3, and offer file downloads with Streamlit buttons.
+---
+
+This page shows how to build Streamlit apps in Peliqan for manual file upload and download workflows.
+
+## Import Excel file into table
+
+Here's an example Streamlit app to upload an Excel file; the data is imported into a table in Peliqan:
+
+```python
+from io import BytesIO
+import pandas as pd
+import re
+
+st.title("Import Excel file")
+st.info('Only the first sheet of the file will be imported. The first row should contain column headers.', icon="ℹ️")
+
+uploaded_file = st.file_uploader("Select Excel file to import from your local computer:", accept_multiple_files = False, type = ['xls','xlsx'])
+if uploaded_file is not None:
+    st.text("Processing file: %s" % uploaded_file.name)
+    
+    file_bytes = BytesIO(uploaded_file.read())
+    df = pd.read_excel(file_bytes)
+    df.insert(0, '__row_number', range(0, len(df)))
+
+    schema_name = 'import_files'
+    table_name = re.sub('[^a-zA-Z0-9]', '_', uploaded_file.name).replace('__','_').strip('_').lower()
+    
+    dbconn = pq.dbconnect('dw_xxx')  # replace with the name of your data warehouse
+    result = dbconn.write(schema_name, table_name, df, pk='__row_number')
+
+    if "detail" in result and "code" in result["detail"] and result["detail"]["code"] == "OK":
+        st.text("File imported into table: %s" % schema_name + '.' + table_name)
+    else:
+        st.text("File import failed.")
+```
+
+## Upload files and store on AWS S3
+
+Here's an example allowing users to manually upload files using a Streamlit app. The uploaded files are stored on an AWS S3 bucket:
+
+```python
+from io import BytesIO
+import boto3
+
+aws_access_key_id = "your_aws_access_key_id"
+aws_secret_access_key = "your_aws_secret_access_key"
+region_name = "your_aws_region_name"
+aws_bucket_name = "my-bucket-name"
+
+uploaded_files = st.file_uploader("Choose files", accept_multiple_files = True, type = ['pdf','png'])
+if uploaded_files:
+  s3_client = boto3.client(
+      's3',
+      aws_access_key_id = aws_access_key_id,
+      aws_secret_access_key= aws_secret_access_key,
+      region_name = region_name
+    ) 
+    for uploaded_file in uploaded_files:
+        if uploaded_file is not None:
+            s3_client.upload_fileobj(BytesIO(uploaded_file.read()), aws_bucket_name, uploaded_file.name)
+```
+
+## Download file
+
+Example adding a download button in a Streamlit app, to download a file:
+
+```python
+st.download_button(
+    label = "Download PDF",
+    data = file_bytes,
+    file_name = f"myfile.pdf",
+    mime = "application/pdf"
+)
+```

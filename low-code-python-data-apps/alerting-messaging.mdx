@@ -1,0 +1,133 @@
+---
+title: "Alerting & messaging"
+sidebarTitle: "Alerting"
+description: "Alerting & messaging can be used to inform the right person at the right time with the right data."
+---
+
+# Alerting & messaging
+
+Alerting & messaging can be used to inform the right person at the right time with the right data. For example you could send out alerts to Slack or MS Teams when stock levels drop below a threshold, or you could send out weekly emails with personalized PDF or Excel reports to each store manager in a large retail company.
+
+Related info per connector:
+
+<img src="https://assets.super.so/35b4fd12-9269-4553-8b56-b54daf78bd41/images/49710d8e-fdd3-4333-97a8-2123d715d272/slack.svg" alt="Slack - Getting started in Peliqan" />[Slack - Getting started in Peliqan](/low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/slack) <img src="https://assets.super.so/35b4fd12-9269-4553-8b56-b54daf78bd41/images/5c5927c2-4b2b-4f86-b2d8-2f3ce0581c2a/msteams.svg" alt="Microsoft Teams - Getting started in Peliqan" />[Microsoft Teams - Getting started in Peliqan](/connect-to-data/getting-started-with-microsoft-teams) <img src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/37be6a58-961f-4e58-b35b-d63045649285/postmark/w=1920,quality=90,fit=scale-down" alt="Postmark - Getting started in Peliqan" />[Postmark - Getting started in Peliqan](/low-code-python-data-apps/writeback-reverse-etl-data-sync/postmark)
+
+# Send a message to Slack
+
+You can use the Slack connector to send messages and alerts to Slack users and Slack channels. Example:
+
+```python
+message = {
+    "text": "Stock levels are below threshold !",
+    "channel": "logistics",
+    "username": "Peliqan bot"
+}
+
+conn = pq.connect('Slack')
+result = conn.add('message', message)
+st.json(result) # for debugging only, see result of sending message to Slack
+```
+
+# Send out emails
+
+You can sign up for a free account on Postmark, and use the Postmark connector in Peliqan to both receive and send out emails.
+
+## Send an email
+
+```python
+email = {
+    "from": "no-reply@acme.com",
+    "to": "john@acme.com",
+    "subject": "Here is your weekly report",
+    "text": "We are happy to provide you with this report !",
+    "html": "We are <b>happy</b> to provide you with this report !"
+}
+
+conn = pq.connect('Postmark')
+result = conn.add('email', email)
+st.json(result) # for debugging only, see result of sending email to Postmark
+```
+
+## Send email with data
+
+Example sending an email with the result of an SQL SELECT query, on a table in the Peliqan data warehouse:
+
+```python
+import json
+
+dbconn = pq.dbconnect(pq.DW_NAME)
+query = "SELECT id, name FROM my_schema.my_table"
+df = dbconn.fetch(pq.DW_NAME, query = query, df = True)
+
+# more info: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_html.html
+html = df.to_html(col_space = 50, border = 0, justify = "left")
+
+email = {
+    "from": "no-reply@acme.com",
+    "to": "john@acme.com",
+    "subject": "Your data",
+    "html": "Here is your data: <br><br>" + json.dumps(html).strip('"')
+}
+
+conn = pq.connect('Postmark')
+result = conn.add('email', email)
+st.json(result) # for debugging only, see result of sending email to Postmark
+```
+
+## Send email with text file as attachment
+
+```python
+import base64
+
+text_file_content = "This will be in the attached text file."
+
+email = {
+    "from": "no-reply@acme.com",
+    "to": "john@acme.com",
+    "subject": "Test email with attachment",
+    "text": "See Text file attached.",
+    "html": "See Text file attached.",
+    "attachment_name": "my_file.txt",
+    "attachment_content_base64": base64.b64encode(text_file_content.encode("ascii")).decode("ascii"),
+    "attachment_contenttype": "text/plain"
+}
+
+conn = pq.connect('Postmark')
+result = conn.add('email_with_attachment', email)
+st.json(result) # for debugging only, see result of sending email to Postmark
+```
+
+## Send email with CSV file as attachment
+
+Example where we store the result of SQL SELECT query in a CSV file and send this file as an email attachment:
+
+```python
+import base64
+
+dbconn = pq.dbconnect(PQ.DW_NAME)
+query = "SELECT id, name FROM pipedrive.organizations"
+df = dbconn.fetch(PQ.DW_NAME, query = query, df = True)
+
+csv = "index" + df.to_csv()
+st.text(csv) # optional, show CSV on screen
+
+email_server = pq.connect('Postmark')
+email = {
+    "from": "no-reply@acme.com",
+    "to": "john@acme.com",
+    "subject": "Test email with attachment",
+    "text": "See CSV file attached.",
+    "html": "See CSV file attached.",
+    "attachment_name": "data.csv",
+    "attachment_content_base64": base64.b64encode(csv.encode("ascii")).decode("ascii"),
+    "attachment_contenttype": "text/csv"
+}
+result = email_server.add('email_with_attachment', email)
+st.json(result) # optional, show result of sending the email
+```
+
+## Send email with PDF as attachment
+
+See the Reporting section for a detailed example on how to generate a PDF file and send that PDF file as an attachment in an email:
+
+[Generate and distribute PDF reports](/low-code-python-data-apps/reporting/generate-a-pdf-using-html)

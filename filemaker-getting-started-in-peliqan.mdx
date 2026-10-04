@@ -1,0 +1,115 @@
+---
+title: "FileMaker - Getting started in Peliqan"
+sidebarTitle: "FileMaker"
+description: "Connect your FileMaker database to Peliqan via the Claris FileMaker Data API using Peliqan support or a custom low-code Python pipeline script."
+---
+
+_FileMaker is a cross-platform relational database application developed by Claris. It integrates a database engine with a graphical user interface (GUI) and security features, allowing users to visually modify a database. Versions for desktops, servers, iOS, and web-delivery have been released._
+
+This article describes how to connect your **FileMaker** database to Peliqan, in order to sync data into the Peliqan data warehouse and use it in your favorite BI tool (Power BI, Metabase etc.).
+
+While Peliqan has 250+ self-service connectors, Filemaker is currently not (yet) a standard self-service connector. Instead the Peliqan support team can set up a custom pipeline for you free of charge. Alternatively you can implement your own custom pipeline using a low-code script in Peliqan. Please note that these scripts are not available in the free trial, you will have to purchase a Peliqan license first.
+
+Peliqan uses the Claris Filemaker Data API to get data out of Filemaker:
+
+[https://help.claris.com/en/data-api-guide/content/index.html](https://help.claris.com/en/data-api-guide/content/index.html)
+
+This needs to be enabled on your Filemaker instance first.
+
+# Request Peliqan support to set up your Filemaker pipeline
+
+In order to set up your Filemaker connection, Peliqan need following details:
+
+- Hostname (Base URL of the REST API from your Filemaker Data API)
+- Username
+- Password
+- Database name in Filemaker
+- List of "layouts" in Filemaker to get the data from
+
+You can provide all details by sending an email to [support@peliqan.io](mailto:support@peliqan.io). The password can be securely shared by using [https://onetimesecret.com](https://onetimesecret.com/) and sending the sharing link in a separate email to [secure@peliqan.io](mailto:secure@peliqan.io).
+
+# Building your own custom pipeline for Filemaker in Peliqan
+
+Here's an example script that you can schedule in Peliqan to sync data from a "layout" in Filemaker to the Peliqan data warehouse:
+
+<Accordion title="Click to expand script">
+  ```python
+  import requests, base64, xmltodict, json
+  
+  username = "xxxx"
+  pw = "xxxx"
+  host = "xxxx.com"
+  db_name = "mydb"
+  layout_name = "mylayout"
+  
+  credentials = f'{username}:{pw}'
+  encoded_credentials = base64.b64encode(credentials.encode()).decode()
+  
+  def sanitize_id(project_id):
+      sanitized_id = str(project_id).replace("/", "").strip()
+      if sanitized_id.isdigit():
+          return int(sanitized_id)
+      elif sanitized_id:
+          return sanitized_id
+      else:
+          return None
+  
+  def sanitize_data(data):
+      """Remove or replace problematic characters in the data."""
+      if isinstance(data, str):
+          # Remove null bytes
+          data = data.replace('\x00', '')
+          # Ensure the string is properly encoded in UTF-8
+          data = data.encode('utf-8', 'ignore').decode('utf-8')
+      return data
+  
+  
+  url = f"https://{host}/fmi/data/vLatest/databases/{db_name}/layouts/{layout_name}/records?_limit=500&_offset=0"
+  cleandata = []
+  
+  # Make the GET request
+  response = requests.get(url, headers=headers)
+  st.write(response)
+  
+  if response.status_code == 200:
+  
+      data = response.json()
+      records = data.get('response', {}).get('data', [])
+      
+      for record in records:
+          field_data = record.get('fieldData', {})
+          field_data = {key: sanitize_data(value) for key, value in field_data.items()}        
+          record_id = field_data.get('id', None)        # Ensure 'id' is present in the field_data
+          
+          if record_id is not None:
+              sanitized_id = sanitize_id(record_id)
+              if sanitized_id is not None:
+                  invoiceline = {
+                      'Id': record_id,
+                      'Created by': field_data.get('creation_user'),
+                      'Created on': field_data.get('creation_date'),
+                      # all fields mapped here...
+                  }
+                  cleandata.append(invoiceline)
+      
+  		result = dbconn.write('filemaker', 'some_table', cleandata, pk="Id")
+  ```
+</Accordion>
+
+### Filemaker Data API
+
+The above script uses the Filemaker Data API (REST API). More info on the API:
+
+[https://help.claris.com/en/data-api-guide/content/index.html](https://help.claris.com/en/data-api-guide/content/index.html)
+
+Getting metadata (list of databases etc.):
+
+[https://help.claris.com/en/data-api-guide/content/get-database-names.html](https://help.claris.com/en/data-api-guide/content/get-database-names.html)
+
+List records:
+
+[https://help.claris.com/en/data-api-guide/content/get-range-of-records.html](https://help.claris.com/en/data-api-guide/content/get-range-of-records.html)
+
+URL format to get a list of records from a Layout:
+
+`https://{host}/fmi/data/{version}/databases/{database-name}/layouts/{layout-name}/records?_offset={starting-record}&_limit={number-of-records}`

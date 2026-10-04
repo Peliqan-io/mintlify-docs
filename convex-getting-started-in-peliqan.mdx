@@ -1,0 +1,76 @@
+---
+title: "Convex - Getting started in Peliqan"
+sidebarTitle: "Convex"
+description: "Learn how to sync data from Convex.dev to Peliqan using a custom Python pipeline with the Convex HTTP API."
+---
+
+[Convex.dev](http://Convex.dev) is a reactive non-relational database. Convex is an open-source, reactive backend-as-a-service platform tailored for modern web and mobile developers. It provides a TypeScript-first experience, including database schemas, queries, and server functions, where everything is code, making backend development feel like frontend work.
+
+In order to sync data from your Convex database to the Peliqan data warehouse, you need to set up a custom pipeline in Peliqan.
+
+## Setup Convex
+
+Create a function in Convex to query e.g. one table. Simple example:
+
+```typescript
+// File location: convex/MyQueryFunction.ts
+import { query } from "./_generated/server";
+
+export const all = query({
+  handler: async (ctx) => {
+    return await ctx.db.query("MyTableName").take(10);
+  },
+});
+```
+
+Use `npx convex dev` or `npx convex deploy` to deploy your function to the Convex cloud.
+
+## Setup Peliqan
+
+In Peliqan, set up a custom pipeline using a Python script. Update the settings in the script.
+
+Set a schedule on the script to run e.g. hourly or daily.
+
+Create a deploy key in Convex under **Settings > URL & Deploy Key > button "+ Generate Development Deploy Key"**. and paste the deploy key in the script, or store it in the Peliqan Secrets Store.
+
+Example custom pipeline:
+
+```python
+# Custom pipeline to sync data from a Convex.dev database into the Peliqan data warehouse
+# Make sure to deploy a function in Convex first, which implements a query on a database table.
+# This pipeline uses the Convex HTTP API to execute the function (query), fetch the data and store it in the data warehouse.
+# Create a deploy key in Convex under Settings > URL & Deploy Key > button "+ Generate Development Deploy Key".
+
+import requests
+
+dbconn = pq.dbconnect(pq.DW_NAME)
+
+##### Update these settings ######
+subdomain = "xxx-xxxxxx-123"
+deploy_key = "dev:fast-xxx-123|eyJ2MiI6I...czYmJlZTRjIn0="
+query_function_name = "MyQueryFunction"
+#######
+
+url = f"https://{subdomain}.convex.cloud/api/query"
+
+request_body = {
+    "path": f"{query_function_name}:all",
+    "args": {},
+    "format": "json"
+}
+
+headers = {
+    "Authorization": f"Convex {deploy_key}"
+}
+
+response = requests.post(url, json = request_body)
+
+if response.status_code == 200:
+    json_response = response.json()
+    data = json_response.get("value", [])
+    st.write(data)
+    dbconn.write('convex_data', 'convex1', records = data, pk='_id')
+    
+else:
+    st.warning(f"Failed to call Convex API: {response.status_code}")
+```

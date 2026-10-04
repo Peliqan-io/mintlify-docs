@@ -1,0 +1,60 @@
+---
+title: Embed apps in Odoo
+sidebarTitle: Odoo
+description: Embed public Peliqan apps inside Odoo detail pages using the Peliqan iframe embed module and pass context via query parameters.
+---
+
+Public Peliqan apps can be embedded in Odoo using the **Peliqan embed module for Odoo**. This module uses an iframe to render a Peliqan app on the detail page of a selected model in Odoo (e.g. Partners, Products...).
+
+You can download the module for Odoo V18 here:
+
+[peliqan_iframe_embed_odoo.zip](https://assets.super.so/35b4fd12-9269-4553-8b56-b54daf78bd41/files/2907727d-ae53-42f7-8d4f-bda060d0fad8/peliqan_iframe_embed_odoo.zip)
+
+## Install the module in Odoo
+
+Unzip the above file and upload the folder to the module folder of your Odoo instance, e.g. `/mnt/extra-addons/iframe_embed`.
+
+In Odoo go to Apps, remove the filter for Apps only (so that modules are also visible).
+
+Find the iframe Embed module and activate it.
+
+## Configure the module in Odoo
+
+Go to Settings &gt; Technical &gt; iframe Embed (General Settings block).
+
+Set the base URL and select the model whose form view should show the iframe.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f296ee53-9747-4172-b801-b0b9e7f4183b/Screenshot_2025-11-24_at_14.19.03/w=1920,quality=90,fit=scale-down)
+
+## Example Peliqan app for embedding in Odoo
+
+Below is an example app for embedding in Odoo. Note that the Odoo module will add the id of the current user (logged in into Odoo) and the id of the current object to the querystring of the URL, when the app is loaded in the iframe in Odoo:
+
+```python
+# Example embedded app in Odoo
+#
+# Use Peliqan's Odoo module to embed apps. It will render this embedded app on the detail page of objects of one selected model (e.g. res.partner).
+# Publish this app, copy/paste the published URL in the Settings of the module (Odoo > Settings, scroll down to see the settings of the embed module).
+# Also set the model under which to show the embedding (e.g. Contacts = res.partner).
+
+user_id = st.query_params.get("user_id")
+user_email = st.query_params.get("user_email")
+object_id = st.query_params.get("object_id")
+object_model = st.query_params.get("object_model")
+
+st.markdown("""
+    <style>
+        .stMainBlockContainer {
+            padding: 0px !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+st.set_page_config(layout="wide")
+st.subheader("My Embedded App")
+st.text(f"User id: {user_id}, Email: {user_email}, Object id: {object_id}, Model: {object_model}")
+```
+
+Example result in Odoo on the detail page of e.g. a Partner (Customer):
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9efb04a2-f482-4b00-8bac-bec81a9a41ee/Odoo_embedded_Peliqan_app/w=1920,quality=90,fit=scale-down)

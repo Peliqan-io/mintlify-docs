@@ -1,0 +1,33 @@
+---
+title: "ETL custom pipelines"
+description: "Build custom ETL pipelines in Peliqan using low-code Python scripts to fetch data from sources, write to the data warehouse, and handle deleted rows or history tables."
+sidebarTitle: "ETL Pipelines"
+---
+
+Peliqan has ETL built-in for a wide range of connectors. This means that when you add a connection to a source, Peliqan will automatically create pipelines and start syncing the data into the Peliqan built-in data warehouse (DWH) or your own DWH.
+
+However, for some cases it might be useful to implement a custom pipeline in Peliqan, using low-code Python scripts.
+
+## Fetch data from a source
+
+A custom pipeline will typically fetch data from some source incrementally:
+
+[Incremental processing from source](/low-code-python-data-apps/writeback-reverse-etl-data-sync/incremental-processing)
+
+## Write data to the DWH
+
+Next, the data from the source will be written to the DWH. Peliqan has a powerful built-in function `dw.write()` that will write a dataset to a table in the DWH, and prior to that it will create the table if needed and add columns if needed. More info:
+
+[Writing data to tables](/low-code-python-data-apps/writing-data-to-tables)
+
+## Handling deleted rows
+
+A regular ETL pipeline cannot detect if records were deleted in the source. This means that when a record is deleted in a source, it will remain in the DWH. Here are various patterns to handle deleted records accordingly:
+
+[Handling deleted rows](/low-code-python-data-apps/etl-custom-pipelines/handling-deleted-rows)
+
+## Creating history tables
+
+You can set up a custom ETL pipeline to store historic data. More info:
+
+[Slow changing dimensions (history tables)](/low-code-python-data-apps/slow-changing-dimensions-history-tables)

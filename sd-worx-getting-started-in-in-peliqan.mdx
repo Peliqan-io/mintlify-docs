@@ -1,0 +1,51 @@
+---
+title: "SD Worx - Getting started in in Peliqan"
+sidebarTitle: "SD Worx"
+description: "Learn how to connect SD Worx to Peliqan, sync employee and absence data to your data warehouse, and schedule a custom Python pipeline for nightly updates."
+---
+
+SD Worx is a payroll company, this connector allows you to fetch employee absence data and related data from the SD Worx HR Selfservice Absences platform.
+
+This article provides an overview to get started with the **SD Worx** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+After connecting, following tables will be available:
+
+- Absence codes
+- Employees
+
+In order to fetch absence data, add a custom pipeline (low-code Python script) in Peliqan using the below code, and schedule this to run every night:
+
+```python
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+
+sdworx_api = pq.connect('SD Worx')
+dbconn = pq.dbconnect(pq.DW_NAME)
+
+# Replace below from/end date with these in initial one-time run (get historic data)
+# Period of 24 months; SD Worx rate limit: max. 1000 months per day --> 1000 / 24 months = max. 40 employees
+#from_date = datetime(2024, 1, 1, 0, 0, 0)
+#end_date = datetime(2026, 1, 1, 0, 0, 0)
+
+# Daily run
+today = datetime.today()
+from_date = (today - timedelta(days = 7))
+end_date = (today + timedelta(days = 90))
+
+while from_date < end_date:
+    st.text(f"Fetching data from %s " % from_date.isoformat())
+    # Max period is 31 days, otherwise employeenumber and employernumber are required
+    until_date = from_date + relativedelta(months=1)
+    absence_request = {
+        'fromdate': from_date.isoformat(),
+        'untildate': until_date.isoformat()
+    }
+    absences = sdworx_api.get('absence_all_employees', absence_request)
+    if absences:
+        if type(absences) is list:
+            st.text(f"Writing %s absences to the DWH" % len(absences))
+            result = dbconn.write('sd worx', 'absences', records = absences, pk='Id')
+        else: # Show error response from API, e.g. rate limit (see above)
+            st.write(absences)
+    from_date = until_date
+```

@@ -1,0 +1,31 @@
+---
+title: "Incoming webhooks"
+sidebarTitle: "Incoming Webhooks"
+description: "Accept incoming webhook events from external systems in your Peliqan data warehouse, or capture them in real-time using API endpoints."
+---
+
+## Process incoming webhooks in batch
+
+You can accept and process incoming webhook events, coming from external systems. Go into Peliqan Settings to find your personal incoming webhook URL:
+
+![Incoming webhook URL in Peliqan Settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/57512d65-d5c0-47e0-a575-49eba82c9053/Screenshot_2024-01-18_at_15.55.17/w=1920,quality=90,fit=scale-down)
+
+Any payload posted to your webhook endpoint, will be stored in a new schema "webhooks" and table "incoming_webhooks" in your Peliqan data warehouse:
+
+![Incoming webhooks table in data warehouse](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e0e68c23-0326-4e8f-84ae-c7a8d59d3052/Screenshot_2024-01-18_at_16.01.40/w=1920,quality=90,fit=scale-down)
+
+If you have sent webhook events to your Account Webhook URL, and the **incoming_webhooks** table does not appear, make sure to refresh the list of schemas and tables. In the left pane, go to your data warehouse node, click on the menu icon (3 dots) and select Refresh Database from the action menu:
+
+![Refresh Database action menu in left pane](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4f6e96a1-ba6b-487f-a0bf-1ca1a556b3ab/screenshot_2026-06-15_at_12.16.46/w=1920,quality=90,fit=scale-down)
+
+<Note>
+  The maximum size of an incoming payload is 16MB !
+</Note>
+
+You can write a low-code Python script in Peliqan to process these incoming webhooks. Typically you will add a column "Status" that is updated from your script, to keep track if which webhook events were processed.
+
+## Process incoming webhooks in real-time
+
+You can create an API endpoint to capture incoming webhook events in real-time. More info:
+
+[Publish APIs](/publish-apis)

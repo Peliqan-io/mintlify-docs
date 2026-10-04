@@ -1,0 +1,64 @@
+---
+title: "Frequently asked questions"
+sidebarTitle: "FAQ"
+description: "Get answers to common questions about Peliqan, including what it is, how connectors work, and how data storage and GDPR compliance are handled."
+---
+
+## General
+
+### What is Peliqan?
+
+Peliqan is an all-in-one data platform that provides direct data access to a wide range of data sources including databases, data warehouses and SaaS business applications. Peliqan provides one-click ETL pipelines from 100+ sources. Peliqan has a built-in data warehouse or you can use your own (Snowflake, BigQuery, Redshift, SQL Server etc.). Peliqan combines magical SQL with low-code Python to get work done fast, including setting up BI, data activation, data syncs (reverse ETL), publishing and embedding data apps and more.
+
+### Is Peliqan a BI tool?
+
+Peliqan is not a BI tool but it has several built-in features to visualize data. You can deploy e.g. Metabase or Superset from the Peliqan market place, you can connect your [favorite BI tool](/connect-your-bi-or-db-tool) (e.g. MS Power BI, Tableau, Qlik) or you can make a dashboard or interactive data app, using Streamlit in Peliqan's [built-in low-code Python scripting environment](/low-code-python-data-apps/basics-of-data-apps).
+
+### Can I connect to on-premise data sources?
+
+Yes, Peliqan provides an on-prem agent that you can install to sync data from local sources (e.g. a DB) to Peliqan's data warehouse.
+
+### Can Peliqan be deployed on premise?
+
+Yes, Peliqan is cloud-agnostic, runs on Kubernetes and can be deployed inside your own cloud environment on e.g. AWS, Azure or GCP. [Contact us](https://peliqan.io/contact) for more information on the private cloud option.
+
+## Connectors
+
+### What is a connector and which connectors are available in Peliqan?
+
+Connectors allow Peliqan to access data from a source. Peliqan has connectors for databases, data warehouses and for SaaS business applications such as CRM systems (Salesforce, Hubspot etc.), ERP systems (Odoo, Unleashed ERP etc.) and many other business applications.
+
+[Click here for a full list of connectors](https://peliqan.io/connectors).
+
+### What if I need a connector to a specific data source?
+
+The Peliqan connector can add new connectors in 2 business days at a fixed low one-time setup price. [Contact support](https://peliqan.io/contact) for more details.
+
+For databases: please provide the name of the database system you want to connect, optionally including a test account.
+
+For SaaS sources: Peliqan can work with any type of API (REST, SOAP Webservices, GraphQL etc.). Please provide following details if possible in your connector request:
+
+- Name of the SaaS business application
+- Brief description of the use case, e.g. which data do you need
+- Do you want to read data only or also perform write-back?
+- Link to API documentation
+- If possible, test credentials to the API
+
+## Security & compliance
+
+### Does Peliqan store a copy of my data?
+
+Peliqan does not store a copy of the data that you process in Peliqan when you write SQL queries on connected DBs or when you process data in Python scripts.
+
+Peliqan does store a copy of your data in the built-in data warehouse or your own connected data warehouse:
+
+- When you enable "materialize" for selected tables
+- When you connect to SaaS business applications: Peliqan will set up an ETL pipeline to sync data into the DW
+
+### Is Peliqan GDPR compliant?
+
+Yes, Peliqan is fully GDPR compliant.
+
+As a customer you can choose in which region your account is provisioned, for example the EU region. Your data will never leave the selected region. For the EU instance, Peliqan uses AWS in Frankfurt, Germany.
+
+Contact us by sending an email to [gdpr@peliqan.io](mailto:gdpr@peliqan.io) if you require more information or if you want to receive our standard DPA (data processing agreement). Peliqan can also work under your DPA, please send a copy to the above email address and allow for 7 business days as our legal team reviews.

@@ -1,0 +1,77 @@
+---
+title: "Piwik - Getting started in Peliqan"
+sidebarTitle: "Piwik"
+description: "Learn how to connect Piwik PRO to Peliqan using a Client ID and Secret, sync standard data, and use Python to sync custom report data."
+---
+
+This article provides an overview to get started with the **Piwik PRO** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Add connection
+
+In Peliqan, go to Connections, click on Add Connection and find Piwik in the list.
+
+You will need a Client id and Client secret:
+
+- In Piwik, click on "Menu" in the top left corner.
+- Click on your account name (e.g. your email address).
+- Next, click on API keys and add a new API key.
+- Copy the Client ID and Client Secret and paste it in Peliqan.
+
+## Get report data in your data warehouse
+
+Peliqan will sync standard data from your Piwik account into the data warehouse. You can also sync report data, using a low-code Python script.
+
+For each report, you first need to copy the "API call definition" of the report in Piwik.
+
+In Piwik go to Analytics > Reports and open a Report. Click on the 3 dots icon above your report chart and select "View API call definition". Copy the JSON and paste it in the script.
+
+![Piwik report menu with three dots](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/696f69b0-2ab5-4f3c-9eb4-cd19b9763ed6/Piwik_report_API_definition_1/w=1920,quality=90,fit=scale-down)
+
+![Piwik View API call definition option](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a5458196-7e72-4cd9-83ee-16d5f2595a2b/Piwik_report_API_definition_2/w=1920,quality=90,fit=scale-down)
+
+### Example script
+
+```python
+# In Piwik go to Analytics > Reports and open a Report.
+# Click on the 3 dots icon above your report chart and select 'View API call definition'.
+# Copy the JSON and paste it in the script below.
+
+piwik_pro_api = pq.connect('Piwik Pro')
+
+from datetime import date, timedelta
+today = date.today().isoformat()
+seven_days_ago = (date.today() - timedelta(days=7)).isoformat()
+
+# Example from report "Audience Overview"
+report = {
+	"date_from": seven_days_ago,
+	"date_to": today,
+	"website_id": "61176dd4-7be9-47a9-a2fd-ec28e7b3e444",
+	"offset": 0,
+	"limit": 1000,
+	"columns": [
+		{
+			"transformation_id": "to_date",
+			"column_id": "timestamp"
+		},
+		{
+			"column_id": "visitors"
+		},
+	],
+	"order_by": [
+		[
+			0,
+			"asc"
+		]
+	],
+	"filters": None,
+	"metric_filters": None
+}
+
+result = piwik_pro_api.get('report', report)
+columns = result["meta"]["columns"]
+data = [dict(zip(columns, row)) for row in result["data"]]
+
+dbconn = pq.dbconnect(pq.DW_NAME)
+dbconn.write('piwik_reports', 'audience_overview', records = data, pk='timestamp__to_date')
+```

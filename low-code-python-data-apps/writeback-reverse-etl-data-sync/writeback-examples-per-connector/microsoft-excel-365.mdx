@@ -1,0 +1,251 @@
+---
+title: "Microsoft Excel 365 - Getting started in Peliqan"
+sidebarTitle: "Excel 365"
+description: "Connect Microsoft Excel 365 to Peliqan, sync spreadsheet data to your warehouse, and use low-code Python to read, update, and sync tables with Sharepoint."
+---
+
+This article provides an overview to get started with the **Microsoft Excel** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Contents
+
+- [Connect](#connect)
+  - [How to find your Site id (Sharepoint)](#how-to-find-your-site-id-sharepoint)
+  - [Document Library Name](#document-library-name)
+  - [Relative File Path](#relative-file-path)
+- [Explore & Combine](#explore--combine)
+- [Activate](#activate)
+  - [Update rows](#update-rows)
+  - [Update rows using drive_id and drive_item_id](#update-rows-using-drive_id-and-drive_item_id)
+  - [Full example syncing a Peliqan table to Excel sheet on Sharepoint](#full-example-syncing-a-peliqan-table-to-excel-sheet-on-sharepoint)
+  - [Read the data of a sheet](#read-the-data-of-a-sheet)
+  - [Read the data of any Excel file into a dataframe](#read-the-data-of-any-excel-file-into-a-dataframe)
+  - [Upload an Excel file in Peliqan and store in a table](#upload-an-excel-file-in-peliqan-and-store-in-a-table)
+- [Tips & Trick](#tips--trick)
+
+## Connect
+
+In peliqan, go to Connections, click on Add new. Find "**Excel 365"** in the list and select it. Click on the Connect button. This will open Microsoft Excel and allow you to authorize access for Peliqan. Once the authorization is done, you will return to Peliqan.
+
+![Excel 365 connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/980ed47f-f3f3-4189-bd4a-e88f3a71ea4d/Screenshot_2024-06-12_at_11.03.04/w=1920,quality=90,fit=scale-down)
+
+![Excel 365 connection details](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d9899fe5-8326-4487-9366-8e7427d37b43/Screenshot_2025-01-09_at_12.50.32/w=1920,quality=90,fit=scale-down)
+
+### How to find your Site id (Sharepoint)
+
+**Using Sharepoint admin**
+
+Go to: `https://{tenant}-admin.sharepoint.com`
+
+Replace `{tenant}` with your Sharepoint subdomain.
+
+Navigate to: Sites > Active Sites > Select your Site.
+
+The Site ID is in the URL on the right hand side.
+
+**Using an \_api URL**
+
+Open this URL in your browser:
+
+- For the main (default) site: `https://{tenant}.sharepoint.com/_api/site/id`
+- For other sites: `https://{tenant}.sharepoint.com/sites/{sitename}/_api/site/id`
+
+Make sure to remove spaces from the site name when inserting `{sitename}`.
+
+The Site ID is in the XML response, see the guid at the end of the XML.
+
+### Document Library Name
+
+In your Sharepoint site, go to "Site contents" to see the names of your Document Libraries.
+
+The default is "Documents".
+
+![Sharepoint Document Library Names](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/26d854c7-5a88-4f43-ae65-0b5ceb98351a/Sharepoint_Document_Library_Names/w=1920,quality=90,fit=scale-down)
+
+### Relative File Path
+
+For example "myfile.xlsx" for a file in the root folder.
+
+Or "myfolder/myfile.xlsx" for a file in a subfolder.
+
+## Explore & Combine
+
+Wait a few minutes for the data to start syncing. Now you can view your **Microsoft Excel** data in tables in Peliqan's built-in data warehouse (or in your own DWH if you connected e.g. SQL Server, Snowflake, Redshift or BigQuery).
+
+Select "Explore" in the left navigation pane, expand "Data warehouse" in the left tree and click on Excel. All tables from Excel will now be shown.
+
+![Excel data in Peliqan grid view](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/70ab68c5-261f-47f2-a9d1-1fc6b1af5709/gridview/w=1920,quality=90,fit=scale-down)
+
+You can explore the data in the gridview, and you can write SQL queries to transform the data and to combine the data from **Microsoft Excel** with data from other sources.
+
+## Activate
+
+Here are example low-code Python scripts in Peliqan to work with Microsoft Excel 365.
+
+Use one of the following connectors:
+
+- Excel 365
+- Excel 365 Writeback
+- Sharepoint Excel 365 Writeback
+- Sharepoint Excel 365 External Tenant
+
+### Update rows
+
+```python
+excel_writeback_sharepoint_api = pq.connect("Microsoft Excel 365 Writeback")
+
+data = [
+  ["abc", "def"],
+  [123, 456]
+]
+
+result = excel_writeback_sharepoint_api.update("rows",
+	worksheet_name = "Sheet1",
+	start_cell = "A1",
+	end_cell = "B2", 
+	values = data)
+
+st.json(result)
+```
+
+### Update rows using drive_id and drive_item_id
+
+Example using a drive_id and a drive_item_id:
+
+Note that each Document Library from your Sharepoint site has one drive_id.
+
+The default Document Library is named "Documents". When you add new Document Libraries, new drive ids will be created.
+
+```python
+result_get_drive_ids = excel_writeback_sharepoint_api.get('drive_id')
+drive_id = result_get_drive_ids["value"][0]["id"]
+
+file = {
+    'drive_id': drive_id,
+    'relative_file_path': "Excel_test_file.xlsx",
+}
+result = excel_writeback_sharepoint_api.get('drive_item_id', file)
+drive_item_id = result["id"]
+
+rows = {
+    'drive_id': drive_id,
+    'drive_item_id': drive_item_id,
+    'sheet_name': "Sheet1",
+    'start_cell': "A1",
+    'end_cell': "B2",
+    'values': [['abc', 'def'], [123, 456]],
+}
+
+# Make sure to use "" instead of blank/no values 
+result = excel_writeback_sharepoint_api.update('rows', rows) 
+st.json(result)
+```
+
+### Full example syncing a Peliqan table to Excel sheet on Sharepoint
+
+This example script will read a Peliqan table as a dataframe DF, prepare the data for Excel and calculate the end cell:
+
+```python
+import numpy as np
+
+excel_writeback_sharepoint_api = pq.connect('Sharepoint Excel 365 Writeback')
+
+def int_to_excel_colindex(i):
+  s = 1
+  l = ''
+  while i > 25 + s:   
+    l += chr(65 + int((i-s)/26) - 1)
+    i = i - (int((i-s)/26))*26
+  l += chr(65 - s + (int(i)))
+  return l
+
+def cast_df(df):
+  df = df.fillna(np.nan).replace([np.nan], [None])
+  for c in df.columns.tolist():
+    col_type = str(df.dtypes[c]).lower()
+    if col_type[:8]=='datetime':
+      df[c] = df[c].dt.strftime('%Y-%m-%d')
+    elif col_type[:6]=="object":
+      df[c] = df[c].astype(str)
+  return df
+
+dbconn = pq.dbconnect(pq.DW_NAME)
+df = dbconn.fetch(pq.DW_NAME, 'chargebee', 'customers', df=True)
+
+df = cast_df(df)
+
+rows = df.values.tolist()
+column_names = df.columns.tolist()
+rows_with_header = [column_names] + rows
+
+end_col = int_to_excel_colindex(len(column_names))
+end_row = len(rows) + 1
+end_cell = end_col + str(end_row)
+
+result = excel_writeback_sharepoint_api.update("rows", 
+  sheet_name = "Sheet1", 
+  start_cell = "A1",
+  end_cell = end_cell, 
+  values = rows_with_header)
+
+st.write(result)
+```
+
+### Read the data of a sheet
+
+Example to get data from sheets of the file that was entered when adding the connection under "My Connections":
+
+```python
+excel_api = pq.connect('Microsoft Excel 365') # Connection is linked to one Excel file
+
+# Get full sheet
+result = excel_api.get('worksheet_values', sheet_name = "Sheet1")
+st.json(result)
+
+# Get range on sheet
+result = excel_api.get('worksheet_range_values', range = "A1:C4", sheet_name = "Sheet2")
+st.json(result)
+```
+
+### Read the data of any Excel file into a dataframe
+
+```python
+import pandas as pd
+import base64
+
+# How to find the drive_id:
+# See first part of the file_id (before "!") or copy "cid" from the OneDrive URL in your browser
+drive_id = "2fe749a6f54bc7fb"
+
+# How to find the item_id:
+# See "id" or "resid" in the URL of the Excel file in your browser
+item_id = "2fe749a6f54bc7fb!745"
+
+excel_api = pq.connect('Microsoft Excel 365')
+
+file_content_base64 = excel_api.get('worksheet_content', 
+		worksheet_drive_id = drive_id,
+    worksheet_drive_item_id =item_id)
+
+file_content = base64.b64decode(file_content_base64['base64'])
+df = pd.read_excel(file_content)
+st.dataframe(df)
+```
+
+### Upload an Excel file in Peliqan and store in a table
+
+See:
+
+[Manual file upload & download](/low-code-python-data-apps/working-with-files/manual-file-uploads)
+
+## Tips & Trick
+
+Convert a column number into the Excel column name (e.g. column 27 is AA):
+
+```python
+def int_to_col_name(n):
+    col_str = ""
+    while n > 0:
+        n, remainder = divmod(n - 1, 26)
+        col_str = chr(65 + remainder) + col_str
+    return col_str
+```

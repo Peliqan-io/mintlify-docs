@@ -1,0 +1,101 @@
+---
+title: "Whitelabel"
+sidebarTitle: "Whitelabel"
+description: "The Peliqan.io data platform is available as a white-labeled platform for SaaS companies, ISV's and consultants that wish to deliver data-centric services to their customers, under their own brand."
+---
+
+The Peliqan.io data platform is available as a white-labeled platform for SaaS companies, ISV's and consultants that wish to deliver data-centric services to their customers, under their own brand. These services range can range from data analysis and visualization to ML/AI and LLM services. Peliqan partners can develop a set of templates that they deploy for their individual end-customers in their white-label data platform.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/bb30eafc-cc4c-4749-bb20-326c657139f7/Untitled/w=1920,quality=90,fit=scale-down)
+
+<Note>
+  [Contact](https://peliqan.io/contact) your Peliqan account manager to set up a white-label environment for your business.
+</Note>
+
+<Note>
+  As an alternative to **whitelabel**, you can also **embed** Peliqan functionality (such as the ability to add connections) into your own UI. [Click here for more info on embedding](/whitelabel/embedding).
+</Note>
+
+# Logo
+
+Please send your logo to [support@peliqan.io](mailto:support@peliqan.io). We will need 2 versions:
+
+- Favicon rectangular icon
+- High resolution logo, preferably in SVG format (PNG or JPG are also supported)
+
+# Setup your own custom domain
+
+You can choose between 3 options:
+
+1. A Peliqan subdomain: e.g. `https://acme.peliqan.io` when your company is ACME.
+2. A Whitelabel subdomain: e.g. `https://acme.mydatacloud.com` when your company is ACME.
+3. Use your own domain: e.g. `https://app.acme.com` or `https://data.acme.com` (or any other subdomain) when your domain name is `acme.com`.
+
+### DNS when using your domain
+
+If you will use your own domain (option 3 above), make sure to configure following CNAME record in the DNS settings of your domain:
+
+`app.acme.com CNAME app.eu.peliqan.io`
+
+### SSL for HTTPS when using your domain
+
+If you will use your own domain (option 3 above), Peliqan Support will provide you with an additional CNAME record that you will have to add to your nameservers (DNS), to validate ownership of the domain name. This is needed because Peliqan will create an SSL certificate for your URL to enable HTTPS.
+
+# Email whitelabel
+
+Optionally, you can also whitelabel the sender email address that is used to send out emails from the platform, e.g. signup emails, forgot password emails, email alerts on errors (failed pipeline or data app) etc. A typical example for a sender email would be `no-reply@acme.com` or `no-reply@acme.mydatacloud.com`.
+
+In order to avoid emails ending up in spam, make sure to check the SPF, DKIM and DMARC configuration for your domain. You can use [https://mxtoolbox.com](https://mxtoolbox.com) to lookup these records.
+
+### DKIM
+
+Peliqan uses AWS SES to send out emails. You will have to add 3 CNAME records for your domain to configure DKIM, these CNAME records will be provided by Peliqan.
+
+### SPF
+
+If you don't have an SPF record, you can add one:
+
+`v=spf1 include:amazonses.com +a +mx ~all`
+
+If you already have an SPF record, make sure to add `include:amazonses.com`.
+
+If you have `-all`, change it to `~all`.
+
+### DMARC
+
+Optionally you can add a DMARC record. Example:
+
+`v=DMARC1; p=none; fo=0; adkim=s; rua=mailto:your@emailaddress.com;`
+
+The `rua` setting will trigger mail servers to send XML reports to the given email address on deliverability of your emails.
+
+If you have a strict policy in your DMARC for the return-path `aspf=s`, we suggest to remove it.
+
+# Data warehouse whitelabel
+
+You can use a whitelabel subdomain for your DWH. This whitelabel DWH will be set up by Peliqan for you, using one of these two options:
+
+- Shared DWH: `db.mydatacloud.com`
+- Dedicated DWH: `acme.db.mydatacloud.com` (when your company is ACME)
+
+Optionally, you can use your domain name for the DWH. In that case, create following CNAME record to whitelabel the host name used by your customers to connect to the data warehouse, e.g. from Microsoft Power BI:
+
+`db.acme.com CNAME db.eu.peliqan.io`
+
+### SSL for DWH when using your domain
+
+Peliqan Support will provide you with an additional CNAME record that you will have to add to your nameservers (DNS), to validate ownership of the domain name. This is needed because Peliqan will create an SSL certificate for your DWH hostname to enable SSL connections (required for e.g. Microsoft Power BI).
+
+# Marketplace whitelabel
+
+Ability to whitelabel the URL of apps, installed from the Market place, e.g. Metabase.
+
+Example: `https://acme.mydatacloud.com/metabase` if your company is ACME.
+
+# Help Center whitelabel
+
+The default URL for the documentation of your whitelabel Data Cloud is `https://help.mydatacloud.com`.
+
+Optionally, Peliqan can also publish a customized whitelabel version of the Help Center for you, using URL `https://acme.help.mydatacloud.com` when your company is ACME.
+
+You can also make a copy of the Peliqan Help Center, make a selection of desired pages and publish your version of the documentation under your own domain. Once done, please provide the URL to Peliqan Support, to configure it as the "Help" link in the UI (bottom left corner when logged in). Example: `https://help.yourdomain.com`.

@@ -1,0 +1,97 @@
+---
+title: "Google Calendar - Getting started in Peliqan"
+sidebarTitle: "Google Calendar"
+description: "Connect Google Calendar to Peliqan to sync events into your data warehouse, and use data activation to create events or configure domain-wide delegation for multiple users."
+---
+
+_Google Calendar is a versatile time-management and scheduling application developed by Google. It enables users to create and manage events, set reminders, and share schedules with others, facilitating efficient organization of both personal and professional activities. Its key features include Event Creation & Management, Multiple Calendar Support, Sharing & Collaboration, Integration with other Google Services and Task Management, etc. Website :_ [https://calendar.google.com/](https://calendar.google.com/)
+
+This article provides an overview to get started with the **Google Calendar** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+# Google Calendar Sync Pipeline
+
+## Connect to Google Calendar
+
+Connect Google Calendar through the Peliqan connectivity module:
+
+![Google Calendar connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5e6a484e-34b2-403c-8c7d-203762d260e2/image/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- Start Date (required)
+- (Optional) table selection via 'Advanced'
+
+Once filled, Click on "Connect Google Calendar" to initiate OAuth Flow Authentication.
+
+## Google Calendar data sync to a data warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync Google Calendar data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![Google Calendar synced tables](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b6dadfcb-fb79-45dc-88b8-723f06d1c2b4/image/w=1920,quality=90,fit=scale-down)
+
+# Data Activation in Peliqan
+
+## Creating a normal event in a specific calendar
+
+![Creating a normal Google Calendar event](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c07d27d6-8e23-42fa-8f2c-bb9fe7bcb880/image/w=1920,quality=90,fit=scale-down)
+
+## Creating an online meeting event in a specific calendar
+
+![Creating an online meeting event](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e8fd21b0-c506-49ff-932c-9f3e915ec521/image/w=1920,quality=90,fit=scale-down)
+
+# Getting access to calendars of all users
+
+If you want to sync calendar events from e.g. an ERP to the calendars of multiple employees (users), you can create a "private app" with **domain-wide delegation, and use the Peliqan connector** "Google calendar (domain-wide delegation)" which is available on request. Contact support: [support@peliqan.io](mailto:support@peliqan.io).
+
+Follow the below steps.
+
+### 1. Create a Google Cloud Project & Service Account
+
+1. Go to Google Cloud Console.
+2. Create a new project (or use an existing one).
+3. Navigate to **IAM & Admin > Service Accounts**.
+4. Click **Create Service Account**.
+   - Give it a name.
+   - Assign **Project > Editor** role (or more fine-tuned permissions).
+5. After creation, go to **Keys** tab → **Add Key → JSON**.
+   - Download the JSON key file.
+
+### 2. Enable Calendar API
+
+- In **API & Services > Library**, enable **Google Calendar API**.
+
+### 3. Enable Domain-Wide Delegation
+
+1. In the Service Account settings → Edit the account.
+2. Check **Enable G Suite Domain-wide Delegation**.
+3. Note down the **Client ID** shown.
+
+**Note that Admin Privileges are required:** You need super-admin access in Google Workspace to configure domain-wide delegation.
+
+### 4. Grant OAuth Scopes in Google Admin Console
+
+1. Go to **Google Admin Console → Security → API Controls → Domain-wide Delegation**:
+   - Click **Add new**.
+   - Enter the **Client ID** from your service account.
+   - Set OAuth Scopes:
+
+```none
+https://www.googleapis.com/auth/calendar
+https://www.googleapis.com/auth/calendar.readonly
+https://www.googleapis.com/auth/admin.directory.user.readonly
+```
+
+### 5. Add a connection in Peliqan
+
+Add a new connection using connector "Google calendar (domain-wide delegation)".
+
+Enter the following details in the Connection form:
+
+- Client ID
+- Open the JSON key file that you downloaded from the Service Account and copy/paste the file contents into the field "JSON key file content".
+
+# Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](/).

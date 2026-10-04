@@ -1,0 +1,41 @@
+---
+title: "Data quality, monitoring & contracts"
+sidebarTitle: "Data Quality"
+description: "Set expectations for your data, implement data quality checks and data monitoring in Peliqan."
+---
+
+Set expectations for your data, implement data quality checks and data monitoring. Send alerts by email or Slack when anomalies are detected and implement your data observability.
+
+# Data monitoring
+
+Write a custom query that performs a check on a dataset, e.g. simply a count of the number of records:
+
+```sql
+SELECT COUNT(id) AS my_count FROM some_table
+```
+
+Now add an app that fetches the result of this query, and that sends out an alert in case the result is incorrect:
+
+```python
+dbconn = pq.dbconnect(pq.DW_NAME)
+data = dbconn.fetch('dw_123', 'schema_name', 'table_name')
+
+count = data[0]["my_count"]
+if count[0]<10000:
+    slack = pq.connect("Slack") # use your name of the connection
+    slack.add("message", channel = "QA", text = "Data quality alert", username = "My bot")
+```
+
+Finally, add a schedule to your monitoring app.
+
+Of course you can implement more advanced quality checks, based on the presense of recent timestamps, performing joins, applying a regular expression to records, a WHERE clause to select outliers etc.
+
+[Click here for more info on the Slack connector](/low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/slack).
+
+Watch a 2 minute demo on how to implement the above script:
+
+# Data contracts
+
+Click here for more information on data contracts:
+
+[Data contracts](/low-code-python-data-apps/data-contracts)

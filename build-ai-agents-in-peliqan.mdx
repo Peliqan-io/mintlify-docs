@@ -1,0 +1,176 @@
+---
+title: "Build a custom AI client (harness) in Peliqan"
+sidebarTitle: "AI Client"
+description: "Build custom AI chatbots in Peliqan with Text-to-SQL, RAG search, MCP actions, and role-based permissions using Streamlit templates."
+---
+
+In Peliqan, you can build a custom AI client (harness). Peliqan provides all the components to access data, implement a semantic layer and a permission layer and publish a front-end for your Chatbots.
+
+## AI Chatbot capabilities
+
+With Peliqan, you can build AI clients with following capabilities:
+
+- **Text to SQL**: allow your AI to convert any question in natural language to an SQL query, executed on the Peliqan data warehouse. Your AI can combine data from all your sources (CRM, ERP etc.) and answer complex _analytical_ questions.
+- **RAG (Retrieval Augmented Generation)**: allow your AI to search internal knowledge including structured and non-structured data (e.g. Google Drive, Notion etc.) in order to answer any _knowledge-related_ question. More info: [Implement RAG](/build-ai-agents-in-peliqan/rag)
+- **MCP style actions**: allow your AI to take actions in your business applications such as scheduling a task, adding draft invoices based on worked hours etc.
+- **Permission layer**: you can implement a role-based permission layer in Peliqan to access data
+- **Link to external tools**: you can allow the AI to provide links to business tools, e.g. opening invoices in the accounting software or opening a query in a BI tool for further analytical processing of a question
+
+## Basic example of an AI Chatbot
+
+Below is a basic example of a chatbot, created in Peliqan.
+
+You can pin the chatbot to the Peliqan homepage, or you can Publish it to make it available outside of Peliqan.
+
+<Accordion title="Streamlit script for basic chatbot">
+  ![Basic chatbot UI screenshot](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f2f92710-19b4-4606-8485-ee6482db1daf/Basic_chatbot/w=1920,quality=90,fit=scale-down)
+
+  ```python
+  # See also https://docs.streamlit.io/knowledge-base/tutorials/build-conversational-apps
+  
+  import json
+  openai_api = pq.connect('OpenAI')
+  
+  st.title("AI Chatbot")
+  
+  if "messages" not in st.session_state:
+      st.session_state.messages = []
+  else:
+      messages = [
+          {"role": m["role"], "content": m["content"]}
+          for m in st.session_state.messages
+      ]
+  
+  # Render full history again on page refresh
+  for message in st.session_state.messages:
+      with st.chat_message(message["role"]):
+          st.markdown(message["content"])
+  
+  if prompt := st.chat_input("How can I help ?"):
+      messages.append({"role": "user", "content": prompt})
+      
+      with st.chat_message("user"): # Show user icon (red)
+          st.markdown(prompt)
+  
+      with st.chat_message("assistant"): # Show bot icon (yellow)
+          request = {
+              "model": "gpt-5",
+              "messages": messages,
+              "reasoning_effort": "minimal"
+          }    
+          llm_answer = openai_api.get('completion_raw', request)
+  
+          if not "choices" in llm_answer:
+              st.warning("Something went wrong. ")
+              st.write(llm_answer)
+          else:
+              message = llm_answer["choices"][0]["message"]
+              answer_content = message["content"]
+              st.write(answer_content)
+      
+      st.session_state.messages = messages
+  ```
+</Accordion>
+
+## Example of an AI Chatbot performing Text-to-SQL
+
+Below is an example of a Chatbot that performs Text-to-SQL. The question of the user is converted to an SQL Query which is executed on the Peliqan data warehouse.
+
+<Accordion title="Streamlit script for Text-to-SQL chatbot">
+  ![Chatbot with Text-to-SQL UI screenshot](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/38dec45e-d830-47d1-8b81-50038386d20b/Chatbot_with_Text-to-SQL/w=1920,quality=90,fit=scale-down)
+
+  ````python
+  # See also https://docs.streamlit.io/knowledge-base/tutorials/build-conversational-apps
+  
+  import json
+  openai_conn = pq.connect('OpenAI')
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  
+  st.title("AI Chatbot for Finance")
+  
+  if "messages" not in st.session_state:
+      st.session_state.messages = []
+  
+  # Show message history
+  for message in st.session_state.messages:
+      with st.chat_message(message["role"]):
+          if not isinstance(message["content"], list):
+              st.markdown(message["content"])
+          else:
+              for query_to_run in message["content"]:
+                  description = query_to_run["description"]
+                  query = query_to_run["query"]
+                  st.text(description)
+  
+  # Handle new chat input from user
+  if question := st.chat_input("How can I help ?"):
+      
+      with st.chat_message("user"):
+          st.markdown(question)
+  
+      with st.chat_message("assistant"):
+          
+          prompt = """
+              The user has a number of datasets, below is a list of all the tables with their columns.
+              Based on the question of the user, write SQL SELECT queries to find answers in these tables.
+              Use LIKE statements with % at the start and end, to find relevant rows.
+              Use LOWER() in the LIKE statements on both sides to make it case insensitive.
+              Your answer should be a JSON with an array of SQL SELECT queries. For each item in the array,
+              provide an object with 2 keys: description and query.
+              The description key explains what part of the question is answered.
+              The query key contains the SQL SELECT query to execute.
+              """
+          
+          all_tables = """
+              Table chargebee.invoices, columns: invoice_id, invoice_status, invoice_date, invoice_total, invoice_customer_id.
+              Table chargebee.customers, columns: customer_id, customer_company, customer_first_name, customer_last_name, customer_email.
+              """
+  
+          prompt = prompt + "\n\n List of tables from the user: \n" + all_tables
+          prompt = prompt + "\n\n The user question is: " + question
+          prompt = prompt.replace('\n', '. ')
+  
+          messages = []
+          for m in st.session_state.messages:
+              if not isinstance(m["content"], list):
+                  messages.append({"role": m["role"], "content": m["content"]})
+              else:
+                  content = ""
+                  for query_to_run in m["content"]:
+                      content += query_to_run["description"] + ": " + query_to_run["query"] + ". "
+                  messages.append({"role": m["role"], "content": content})
+          
+          messages.append({"role": "user", "content": prompt})
+          st.session_state.messages.append({"role": "user", "content": question})
+          
+          #response = openai_conn.get('completion', message = prompt, role = "user") # without history (context)
+          response = openai_conn.get('completion_raw', { "model": "gpt-3.5-turbo", "messages": messages, "temperature": 0.7 })
+          
+          content = response["choices"][0]["message"]["content"]
+          content = content.replace('```json', '').replace('```', '') # rarely added by OpenAI in response
+          response_content = json.loads(content)
+         
+          if "queries" in response_content:
+              queries_to_run = response_content["queries"]
+          else:
+              queries_to_run = response_content
+          #st.json(queries_to_run)
+          
+          for query_to_run in queries_to_run:
+              description = query_to_run["description"]
+              query = query_to_run["query"]
+              df = dbconn.fetch(pq.DW_NAME, query = query.replace("\n", " "), df = True)
+              df = df.loc[:,~df.columns.duplicated()].copy() # remove duplicate column names
+              st.text(description)
+              #st.code(query, language = "SQL")
+              st.dataframe(df)
+      
+          st.session_state.messages.append({"role": "assistant", "content": queries_to_run})
+  ````
+</Accordion>
+
+## More AI templates
+
+You can find more AI Chatbot templates in Peliqan:
+
+![AI Chatbot templates gallery in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5add1d1a-f37f-424f-a74c-917725e98bfe/Screenshot_2025-09-11_at_14.43.11/w=1920,quality=90,fit=scale-down)

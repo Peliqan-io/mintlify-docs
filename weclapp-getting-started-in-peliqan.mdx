@@ -1,0 +1,105 @@
+---
+title: "Weclapp - Getting started in Peliqan"
+sidebarTitle: "Weclapp"
+description: "Connect Weclapp to Peliqan using an API token and tenant URL. Sync your ERP data into Peliqan and write back records and custom attributes using low-code Python scripts."
+---
+
+Weclapp is a Cloud based ERP system which allows teams to logically control all the day-to-day business processes on a single platform. Weclapp aims to provide complete and easy CRM and ERP solution to small & mid-size enterprises and helping them manage their customers, integrating projects, invoices, purchases, warehouses, orders and accounting through a unified dashboard. Its ease-of-use and features like Multi-tenancy makes it widely acceptable CRM tool. For more visit: [https://www.weclapp.com/en/](https://www.weclapp.com/en/)
+
+This article provides an overview to get started with the **Weclapp** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Content
+
+- [Content](#content)
+- [Weclapp Data Pipeline](#weclapp-data-pipeline)
+  - [Connect Weclapp](#connect-weclapp)
+    - [Connection fields](#connection-fields)
+- [WeClapp data sync to a data warehouse](#weclapp-data-sync-to-a-data-warehouse)
+- [Writeback to Weclapp](#writeback-to-weclapp)
+  - [Updating records in Weclapp](#updating-records-in-weclapp)
+  - [Updating customAttributes (custom fields) in Weclapp](#updating-customattributes-custom-fields-in-weclapp)
+- [Need further help](#need-further-help)
+
+## Weclapp Data Pipeline
+
+### Connect Weclapp
+
+Connect Weclapp through the Peliqan Connectivity module:
+
+![Weclapp connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/36d984fb-0d6d-47e6-8dba-9ecd3f4a55a2/image/w=1920,quality=90,fit=scale-down)
+
+#### Connection fields
+
+- **API Token**: Login to Weclapp, click on your Profile in the top right corner, click "My Settings", scroll down to the bottom, authenticate yourself in the "API token" section, Add a new API token and copy/paste it in Peliqan.
+- **Tenant**: see your WeClapp instance URL. Enter a full URL in the format `https://<your_company>.weclapp.com`
+- **Start Date** (optional): date in format `YYYY-MM-DD` to start data sync from. By default it is 2010-01-01
+- **Additional Properties** (optional): additional properties to sync, e.g. calculated fields. Needs to be provided as a JSON object, where each key represents a table name, and the corresponding value is a comma-separated list of fields to be retrieved for the table. Click on Advanced to see list of available tables, to make sure you use the correct table name. Example for tables **article** and **incomingGoods**: `{ "article": "totalStockQuantity,currentSalesPrice", "incomingGoods": "discountPercentage,totalGoodsQuantity" }`
+
+Once filled, click on **Save** to start the data sync.
+
+## WeClapp data sync to a data warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally you can choose to sync WeClapp data to your own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration:
+
+![Weclapp data in Peliqan gridview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/38bec44f-529d-481c-b702-0b3eb2194229/image/w=1920,quality=90,fit=scale-down)
+
+With the Peliqan federated query engine, queries on the Weclapp data can be written and data can be transformed and combined with other sources:
+
+![Peliqan SQL query on Weclapp data](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1d4598be-d67b-4416-8207-cf22c6b7a682/image/w=1920,quality=90,fit=scale-down)
+
+## Writeback to Weclapp
+
+With the Peliqan low-code Python scripts, you can implement "writebacks" to Weclapp, for examples writing new records into Weclapp or updating existing records.
+
+### Updating records in Weclapp
+
+Below is an example to update an Article in Weclapp.
+
+Note that we fetch the object first, update one or more properties and then send the updated object to Weclapp. This is needed because Weclapp has a lot of required fields, that have to be included when doing an Update, even if the values of those fields did not change.
+
+```python
+weclapp_api = pq.connect('WeClapp')
+
+# Fetch the existing object
+object = weclapp_api.get('object', id = 123, resource_name = 'article')
+
+# Update the object
+object["name"] = "New article name"
+
+# Write update to Weclapp
+result = weclapp_api.update('object', object, resource_name = 'article')
+```
+
+### Updating customAttributes (custom fields) in Weclapp
+
+Here's an example to update a custom field (customAttribute) of an Article in Weclapp:
+
+```python
+# Required Connections
+weclapp_api = pq.connect('WeClapp')
+
+# Required inputs
+attributeDefinitionId = "4299"
+attribute_data_type = "numberValue" # can be stringValue, dateValue etc.
+resource_name = "article"
+object_id = "4302"
+new_value = "93"
+
+# Fetch the existing object
+object = weclapp_api.get('object', id = object_id, resource_name = resource_name)
+
+# Update the existing object, e.g. update a customAttribute value
+if object:
+    for customAttribute in object['customAttributes']:
+        if customAttribute['attributeDefinitionId']== attributeDefinitionId:
+            customAttribute[attribute_type] = new_value 
+            
+# Do the API call to Weclapp
+result = weclapp_api.update('object', object, resource_name = resource_name)
+```
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](mailto:support@peliqan.io).

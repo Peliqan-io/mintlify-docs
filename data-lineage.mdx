@@ -1,0 +1,52 @@
+---
+title: "Data Lineage"
+description: "Peliqan automatically generates lineage for tables and SQL queries, showing data provenance and downstream usage to help with impact analysis."
+sidebarTitle: "Data Lineage"
+---
+
+Peliqan automatically generates lineage for tables and SQL queries. Lineage shows the dependency of SQL queries that you write, it shows the provenance of data and it shows you downstream usage of a given table or query which is important for impact analysis. For example if you change a query and remove a column, the lineage will show you which downstream processes might brake.
+
+To see the lineage of a table, go to a table and click on "Details" in the top menu and expand the Lineage section. Click on a block in the lineage flow to see details of that table and to go into that table.
+
+![Lineage view](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7829e471-5ea7-45b8-b9e1-e3c693c1b557/lineage/w=1920,quality=90,fit=scale-down)
+
+Next to the automatically generated lineage, you can also add your own lineage by adding annotations to a table or to a Python script.
+
+## Lineage annotations
+
+Add annotations to a table or Python script in order to add a node to the lineage graph:
+
+- For tables: add annotations in the description field of a table (under Details)
+- For scripts: add annotations in the Python script code
+
+Example annotation for an SQL query (table):
+
+```python
+"""
+:lineage_annotation:
+:lineage_ref: query_vip_customers
+:lineage_ref_source_annotation: hubspot_companies
+"""
+```
+
+Example annotation for a script:
+
+```python
+"""
+:lineage_annotation:
+:lineage_title: Sync data to CRM
+:lineage_img: https://app.eu.peliqan.io/img/python.svg
+:lineage_color: #f1eada
+:lineage_ref: crm_sync_data
+:lineage_ref_target_annotation: some_ref_from_a_table_or_another_script
+"""
+```
+
+Parameters in the annotation:
+
+- `lineage_ref`: unique id of the item (used to reference it from another node)
+- `lineage_ref_source_annotation`: incoming link from a "source" node, use the `lineage_ref` of the source node to reference it
+- `lineage_ref_target_annotation`: outgoing link to a "target" node, use the `lineage_ref` of the target node to reference it
+- `lineage_title:` the title displayed in the node in the lineage graph
+- `lineage_img`: the icon displayed in the node in the lineage graph
+- `lineage_color`: the background color used for the node in the lineage graph

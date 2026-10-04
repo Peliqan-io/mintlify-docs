@@ -1,0 +1,42 @@
+---
+title: "Instagram - Getting started in Peliqan"
+sidebarTitle: "Instagram"
+description: "Connect your Instagram Business Account to Peliqan via Facebook Ads and a System User token with the required permissions for insights and engagement data."
+---
+
+This article provides an overview to get started with the **Instagram** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect Instagram
+
+Make sure your **Instagram Business Account** is linked to a Facebook page. Example:
+
+![Instagram Business Account linked to Facebook page](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5c9928eb-46ab-43c4-bfda-34daffd215e7/screenshot_2025-08-06_at_12.57.13/w=1920,quality=90,fit=scale-down)
+
+Add a **Facebook Ads** connection first, more info:
+
+[Facebook Ads - Getting started in Peliqan](/facebook-ads-getting-started-in-peliqan)
+
+### System User Token
+
+1. Create a **System User** (to have a permanent token): Facebook Business Manager > System Users [https://business.facebook.com/settings](https://business.facebook.com/settings)
+2. **Assign** assets to the System User:
+   1. Add Facebook page(s) - for the Instagram connector: select a Facebook page which is linked to the Instagram Business Account
+   2. Add the app (with permission "full access")
+3. Generate a **token** for the System User:
+   1. Select your Facebook app
+   2. Expiration: never
+   3. Assign permissions: `pages_show_list`, `pages_read_engagement`, `instagram_basic`, `instagram_manage_insights`
+
+You can debug a Facebook token (e.g. check type, expiry etc.): [https://developers.facebook.com/tools/debug/accesstoken](https://developers.facebook.com/tools/debug/accesstoken)
+
+![Facebook token debug tool](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b113e489-e8ca-4e4b-bed9-e25c43f0db69/facebook_debug_token/w=1920,quality=90,fit=scale-down)
+
+### Instagram Business Account ID
+
+To get your Instagram Business Account ID, first Add a "Facebook Ads" connection.
+
+1. Open the Pages table in Facebook Ads.
+2. Find the Facebook page that's linked to your Instagram Business Account.
+3. Copy the value of the "Instagram Business Account Id" for that page.
+
+Paste that ID into the Instagram connection setup.

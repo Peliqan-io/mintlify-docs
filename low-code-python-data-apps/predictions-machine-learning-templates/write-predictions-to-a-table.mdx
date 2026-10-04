@@ -1,0 +1,115 @@
+---
+title: "Write predictions to a table"
+sidebarTitle: "Write Predictions to Table"
+description: "Add predictions to new data, using saved ML models and apply them to new records in a table on a scheduled basis."
+---
+
+Add predictions to new data, using saved ML models.
+
+This template allows you to **load a pre-trained ML model** and apply the model to new records in a table, to make **predictions** on a **scheduled basis**. The predictions are written to a column "Prediction" in the same table in Peliqan.
+
+In this tutorial we'll use a [Lead Conversion prediction model](/low-code-python-data-apps/predictions-machine-learning-templates/lead-conversion), you can modify the code to work with other ML models as well.
+
+### Import required modules
+
+```python
+from joblib import load # to load the existing saved model
+import pandas as pd
+```
+
+### Load new records
+
+We'll load records that do not have a prediction yet. Make sure to add a "Prediction" column first in the spreadsheet view of the table.
+
+```python
+dbconn = pq.dbconnect(pq.DW_NAME)
+df = dbconn.fetch(pq.DW_NAME, query='select * from leads where prediction is null limit 5', df=True)
+```
+
+### Data Preprocessing
+
+For predicting, we have to **prepare the data** in the same format as it was trained on.
+
+```python
+# Drop unwanted features
+drop_features = ['Prospect ID', 'index', 'Prediction'] 
+
+X = df.drop(drop_features, axis=1)
+
+# Apply Label Encoding to convert categorical variables to Numerical
+encoder = load('/data_app/encoder_lead_conversion')
+cat_cols = X.select_dtypes('object').columns
+X[cat_cols] = X[cat_cols].apply(lambda x: encoder[x.name].fit_transform(x))
+
+# Input columns to make predictions and drop null values
+X = X.drop('Converted', axis=1)
+```
+
+<Note>
+It's recommended to add try to block to capture if there are no records to update other wise it will throw errors in the future.
+</Note>
+
+### Load the model & predict
+
+```python
+model = load('/data_app/model_lead_conversion') # loading the model
+
+# Making prediction
+pred = model.predict(X)
+
+# Saving the prediction to df
+df['prediction'] = pred
+```
+
+### Write predictions to table
+
+We can accomplish this using the `update_cell` method from the Peliqan module `pq`:
+
+```python
+for _, record in df.iterrows():
+    pq.update_cell(table_name='leads', field_name='Prediction', row_pk=record['Prospect ID'], value=record['prediction'])
+    st.text(f"Updated Prediction for {record['Prospect ID']}")
+```
+
+<details>
+  <summary>Expand this to see the full code</summary>
+
+```python
+from joblib import load # to load the existing saved model
+import pandas as pd
+
+my_query = 'select * from lead_conversion where prediction is null limit 5'
+dbconn = pq.dbconnect('dw_123')
+df = dbconn.fetch('dw_123', query = my_query, df = True)
+
+# Drop unwanted features
+not_features = ['Prospect ID', 'index', 'Prediction'] 
+
+X = df.drop(not_features, axis=1)
+
+# Applying Label Encoding to convert categorical variables to Numerical
+encoder = load('/data_app/encoder_lead_conversion')
+cat_cols = X.select_dtypes('object').columns
+X[cat_cols] = X[cat_cols].apply(lambda x: encoder[x.name].fit_transform(x))
+
+# Input columns to make predictions and drop null values
+X = X.drop('Converted', axis=1)
+
+model = load('/data_app/model_lead_conversion') # loading the model
+
+# Making prediction
+pred = model.predict(X)
+
+# Saving the prediction to df
+df['prediction'] = pred
+
+for _, record in df.iterrows():
+    pq.update_cell(table_name='public.lead_conversion', field_name='Prediction', row_pk=record['Prospect ID'], value=record['prediction'])
+    st.text(f"Updated Prediction for {record['Prospect ID']}")
+```
+</details>
+
+## What's Next
+
+1. You can make real-time predictions on new incoming data and send **alerts on slack** if the model makes a prediction **above a certain threshold**. Learn more about [sending critical notifications to slack](/low-code-python-data-apps/predictions-machine-learning-templates/send-alerts-to-slack)**.**
+2. Using **Peliqan** you can **create an app for business users to consume** the model you have made in a **simple and intuitive UI**. Learn more about [creating apps for users to consume your model](/low-code-python-data-apps/predictions-machine-learning-templates/create-an-app-for-business-users-to-get-predictions)**.**

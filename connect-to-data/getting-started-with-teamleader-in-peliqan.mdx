@@ -1,0 +1,298 @@
+---
+title: "Teamleader Focus - Getting started in Peliqan"
+sidebarTitle: "Teamleader Focus"
+description: "Connect Teamleader Focus to Peliqan to sync CRM, project, and invoicing data into your data warehouse. Use Python scripts to activate the data via the Teamleader API."
+---
+
+_Teamleader is a cloud-based software platform designed to streamline project management, CRM, and invoicing for small to medium-sized businesses. By integrating various business processes into a single interface, Teamleader enhances productivity and simplifies workflow management._
+
+This article provides an overview to get started with the **Teamleader** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Contents
+
+- [Contents](#contents)
+- [Connect](#connect)
+- [Explore & Combine](#explore--combine)
+- [Activate](#activate)
+- [Get custom fields for invoices, tasks etc.](#get-custom-fields-for-invoices-tasks-etc)
+- [Custom pipeline to fetch all details (e.g. for subscriptions)](#custom-pipeline-to-fetch-all-details-eg-for-subscriptions)
+- [Custom pipeline to fetch contact-company relations](#custom-pipeline-to-fetch-contact-company-relations)
+- [Need further help](#need-further-help)
+
+## Connect
+
+In peliqan, go to Connections, click on Add new. Find **Teamleader** in the list and select it. Click on the Connect button. This will open Teamleader and allow you to authorize access for Peliqan. Once that is done, you will return to Peliqan.
+
+![Teamleader connection setup in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/980ed47f-f3f3-4189-bd4a-e88f3a71ea4d/Screenshot_2024-06-12_at_11.03.04/w=1920,quality=90,fit=scale-down)
+
+## Explore & Combine
+
+Wait a few minutes for the data to start syncing. Now you can view your **Teamleader** data in tables in Peliqan's built-in data warehouse (or in your own DWH if you connected e.g. SQL Server, Snowflake, Redshift or BigQuery).
+
+Select "Explore" in the left navigation pane, expand "Data warehouse" in the left tree and click on Teamleader. All tables from Teamleader will now be shown.
+
+![Teamleader data tables in Peliqan gridview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/70ab68c5-261f-47f2-a9d1-1fc6b1af5709/gridview/w=1920,quality=90,fit=scale-down)
+
+You can explore the data in the gridview, and you can write SQL queries to transform the data and to combine the data from **Teamleader** with data from other sources.
+
+## Activate
+
+You can use Peliqan's low-code Python scripts to interact with Teamleader using the Teamleader API. With a single line of code, you can for example add or update a contact, company or invoice in Teamleader.
+
+In Peliqan, click on "Build" in the left navigation pane. Now add a new "App" or Python script.
+
+In the right pane, expand the "Connected SaaS APIs", and expand Teamleader. You will now see the available functions to interact with Teamleader. Click on a function to insert it into your script.
+
+Basic example to add a company in Teamleader:
+
+```python
+teamleader_api = pq.connect('Teamleader')
+company = {
+    "name": "ACME",
+    "website": "http://example.com"
+}
+teamleader_api.add('company', company)
+```
+
+Extended example to fetch a subscription, add a line item and update the subscription:
+
+<Accordion title="Click here to expand the script">
+  ```python
+  teamleader_api = pq.connect('Teamleader Focus')
+  
+  # Find tax rate id
+  result = teamleader_api.get('objects', path = "taxRates.list")
+  taxrates = result["data"]
+  taxrate_id = taxrates[0]["id"]
+  
+  # Get existing subscription
+  id = "8a7a96a7-3f0d-06fb-a863-57d28611f229"
+  result = teamleader_api.get('subscription', id = id)
+  subscription = result["data"]
+  
+  # New line item to add
+  new_line_item = {
+      "quantity": 3,
+      "description": "My new line item",
+      "unit_price": {
+          "amount": 456.78,
+          "tax": "excluding"
+      },
+      "tax_rate_id": taxrate_id,
+  }
+  
+  # Add new line item to some section (0 = first section, 1 = second section...)
+  section_number = 0
+  grouped_lines = subscription["grouped_lines"]
+  grouped_lines[section_number]["line_items"].append(new_line_item)
+  
+  # Fix all existing line_items for update
+  for grouped_line in grouped_lines:
+      for line_item in grouped_line["line_items"]:
+  
+          # remove empty keys (avoid errors in update)
+          keys_to_remove = []
+          for key, val in line_item.items():
+              if not val:
+                  keys_to_remove.append(key)
+          for key_to_remove in keys_to_remove:
+              line_item.pop(key_to_remove)
+  
+          # remove total (not allowed in update)
+          if "total" in line_item:
+              line_item.pop("total")
+              
+          # convert tax object to tax_rate_id
+          if "tax" in line_item:
+              line_item["tax_rate_id"] = line_item["tax"]["id"]
+              line_item.pop("tax")
+  
+  # Update the subscription
+  update_subscription = {
+      "id": subscription["id"],
+      "grouped_lines": grouped_lines
+  }
+  result = teamleader_api.update('subscription', update_subscription)
+  st.json(result)
+  ```
+</Accordion>
+
+## Get custom fields for invoices, tasks etc.
+
+<Note>
+  Custom fields are automatically added in some tables such as **Companies**, **Contacts, Deals** and **Projects**, but not in other tables such as **Invoices** or **Tasks**. For those tables, use the below custom script which fetches the records of a given table one by one including their custom fields.
+</Note>
+
+Example script to sync Teamleader custom fields:
+
+<Accordion title="Click here to expand the script">
+  ```python
+  ###### Settings ######
+  
+  # Example values for object_name: company, contact, project, invoice, task etc.
+  object_name = "invoice"
+  
+  ###### Settings end ######
+  
+  connection_name = "Teamleader Focus"
+  schema_name = connection_name.lower().replace(" ", "_")
+  object_name_plural = object_name + "s"
+  if object_name == "company":
+      object_name_plural = "companies"
+  
+  table_name = object_name_plural
+  teamleader_api_path = object_name_plural + ".info"
+  if table_name == "projects" or table_name == "tasks":
+      table_name = object_name_plural + "v2"
+      teamleader_api_path = "projects-v2/" + object_name_plural + ".info"
+  
+  teamleader_api = pq.connect(connection_name)
+  dw = pq.dbconnect(pq.DW_NAME)
+  
+  bookmark = pq.get_state()
+  if not bookmark:
+      bookmark = '2000-01-01T00:00:00.000000Z'
+  
+  st.write(f"Processing records after {bookmark}")
+  query = f"SELECT id, _sdc_batched_at FROM \"{schema_name}\".{table_name} WHERE _sdc_batched_at > '{bookmark}' ORDER BY _sdc_batched_at"
+  records = dw.fetch(pq.DW_NAME, query = query)
+  
+  custom_field_definitions = teamleader_api.list("customFieldDefinitions")
+  
+  for record in records:
+      st.write(f"Processing id %s" % record["id"])
+      details = teamleader_api.get("object", id = record["id"], path = teamleader_api_path)
+      if "data" in details and "custom_fields" in details["data"]:
+          custom_fields = {}
+          for custom_field in details["data"]["custom_fields"]:
+              if custom_field["value"]:
+                  custom_fields[object_name + "_id"] = record["id"]
+                  if "name" in record:
+                      custom_fields[object_name + "_name"] = record["name"]
+                  elif "title" in record:
+                      custom_fields[object_name + "_name"] = record["title"]
+                  for custom_field_definition in custom_field_definitions["detail"]:
+                      if custom_field_definition["context"] == object_name and custom_field_definition["id"] == custom_field["definition"]["id"]:
+                          if isinstance(custom_field["value"], list):
+                              custom_fields[custom_field_definition["label"]] = ",".join(custom_field["value"])
+                          else:
+                              custom_fields[custom_field_definition["label"]] = custom_field["value"]
+      
+          if custom_fields:
+              result = dw.write(schema_name, table_name + "_customfields", custom_fields, pk = object_name + '_id')
+              if result["status"] != "success":
+                  st.json(result)
+      bookmark = record["_sdc_batched_at"]
+  
+  pq.set_state(bookmark)
+  ```
+</Accordion>
+
+## Custom pipeline to fetch all details (e.g. for subscriptions)
+
+Below is an example custom pipeline that stores subscription details in the data warehouse. This is useful if you want details such as "direct debit" etc. as well as line items from subscriptions.
+
+<Accordion title="Click here to expand the script">
+  ```python
+  # This custom pipeline syncs subscription details and subscription line items
+  # to the data warehouse, including settings under "Advanced" (direct debit etc.)
+  # Not included: deleting subscriptions and line items that are no longer present in Teamleader Focus.
+  
+  teamleader_api = pq.connect("Teamleader Focus")
+  dw = pq.dbconnect(pq.DW_NAME)
+  
+  bookmark = pq.get_state()
+  if not bookmark:
+      bookmark = '2000-01-01T00:00:00.000000Z'
+  
+  st.write(f"Processing subscriptions after {bookmark}")
+  query = f"SELECT id, _sdc_batched_at FROM teamleader_focus.subscriptions WHERE _sdc_batched_at > '{bookmark}' ORDER BY _sdc_batched_at"
+  subscriptions = dw.fetch(pq.DW_NAME, query = query)
+  
+  for subscription in subscriptions:
+      st.write(f"Processing subscription id %s" % subscription["id"])
+      result = teamleader_api.get('subscription', id = subscription["id"])
+      if "data" in result:
+          subscription_details = result["data"]
+      
+          line_items = []
+          if "grouped_lines" in subscription_details:
+              for grouped_line in subscription_details["grouped_lines"]:
+                  section = grouped_line.get("section", {}).get("title", "")
+                  if not section:
+                      section = ""
+                  i = 0
+                  for line_item in grouped_line["line_items"]:
+                      line_item["section"] = section
+                      line_item["subscription_id"] = subscription_details["id"]
+                      line_item["id"] = subscription_details["id"] + "_" + section + "_" + str(i)
+                      line_items.append(line_item)
+                      i += 1
+  
+          subscription_details.pop("grouped_lines", None)
+          #st.write(subscription_details)
+          #st.write(line_items)
+          
+          result = dw.write("teamleader_focus", "subscription_details", subscription_details, pk = "id")
+          if result["status"] != "success":
+              st.json(result)
+  
+          result = dw.write("teamleader_focus", "subscription_lineitems", line_items, pk = "id")
+          if result["status"] != "success":
+              st.json(result)
+               
+          bookmark = subscription["_sdc_batched_at"]
+      else:
+          st.write(f"Subscription id %s not found" % subscription["id"])
+  
+  pq.set_state(bookmark)
+  ```
+</Accordion>
+
+## Custom pipeline to fetch contact-company relations
+
+Below is a custom pipeline that syncs the contact-company relations to the data warehouse.
+
+<Accordion title="Click here to expand the script">
+  ```python
+  # This custom pipeline syncs Teamleader Focus contact-company 
+  # relations to the data warehouse.
+  
+  teamleader_api = pq.connect("Teamleader Focus")
+  dw = pq.dbconnect(pq.DW_NAME)
+  
+  bookmark = pq.get_state()
+  if not bookmark:
+      bookmark = '2000-01-01T00:00:00.000000Z'
+  
+  st.write(f"Processing contacts after {bookmark}")
+  query = f"SELECT id, _sdc_batched_at FROM teamleader_focus.contacts WHERE _sdc_batched_at > '{bookmark}' ORDER BY _sdc_batched_at"
+  contacts = dw.fetch(pq.DW_NAME, query = query)
+  
+  for contact in contacts:
+      st.write(f"Processing contact id %s" % contact["id"])
+      result = teamleader_api.get('contact', id = contact["id"])
+      if "data" in result:
+          contact_details = result["data"]
+          contact_companies = contact_details["companies"]
+          for contact_company in contact_companies:
+              contact_company["contact_id"] = contact["id"]
+              contact_company["company_id"] = contact_company["company"]["id"]
+              contact_company["company_type"] = contact_company["company"]["type"]
+              contact_company["id"] = contact["id"] + "_" + contact_company["company"]["id"]
+              contact_company.pop("company")
+          result = dw.write("teamleader_focus", "contact_companies", contact_companies, pk = "id")
+          if result["status"] != "success":
+              st.json(result)
+               
+          bookmark = contact["_sdc_batched_at"]
+      else:
+          st.write(f"Contact id %s not found" % contact["id"])
+  
+  pq.set_state(bookmark)
+  ```
+</Accordion>
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](mailto:support@peliqan.io).

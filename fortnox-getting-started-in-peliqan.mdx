@@ -1,0 +1,55 @@
+---
+title: "Fortnox - Getting started in Peliqan"
+sidebarTitle: "Fortnox"
+description: "Connect Fortnox to Peliqan via OAuth, configure start date and table selection, then sync Swedish accounting data to your Peliqan data warehouse or external BI tools."
+---
+
+A market leader in Sweden, Fortnox is a Swedish cloud-based accounting software that helps businesses to manage their accounting and bookkeeping processes and efficiently control finance and administration. The software is designed to cater to the needs of small and medium-sized businesses, allowing them to manage their finances efficiently without the need for extensive accounting knowledge.
+
+This article provides an overview to get started with the **Fortnox** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+# Content
+
+- [Content](#content)
+- [Fortnox Data Pipeline](#fortnox-data-pipeline)
+- [Connect Fortnox](#connect-fortnox)
+- [Fortnox data sync to a data warehouse](#fortnox-data-sync-to-a-data-warehouse)
+
+# Fortnox Data Pipeline
+
+## Connect Fortnox
+
+Connect Fortnox in Peliqan under Connections > Add connection > find Fortnox:
+
+![Fortnox connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/33a0347f-7a16-498a-b943-2cb2d7161f92/fortnox/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- Start Date in YYYY-MM-DD format.
+- Select Tables to sync under 'Advanced' (Optional)
+- Select the account type: user account or service account
+
+Use Service account with a suitable set of permissions to remove the dependancy on a specific person within the company.
+
+Start the oAuth connection flow by selecting 'Connect Fortnox':
+
+- Provide your username and password
+- Authorize Peliqan to access your data with following scopes. Allow access to all the scopes asked to get the data sync in.
+
+![Fortnox OAuth scopes](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0c364646-9e4e-42c8-b72e-a7515dc47c92/image/w=1920,quality=90,fit=scale-down)
+
+<Tip>
+  Fortnox does not allow **2 parallel connections** with the same users and app. So adding the same connection (User ↔ Peliqan) will result in one of the 2 connections to start failing due to invalid authorization tokens.
+</Tip>
+
+## Fortnox data sync to a data warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync Fortnox data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![Fortnox data in data warehouse](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/491f40a7-c134-43fc-9451-b709608c3225/image/w=1920,quality=90,fit=scale-down)
+
+With the Peliqan federated query engine, queries on the Fortnox data can be written and data can be transformed and combined with other sources.
+
+![Fortnox federated queries](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1e1ce185-69ac-4307-bfe8-93984e34ef58/image/w=1920,quality=90,fit=scale-down)

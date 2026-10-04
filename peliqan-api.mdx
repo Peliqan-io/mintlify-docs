@@ -1,0 +1,42 @@
+---
+title: "Peliqan REST API"
+sidebarTitle: "REST API"
+description: "Access the Peliqan REST API for your instance using JWT authentication in the Authorization header to list databases and applications."
+---
+
+The Peliqan API is a REST API, accessible on this URI:
+
+```none
+https://{instance_url}/api
+```
+
+The instance URL is the same as what you use to access Peliqan in your browser. For example for the EU instance:
+
+```python
+https://app.eu.peliqan.io/api
+```
+
+<Note>
+  When you publish your own API endpoints, the base URL is different. More info: [Publish APIs](/publish-apis)
+</Note>
+
+## Authentication
+
+Get your API token (JWT) under **Admin > Security settings > API token**, in Peliqan.
+
+Add your token as header:
+
+```none
+Authorization: JWT {your_token}
+```
+
+## Endpoints
+
+Example endpoint to list all your databases (applications):
+
+```none
+/api/applications/
+/api/applications/?exclude_tables=1
+```
+
+[Click here for the full API documentation](https://app.eu.peliqan.io/api/redoc/).

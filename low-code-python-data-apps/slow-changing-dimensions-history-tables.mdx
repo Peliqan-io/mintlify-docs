@@ -1,0 +1,275 @@
+---
+title: "Slow changing dimensions (history tables)"
+description: "Implement SCD Type 2 history tables in Peliqan using Python scripts to track every version of a record, generate snapshots, changelogs, and reports."
+sidebarTitle: "SCD History Tables"
+---
+
+**Slow Changing Dimensions Type 2** (SCD T2) is a pattern in data warehouses where you store every _version_ of a record, in order to keep track of historic data. In other words, when a record changes, we insert a new row in a history table. This allows users to go back in time and see what the data looked like on a specific date & time.
+
+Example table Customers:
+
+```none
+Id    Name       City
+1     ACME Inc   NY
+2     Pepsi      WA
+3     Cola       BR
+```
+
+Example history table for Customers using SCD T2 where the name of ACME was updated on 15th of Jan from "ACME Ltd" to "ACME Inc":
+
+```none
+Id    Name       City    Timestamp      History id
+1     ACME Ltd   NY      2024-01-01     1_2024-01-01
+1     ACME Inc   NY      2024-01-15     1_2024-01-15
+2     Pepsi      WA      2024-01-01     2_2024-01-01
+3     Cola       BR      2024-01-01     3_2024-01-01
+```
+
+The "History id" column is the so called "**surrogate key**", which is unique for each line in the history table. The PK of the original table (id) is called the "**natural key**", it is unique in the main table but of course not unique in the history table.
+
+## Activating a history pipeline in Peliqan
+
+We can implement this pattern in Peliqan with a low-code script, see below.
+
+Make sure the script is executed after each refresh of the source table, using e.g. a regular schedule or by including this in a pipeline. For example set an hourly schedule on the script when the source table is from a daily scheduled pipeline.
+
+Note: this script does not compare the historic and current record, it will fetch new and updated records incrementally (based on a timestamp) and write those to a history table.
+
+<Accordion title="Click to see the script">
+  ```python
+  # Slowly Changing Dimensions SCD Type 2 = history table with new row on changes.
+  # Make sure to add a schedule to this script, e.g. hourly for tables from daily pipelines.
+  #
+  # This script does not compare history and current record,
+  # it will fetch new and updated records incrementally (based on a timestamp) and write those to a history table.
+  
+  import json
+  
+  db_name = pq.DW_NAME
+  schema_name = 'pipedrive'
+  pk_field_name = 'id'
+  timestamp_field_name = 'update_time'
+  table_names = [
+      'deals',
+      'persons',
+      'companies'
+      ]
+  
+  history_schema = 'history'
+  reset_state = False
+  
+  dw = pq.dbconnect(db_name)
+  last_processed_all_tables = pq.get_state()
+  
+  for table_name in table_names:
+      st.header(table_name)
+  
+      if not last_processed_all_tables or reset_state:
+          last_processed_all_tables = {}
+  
+      if table_name in last_processed_all_tables:
+          last_processed = last_processed_all_tables[table_name]
+      else:
+          last_processed = '2000-01-01 00:00:00.000Z'
+  
+      st.text("Last processed: " + last_processed)
+  
+      query_changed_rows = f"SELECT * FROM {schema_name}.{table_name} WHERE {timestamp_field_name} > CAST('{last_processed}' AS TIMESTAMP) ORDER BY {timestamp_field_name} ASC"
+      df = dw.fetch(db_name, query = query_changed_rows, df=True)
+  
+      if len(df.index)>0:
+          #get highest timestamp in result, from last row because query was ordered by timestamp ascending
+          new_state = df.iloc[-1][timestamp_field_name]
+          st.text("History rows to process: " + str(len(df.index)))
+      else:
+          new_state = None
+          st.text("No history to process")
+  
+      # Add timestamp to PK to have a unique id per version in the T2 history table
+      df['_history_id'] = df[pk_field_name].astype(str) + '_' + df[timestamp_field_name].astype(str)
+      df['_history_timestamp'] = df[timestamp_field_name].astype(str)
+  
+      # Remove meta columns from source table (because new metadata will be added)
+      df = df.drop('_sdc_received_at', axis=1)
+      df = df.drop('_sdc_sequence', axis=1)
+      df = df.drop('_sdc_table_version', axis=1)
+      df = df.drop('_sdc_batched_at', axis=1)
+  
+      # Get object schema from table (only for pipeline tables)
+      if timestamp_field_name == '_sdc_batched_at': # table is a pipeline target table
+          get_table_object_schema_query = f"""
+              SELECT obj_description(c.oid) AS table_metadata
+              FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+              WHERE  c.relkind = 'r' AND obj_description(c.oid) IS NOT NULL AND n.nspname = '{schema_name}' AND relname = '{table_name}';
+          """
+          query_result = dw.execute(pq.DW_NAME, query = get_table_object_schema_query)
+          object_schema_properties = json.loads(query_result["detail"][1][0])["mappings"]
+          object_schema_properties.pop('_sdc_received_at', None)
+          object_schema_properties.pop('_sdc_sequence', None)
+          object_schema_properties.pop('_sdc_table_version', None)
+          object_schema_properties.pop('_sdc_batched_at', None)
+          object_schema_properties['_history_id'] = { "type": [ "string", "null" ] }
+          object_schema_properties['_history_timestamp'] = { "type": [ "string", "null" ] }
+          object_schema = { "properties": object_schema_properties }
+      else:
+          object_schema = None
+  
+      # Write to history table
+      history_table_name = table_name + "_history"
+      history_rows = df.to_dict(orient='records')
+      batches = [history_rows[i:i+100] for i in range(0, len(history_rows), 100)]
+      for batch in batches:
+          result = dw.write(history_schema, history_table_name, batch, pk = '_history_id', object_schema = object_schema)
+          if result['status'] != "success":
+              st.write(result)
+  
+      if new_state:
+          last_processed_all_tables[table_name] = new_state
+          pq.set_state(last_processed_all_tables)
+  ```
+</Accordion>
+
+## Viewing historic data snapshots
+
+The history tables can be used to view historic snapshots of your data.
+
+Here's an example of an SQL query you can use (in Peliqan or in your BI tool) to see data as it was on a given date in the past (24 December 2024 in the example below):
+
+```sql
+SELECT DISTINCT ON (id) *
+FROM history.deals_history
+WHERE _history_timestamp < '2024-12-25T00:00:00'
+ORDER BY id, _history_timestamp DESC;
+```
+
+## Creating a change log
+
+The below script can be used to generate an SQL query, that will convert a history table into a change log. The change log will list out only the columns (cells) that changed. This is useful when you have tables with many columns, to show in a condensed way which values actually changed on a given date. A change log is useful in reporting to explain e.g. changes in forecasts over time.
+
+Example of a changelog for a history table from "tickets" with columns Name, Description, Color etc:
+
+```none
+        Id  Date                  Changes
+        1   2025-04-21 13:08:51   Name changed to: Ticket V2 | Color changed to: NULL
+        5   2025-04-20 13:08:51   Color changed to: Red
+        7   2025-04-21 13:08:51   Name changed to: Ticket V2 | Color changed to: Yellow
+        7   2025-04-25 13:08:51   Name changed to: Ticket V3 | Color changed to: NULL
+```
+
+By using **snapshots** (see above) in combination with **changelogs**, it's possible to provide clear information to a user on what changed when.
+
+<Accordion title="Click here to see the script">
+  ```python
+  schema_name = 'history'
+  table_name = 'tickets_history'
+  pk = 'id'
+  max_columns = 500
+  exclude_columns = "'modifieddate', 'modifiedbyid'"
+  
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  
+  def get_columns():
+      query_get_columns = f"""
+          SELECT
+            column_name,
+            data_type
+          FROM information_schema.columns
+          WHERE table_name = '{table_name}'
+            AND table_schema = '{schema_name}'
+            AND column_name NOT IN ({exclude_columns})
+          ORDER BY ordinal_position LIMIT {max_columns};
+      """
+      result = dbconn.execute(pq.DW_NAME, query = query_get_columns)
+      columns = [i[0] for i in result["detail"] if not i[0].startswith('_')][1:]
+      return columns
+  
+  columns = get_columns()
+  
+  changes = []
+  lags = []
+  wheres = []
+  for column in columns:
+      lag = f"LAG({column}) OVER (PARTITION BY id ORDER BY _history_timestamp) AS prev_{column}"
+      lags.append(lag)
+      if column != pk:
+  
+          # Show only new value in change log
+          change = f"CASE WHEN {column} IS DISTINCT FROM prev_{column} THEN ' | {column} changed to ' || COALESCE({column}::text, 'NULL') ELSE '' END"
+  
+          # Show old and new value in change log
+          #change = f"CASE WHEN {column} IS DISTINCT FROM prev_{column} THEN ' | {column} changed from ' || COALESCE(prev_{column}::text, 'NULL') || ' to ' || COALESCE({column}::text, 'NULL') ELSE '' END"
+  
+          changes.append(change)
+          where = f"{column} IS DISTINCT FROM prev_{column}"
+          wheres.append(where)
+  
+  
+  all_changes = ' ||\n'.join(changes)
+  all_lags = ',\n'.join(lags)
+  all_wheres = ' OR\n'.join(wheres)
+  all_columns = ',\n'.join(columns)
+  
+  query = f"""
+  SELECT
+    {pk},
+    DATE_TRUNC('second', _history_timestamp::timestamptz) AS changed,
+    TRIM(' | ' FROM
+      {all_changes}
+    )
+    AS changes
+  FROM (
+    SELECT
+    {all_columns},
+    {all_lags},
+    _history_timestamp
+    FROM {table_name}
+    ORDER BY {pk}, _history_timestamp
+    ) t
+  WHERE
+    {pk}=prev_{pk} AND
+    (
+      {all_wheres}
+    );
+  """
+  
+  st.code(query)
+  ```
+</Accordion>
+
+## Reporting on number of history records
+
+The below script can be used to show a report of the number of records per table and the number of history records per table.
+
+<Accordion title="Click here to see the script">
+  ```python
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  schema = 'pipedrive'
+  pk = "id"
+  table_names = [
+      'deals',
+      'companies',
+      'persons'
+      ]
+  
+  counts = []
+  for table_name in table_names:
+  
+      count_query = f"SELECT COUNT({pk}) FROM {schema}.{table_name}"
+      result = dbconn.execute(pq.DW_NAME, query = count_query)
+      count = result["detail"][1][0]
+  
+      count_history_query = f"SELECT COUNT(_history_id) FROM history.{table_name}_history"
+      result = dbconn.execute(pq.DW_NAME, query = count_history_query)
+      count_history = result["detail"][1][0]
+  
+      counts.append({"Table": table_name, "Count": count, "History count": count_history, "Changes count": count_history - count})
+  
+  st.table(counts)
+  ```
+</Accordion>
+
+## Using history tables in Power BI for "Time travel"
+
+You can use history tables in a BI tool such as Power BI, to perform "Time Travel", allowing you to see dashboards with data as it was on a given date in the past. In the below article we explore different methods on how to consume history tables in Power BI.
+
+[Click here to read the article.](https://peliqan.io/blog/time-travelling-in-power-bi/)

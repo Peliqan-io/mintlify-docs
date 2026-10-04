@@ -1,0 +1,113 @@
+---
+title: "Materialize & Replicate"
+description: "Replicate tables into the Peliqan data warehouse or materialize SQL queries into physical tables for improved performance and BI tool compatibility."
+sidebarTitle: "Materialize"
+---
+
+Peliqan allows you to **_replicate_** any table from an external database, into the Peliqan data warehouse or any other target that is connected in Peliqan (e.g. Snowflake, SQL Server on Azure or Fabric, Redshift, Bigquery, Postgres etc). The same feature can be used to **_materialize_** a query into a physical table.
+
+## Replicate a table
+
+Select "Replicate table" from the Settings in the top menu (gear icon):
+
+![Replicate table menu option](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d73e5b8a-c39e-45dc-8dd5-505ebf4526d5/Replicate_table_in_menu/w=1920,quality=90,fit=scale-down)
+
+Configure the Replication:
+
+![Replicate table settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/016dbca1-d530-4fb7-9ba5-f1486090fc11/Replicate_table_settings/w=1920,quality=90,fit=scale-down)
+
+## Materialize a query
+
+### Different options for SQL queries in Peliqan
+
+SQL queries that you write in Peliqan are ephemeral, this means that they are executed each time you view the data or use the query. By default queries only exist in Peliqan. You can enable "Create as view" to make the query visible as a view in the data warehouse. Or you can **Materialize** a query (turn it into a physical table), which is the opposite of **ephemeral**.
+
+For each SQL query in Peliqan you have 3 options:
+
+1. SQL Query exists in Peliqan (default)
+2. SQL Query is a view in the data warehouse (and visible by BI tools)
+3. SQL Query is materialized into a physical table
+
+### Create a view for your query
+
+SQL queries are "views" on the underlying data. By default they only live inside Peliqan. You can enable "Create as view" on an SQL query in Peliqan. By doing so, the view is created in the data warehouse and it will be visible when you connect to the data warehouse using e.g. a BI tool such as Microsoft Power BI or Metabase.
+
+Enable "Create as view" under Settings (gear icon) in the top menu:
+
+![Create as view setting](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a5f27bbe-179a-4bd1-b62d-0550e12c8626/Replicate_table_in_menu/w=1920,quality=90,fit=scale-down)
+
+### Enable materialize on a query in Peliqan
+
+You can also enable "Materialize" for an SQL query by enabling the "Replicate table" feature on the query, under Settings in the top menu above the query editor:
+
+![Materialize query setting](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a5f27bbe-179a-4bd1-b62d-0550e12c8626/Replicate_table_in_menu/w=1920,quality=90,fit=scale-down)
+
+When you activate Replicate, you can configure the schedule at which your query will be executed and written to a phyiscal (target) table
+
+### When to use materialize on a query
+
+You should materialize a query for one of two reasons:
+
+- Speed up complex queries
+- Make tables available to BI tools and other applications outside of Peliqan, but only in case the option "Create as view" on your SQL query is not available
+
+## Replicate or materialize from a script (custom pipeline)
+
+You can also replicate a table or materialize a query from a low-code Python script in Peliqan, e.g. as part of a custom pipeline. For query materialize, the table_id is the query id in Peliqan.
+
+Examples:
+
+<Note>
+  You can find the id of the table (or query) to replicate/materialize by opening the Details view. In Peliqan go to "Explore", and found the table or query in the left pane. Hover over it, click the "3 dots" icon > Show Details.
+</Note>
+
+<Note>
+  When you materialize/replicate from a script, please make sure to disable the above "built-in" Replicate option on the query or table.
+</Note>
+
+```python
+# Example one-time replicate to built-in DWH
+dbconn = pq.dbconnect(pq.DW_NAME) # e.g. dw_123 (connection name & DWH name)
+result = dbconn.replicate(db_name=pq.DW_NAME, table_source_list=[ (source_table_id, target_table_name), (source_table_id, target_table_name) ], target_schema='my_target_schema')
+st.write(result)
+
+
+# Example one-time replicate to external target
+dbconn = pq.dbconnect('MS SQL Server')
+result = dbconn.replicate(db_name='my_target_db', table_source_list=[ (source_table_id, target_table_name), (source_table_id, target_table_name) ], target_schema='my_target_schema')
+st.write(result)
+
+
+# Example scheduled replicate to built-in DWH
+replicate_settings = {
+  "schedule": {
+    "interval": 3600,                                    # 3600 (hourly), 21600 (every 6 hours), 86400 (daily)
+    "weekdays": [0,1,2,3,4,5,6],                         # 0 = Monday
+    "start_time": "03:30:00"                             # Only used when interval = 86400 (24 hour interval)
+  }
+  "source_incremental_field": "timestamp_last_update",   # optional field, value should be an ISO 8601 timestamp
+  "target_table_name":        "replicated_report",       # required field
+  "target_schema_name":       "my_replicated_data",      # required field
+  "target_database_id":       pq.DW_ID,                  # required field
+  "target_connection_name":   pq.DW_NAME,                # required field
+}
+result = pq.replicate(table_id=source_table_id, enabled=True, settings=replicate_settings)
+st.write(result)
+
+
+# Example scheduled replicate to external target
+replicate_settings = {
+  "schedule": {
+    "interval": 3600,                                   # 3600 (hourly), 21600 (every 6 hours), 86400 (daily)
+    "weekdays": [0,1,2,3,4,5,6],                        # 0 = Monday
+    "start_time": "03:30:00"                            # Only used when interval = 86400 (24 hour interval)
+  }
+  "source_incremental_field": "timestamp_last_update",  # optional field, value should be an ISO 8601 timestamp
+  "target_table_name":        "replicated_report",      # required field
+  "target_schema_name":       "my_replicated_data",     # required field
+  "target_database_id":       123,                      # required field
+  "target_connection_name":   "SQL Server",             # required field
+}
+result = pq.replicate(table_id=source_table_id, enabled=True, settings=replicate_settings)
+st.write(result)
+```

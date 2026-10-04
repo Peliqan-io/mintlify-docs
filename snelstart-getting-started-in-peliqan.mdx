@@ -1,0 +1,53 @@
+---
+title: "SnelStart - Getting started in Peliqan"
+sidebarTitle: "SnelStart"
+description: "Learn how to connect SnelStart to Peliqan using your developer credentials, sync Dutch accounting data to your warehouse, and explore the available tables."
+---
+
+## About
+
+SnelStart is Dutch cloud accounting and bookkeeping software. The Peliqan connector syncs your sales invoices, purchase invoices, bank bookings, and general ledger transactions into the Peliqan datawarehouse or any other data warehouse, so you can report on that data alongside your other business data.
+
+This article provides an overview to get started with the SnelStart connector in Peliqan. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect SnelStart in Peliqan
+
+In Peliqan, go to Connections > Add connection, find SnelSart in the list.
+
+You need to enter a subscription key and a client key.
+
+Steps to get your credentials:
+
+1. Register on the [SnelStart Developer Portal](https://developer.snelstart.nl/) and subscribe to a plan (for example, "Ontwikkeling & Test") to receive your **Subscription Key**.
+2. In the SnelStart web app, go to **Koppelingen** > **Maatwerk** and generate a connection key (**maatwerksleutel**) for the administration you want to connect — this is your **Client Key**.
+3. Enter both keys into the connect form in Peliqan
+
+## Included tables
+
+| Endpoint |
+| --- |
+| article_sales_groups |
+| articles |
+| bank_bookings |
+| cash_bookings |
+| companyInfo |
+| costcenters |
+| countries |
+| general_ledger_transactions |
+| journals |
+| ledgers |
+| price_agreements |
+| promotional_prices |
+| purchaseinvoices |
+| quotes |
+| relationships |
+| sales_invoices |
+| sales_order_templates |
+| sales_orders |
+| vat_ratedefinitions |
+| vat_rates |
+| vat_returns |
+
+## Limitations
+
+- This connector doesn't use an incremental filter on any stream, so every sync run does a full resync of all data rather than pulling only changed records.

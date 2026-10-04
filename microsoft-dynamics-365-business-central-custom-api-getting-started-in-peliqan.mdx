@@ -1,0 +1,231 @@
+---
+title: MS Dynamics 365 Business Central - Custom API
+sidebarTitle: BC Custom API
+description: "Get started with the MS Business Central Custom API connector in Peliqan to integrate Business Central data."
+---
+
+***Microsoft Dynamics 365 Business Central "Custom API"*** *is a feature of the Business Central ERP system developed by Microsoft, which allows organizations to create tailor-made API endpoints to expose specific business data and logic. It is part of the Business Central extensibility framework and is typically used to integrate external applications or systems with Business Central in a secure and structured way.*
+
+*Custom APIs are ideal for automating workflows, syncing data, and tailoring integrations. They support versioning, controlled access, and data shaping, making them a powerful tool for building flexible and secure connections to Business Central.*
+
+This article provides an overview to get started with the **MS Business Central "Custom API"** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect to Microsoft Dynamics 365 Business Central using a "Custom API"
+
+Peliqan has 2 connectors to work with a **Custom API** in Business Central:
+
+- MS Business Central Custom API
+- MS Business Central Custom API (Private app)
+
+The steps below are ***without*** using a Private app. If you want to use a Private app, make sure to create the app in Azure first. See the general documentation of Business Central for more information on how to create a Private app in Azure:
+
+[MS Dynamics 365 Business Central - Getting started in Peliqan](/connect-to-data/microsoft-dynamics-365-business-central)
+
+### Add connection
+
+In Peliqan, go to Connections, click on "Add Connection" and search for Business Central Custom API. Choose one of the connectors:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c2999f0e-0538-4506-b0d2-6d1eab55b632/Screenshot_2025-05-27_175440/w=1920,quality=90,fit=scale-down)
+
+### Prerequisites
+
+- Access to your Microsoft Business Central environment with admin privileges
+- Valid API permissions set up in Business Central
+
+### Configuration Steps
+
+#### 1. Connection Setup
+
+**Connection Name**
+
+Enter a descriptive name for this connection
+
+#### 2. Business Central Credentials
+
+**Tenant ID**
+
+To find your Tenant ID:
+
+1. Log in to Business Central and navigate to the Dashboard
+2. Click the Settings icon (⚙) in the top toolbar
+3. Select "Admin Center"
+4. Copy the Tenant ID from the URL (it appears as `https://businesscentral.dynamics.com/{TENANT_ID}/admin`)
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/83065012-05e3-4e02-aab0-99f679451f3f/image/w=1920,quality=90,fit=scale-down)
+
+**Environment Name**
+
+To locate your Environment Name:
+
+1. In the Admin Center, select "Environments"
+2. Choose your environment from the list (or create one if needed)
+3. Enter the exact environment name as shown
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/bab1f8af-7eaa-40ba-ad29-dd0c3b5d662c/image/w=1920,quality=90,fit=scale-down)
+
+**Company Name**
+
+To find your Company Name:
+
+1. On the Business Central Dashboard
+2. Click the Building icon in the top toolbar
+3. Select the company you want to connect to from the list
+4. Enter the exact company name as shown
+
+#### 3. API Configuration
+
+**API Category Route**
+
+Enter the API route in the format: `publisher/group/version`
+
+Example: `zy/zygroup/v2.0`
+
+#### 4. Entity Selection
+
+**List of Entities**
+
+- Enter a comma-separated list of custom tables you want to access
+- By default, the primary key is assumed to be "id"
+- To specify a different primary key: `entityName|primaryKey` (e.g., `customer|systemId`)
+- For composite primary keys: `entityName|key1+key2` (e.g., `order|orderId+lineNumber`)
+
+#### 5. Replication Settings
+
+**Replication Key**
+
+(Optional) Specify which field should be used for incremental refreshes:
+
+- Enter the field name that tracks record changes (typically a timestamp or version field)
+- Leave blank if you don't need incremental refresh
+- Provided primary key works for all the **Entities** provided in connect form.
+
+**Incremental/Non-incremental**
+
+- Select "Incremental" if all your selected entities have the replication key available
+- Select "Non-incremental" for full refreshes each time
+
+Once done, click on **Connect MS Business Central Custom API** to initiate an OAuth Flow.
+
+## MS Business Central data sync to your data warehouse
+
+Once the connection is added, the ETL/ELT pipeline will start running and the data will be added to new tables in your data warehouse.
+
+Peliqan offers an out of the box data warehouse. Optionally you can choose to sync MS Business Central data to your own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/09437af8-a6d4-4937-97cf-c1ccd0f13266/Screenshot_2025-05-27_182039/w=1920,quality=90,fit=scale-down)
+
+## Support
+
+If you encounter issues or don't see the tables you need:
+
+- Contact support at [support@peliqan.io](mailto:support@peliqan.io)
+- Include your Business Central version and any error messages received
+
+## How to add custom API endpoints in Business Central
+
+This guide explains how to create custom API endpoints in Business Central, e.g. in order to fetch data that is not available in standard API endpoints.
+
+### How to create a custom API endpoint in Business Central (extension)
+
+In Business Central click on Search (magnifier icon in top right corner), search for "Extension management" --&gt; click on "Develop in VS Code" --&gt; click on "Generate launch configurations".
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/11ad5d90-2f0e-4adf-a09f-8a0c21925ead/screenshot_2026-04-16_at_18.05.23/w=1920,quality=90,fit=scale-down)
+
+This will open VS Code on your computer and create a project in AL (the extension language for Business Central).
+
+In VS Code, first install the extension from Microsoft: "AL Language extension for Microsoft Dynamics 365 Business Central"
+
+Hit `COMMAND+SHIFT+P` --&gt; Select "AL: Download Symbols"
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f471a6e5-3b8c-412b-b869-32076f2f2c24/screenshot_2026-04-16_at_18.08.18/w=1920,quality=90,fit=scale-down)
+
+Select the launch configuation "AL: Generated Download Symbols request"
+
+Once symbols have downloaded successfully, add a file to create a new custom API endpoint, e.g. `VendorApi.Page.al`
+
+Example content to list vendors with 3 selected fields `id`, `number` and `displayName`:
+
+```none
+page 50100 "Peliqan Vendors API"
+{
+    PageType = API;
+    APIPublisher = 'peliqan';
+    APIGroup = 'peliqangroup';
+    APIVersion = 'v1.0';
+    EntityName = 'vendor';
+    EntitySetName = 'vendors';
+    SourceTable = Vendor;
+    DelayedInsert = true;
+    ODataKeyFields = SystemId;
+    Extensible = false;
+
+    layout
+    {
+        area(Content)
+        {
+            repeater(General)
+            {
+                field(id; Rec.SystemId)
+                {
+                    Caption = 'Id';
+                }
+                field(number; Rec."No.")
+                {
+                    Caption = 'number';
+                }
+                field(displayName; Rec.Name)
+                {
+                    Caption = 'displayName';
+                }
+
+            }
+        }
+    }
+}
+```
+
+Hit `COMMAND+SHIFT+P` --&gt; Select "AL: Publish"
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/bfcf275d-44c7-49c5-bce0-e7e53da37386/screenshot_2026-04-16_at_18.06.34/w=1920,quality=90,fit=scale-down)
+
+Check if the Extension is now published in BC, example:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f5262ed3-7ff4-4747-8352-e71ecdb996f1/custom_extension/w=1920,quality=90,fit=scale-down)
+
+### Add a connection in Peliqan for the newly created API endpoints
+
+In Peliqan, add a connection of type "MS Business Central Custom API":
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f4474431-b9d9-4e98-8d59-723c1c3e26e8/connection_in_peliqan/w=1920,quality=90,fit=scale-down)
+
+- For **Environment name**: see Business Central Admin: `https://businesscentral.dynamics.com/{tenant_id}/admin`
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/12a86768-1054-41e0-a630-3c0d5d975bb9/screenshot_2026-04-16_at_17.46.02/w=1920,quality=90,fit=scale-down)
+
+- For **Apicategoryroute**, use this format: `publisher/group/version`. See the above created file for details, in our example:
+
+```none
+APIPublisher = 'peliqan';
+APIGroup = 'peliqangroup';
+APIVersion = 'v1.0';
+```
+
+So the Apicategoryroute becomes `peliqan/peliqangroup/v1.0`
+
+### Troubleshooting
+
+User in BC has no access to Extension Management: make sure the user has Permission set `EXTEN. MGT. - ADMIN`. Example:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/073f0e8c-8b94-40d7-b10f-9da6314a61b7/user_permissions/w=1920,quality=90,fit=scale-down)
+
+Downloading Symbols fails: make sure you are logged in into VS Code with the same Azure user as your login to BC (in VS Code see bottom left corner).
+
+Make sure your user is assigned a product license for Business Central in Microsoft 365 admin center: [https://admin.cloud.microsoft](https://admin.cloud.microsoft/). Example:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/afd7c5fc-6b3e-4fdc-9a43-8afe2325e1e6/user_license_in_admin_center/w=1920,quality=90,fit=scale-down)
+
+When error "not found" during downloading of symbols: double check the version in app.json: e.g. `"application": "27.5.46862.46929"`. This should be same version as the extension "Application", in BC go to Extension Management, find this extension and copy its version. Example:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9f27a6a1-336b-453b-b12c-c16bd09f61a2/extension_application_version_number/w=1920,quality=90,fit=scale-down)

@@ -1,0 +1,38 @@
+---
+title: "LightSpeed Retail R-Series - Getting started in Peliqan"
+sidebarTitle: "LightSpeed Retail"
+description: "Connect LightSpeed Retail R-Series to Peliqan via OAuth to sync your point-of-sale and inventory data into the built-in or your own data warehouse."
+---
+
+This article provides an overview to get started with the **LightSpeed Retail R-Series** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarksThis article provides an overview to get started with the **LightSpeed Retail R-Series** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## LightSpeed Retail R-Series Sync Pipeline
+
+### Connecting to LightSpeed Retail
+
+Connect Lightspeed through the Peliqan Connectivity module:
+
+![LightSpeed Retail connection in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/93c3ec54-689b-4db5-989c-c14a17befced/image/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- Account Id
+- Start Date
+- (Optional) table selection via 'Advanced'
+
+Start the oAuth connection flow by selecting 'Connect LightSpeed Retail( R-Series )':
+
+- Provide your username and password
+- Authorize Peliqan to access your data
+
+![LightSpeed Retail OAuth authorization](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/77f768e7-00d6-4f44-8762-7f39fd241c68/image/w=1920,quality=90,fit=scale-down)
+
+Once authentication and authorization is confirmed, control gets redirected back to Peliqan and data starts to sync-in.
+
+### LightSpeed Retail data sync to a data warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync LightSpeed Retail data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![LightSpeed Retail data in Peliqan Explore](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/de855afe-56b7-4ba5-8aef-b6aebde7c6ac/image/w=1920,quality=90,fit=scale-down)

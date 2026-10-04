@@ -1,0 +1,202 @@
+---
+title: "MS Dynamics 365 Business Central - Getting started in Peliqan"
+sidebarTitle: "Business Central"
+description: "Connect Microsoft Dynamics 365 Business Central to Peliqan using standard or private app connectors, and learn how to create an Azure app for authentication."
+---
+
+**_Microsoft Dynamics 365 Business Central (formerly Microsoft Dynamics NAV or Navision)_** _is a cloud based enterprise resource planning (ERP) app that assists with finance, manufacturing, customer relationship management (CRM), supply chains, analytics, and electronic commerce for small and medium-sized companies and local subsidiaries of large international groups. Business central is available On Prem as well as On Cloud._
+
+This article provides an overview to get started with the **_Microsoft Dynamics 365 Business Central_** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Contents
+
+- [Connect Microsoft Dynamics 365 Business Central in Peliqan](#connect-microsoft-dynamics-365-business-central-in-peliqan)
+- [Add connection](#add-connection)
+- [Configuration Steps](#configuration-steps)
+  - [1. Connection Setup](#1-connection-setup)
+  - [2. Business Central Credentials](#2-business-central-credentials)
+- [Create a "Private App" in Azure](#create-a-private-app-in-azure)
+- [Sync data from Custom APIs](#sync-data-from-custom-apis)
+- [Sync data using Peliqan's extension for Microsoft Business Central](#sync-data-using-peliqans-extension-for-microsoft-business-central)
+- [Need further help](#need-further-help)
+
+## Connect Microsoft Dynamics 365 Business Central in Peliqan
+
+In Peliqan, go to Connections and click on "Add connection". Search for "Business Central" in the list. There are multiple connectors available for Business central.
+
+Note: if you want to use a Private App, see below on how to create the app in Azure.
+
+**Connectors for standard data:**
+
+- Microsoft Dynamics 365 Business Central
+- Microsoft Dynamics 365 Business Central (Private app)
+
+**Connectors for working with Custom API's in Business Central:**
+
+- MS Business Central Custom API
+- MS Business Central Custom API (Private app)
+
+For more info on using the Custom API, see:
+
+[MS Dynamics 365 Business Central - Custom API](/microsoft-dynamics-365-business-central-custom-api-getting-started-in-peliqan)
+
+**Connectors for working with Peliqan's extension for Business Central:**
+
+For more info on the Peliqan extension, see:
+
+[MS Business Central extension](/connect-to-data/microsoft-dynamics-365-business-central/ms-business-central-extension)
+
+## Add connection
+
+In Peliqan, go to Connections, search for Business Central and select one of the connectors:
+
+![Business Central connector selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/63f77182-0d90-4e4f-9f16-807d675af846/Screenshot_2025-05-27_at_16.55.24/w=1920,quality=90,fit=scale-down)
+
+![Business Central connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0a09b361-5dfd-4fe3-8624-38b583e3a0c5/Screenshot_2025-05-27_at_16.55.37/w=1920,quality=90,fit=scale-down)
+
+## Configuration Steps
+
+### 1. Connection Setup
+
+**Connection Name**
+
+Enter a descriptive name for this connection.
+
+### 2. Business Central Credentials
+
+**Tenant ID**
+
+To find your Tenant ID:
+
+1. Log in to Business Central and navigate to the Dashboard
+2. Click the Settings icon (⚙) in the top toolbar
+3. Select "Admin Center"
+4. Copy the Tenant ID from the URL (it appears as `https://businesscentral.dynamics.com/{TENANT_ID}/admin`)
+
+![Business Central Admin Center Tenant ID](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/83065012-05e3-4e02-aab0-99f679451f3f/image/w=1920,quality=90,fit=scale-down)
+
+You can also find your Tenant ID by clicking on the Help icon (question mark top right corner) > Help & Support > See Under "Troubleshooting".
+
+**Environment Name**
+
+To locate your Environment Name:
+
+1. In the Admin Center, select "Environments"
+2. Choose your environment from the list (or create one if needed)
+3. Enter the exact environment name as shown
+
+![Business Central Environment Name](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/bab1f8af-7eaa-40ba-ad29-dd0c3b5d662c/image/w=1920,quality=90,fit=scale-down)
+
+You can also find your Environment name by clicking on the Help icon (question mark top right corner) > Help & Support > See Under "Troubleshooting".
+
+**Company Name**
+
+To find your Company Name:
+
+1. On the Business Central Dashboard
+2. Click the Building icon in the top toolbar
+3. Select the company you want to connect to from the list
+4. Enter the exact company name as shown
+
+## Create a "Private App" in Azure
+
+In order to connect Business Central in Peliqan, you have to create an app in Azure. This is a so called "private" app. After entering all the details in Peliqan (client id, client secret, tenant id) etc. Peliqan will start syncing your data.
+
+1. **Login to Azure Portal Account and click on App Registrations (or search for App Registrations):**
+
+![Azure App Registrations](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/59e561e7-80a7-4a56-aeea-73983d34d02d/Untitled/w=1920,quality=90,fit=scale-down)
+
+2. **Click on New Registration to register a single tenant application:**
+
+![Azure New Registration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9b71bd18-7bdf-42bd-bb6b-0894dd46073c/Untitled/w=1920,quality=90,fit=scale-down)
+
+3. **Provide details and click on Register:**
+
+![Azure Register app](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d74154cd-493f-449f-8f4f-1ede74648d0d/Untitled/w=1920,quality=90,fit=scale-down)
+
+4. **On Overview, make sure to copy ClientId and TenantId:**
+
+![Azure App Overview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4ff99a66-5352-45a1-b347-965f74c66227/Untitled/w=1920,quality=90,fit=scale-down)
+
+5. **To enable OAuth, click on Authentication > Add Platform > Click on Web:**
+
+![Azure Authentication Add Platform](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/858b33ca-414e-44bc-a990-828c733db33e/Untitled/w=1920,quality=90,fit=scale-down)
+
+6. **A configure Web window will open to add Redirect URL ([https://oauth.peliqan.io](https://oauth.peliqan.io)) and click configure:**
+
+![Azure Redirect URL configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a9b55ac2-d001-4c98-906e-97611f83fe95/Screenshot_2023-10-23_at_4.13.32_PM/w=1920,quality=90,fit=scale-down)
+
+7. **Add Permissions, select API Permissions > Add a permission > Dynamics 365 Business central:**
+
+![Azure API Permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4086d029-4c3d-468e-921f-9bc864798be9/Screenshot_2023-10-23_at_4.25.23_PM/w=1920,quality=90,fit=scale-down)
+
+8. **Add Delegated permissions and Applications permissions as below:**
+
+**Delegated permissions:**
+
+![Azure Delegated permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b41fc14f-6a2a-425c-8c63-3e77f6efa37d/Untitled/w=1920,quality=90,fit=scale-down)
+
+**Application permissions:**
+
+![Azure Application permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/77c8a340-f791-4a49-a1e6-c44e044099c1/Screenshot_2023-10-23_at_4.29.52_PM/w=1920,quality=90,fit=scale-down)
+
+Following permissions have to be added:
+
+- AdminCenter.ReadWrite.all
+- API.ReadWrite.All
+- app_access
+- Automation.ReadWrite.All
+- Financials.ReadWrite.All
+- user_impersonation
+
+![Business Central API permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/034dc04d-faf8-45ba-8611-adbed88e802e/Business_Central_API_permissions/w=1920,quality=90,fit=scale-down)
+
+9. **Grant Admin consent to the Apps:**
+
+![Azure Grant Admin Consent](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b8a5486d-fd57-4448-8f1e-0a25ace5ac1d/Screenshot_2023-10-23_at_4.31.17_PM/w=1920,quality=90,fit=scale-down)
+
+![Azure Admin Consent granted](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f127e80b-1358-47a5-8a8f-5d5204d97922/Untitled/w=1920,quality=90,fit=scale-down)
+
+10. **Get Client Secret: In left pane, click Certificates & Secrets > Client Secret > New Client Secret and provide details to get the client secret. and click on the Add button:**
+
+NOTE: Client secret is only visible when created, make sure to copy and save it for future use. For the Peliqan Connection, you will need to provide the **client secret value.**
+
+![Azure New Client Secret](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3f0aba50-2fec-45e7-bdd8-7528e9b8f857/Screenshot_2023-10-23_at_4.36.24_PM/w=1920,quality=90,fit=scale-down)
+
+![Azure Client Secret value](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1486e477-3b33-48ba-ab05-4d299a59f174/Screenshot_2023-10-23_at_4.38.34_PM/w=1920,quality=90,fit=scale-down)
+
+11. **Register the Application in Business Central:**
+    1. Go to [https://businesscentral.dynamics.com/](https://businesscentral.dynamics.com/) and login with the same account as Azure Portal.
+    2. Click on search icon and search for **'aad' (or "Entra")** and select Azure Entra Applications.
+    ![Business Central search for Azure Entra](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0751637a-cf39-4ec1-97c1-6b04b497cbba/Untitled/w=1920,quality=90,fit=scale-down)
+    3. Click on New button
+    ![Business Central New Azure Entra App](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d64bdb00-0665-4c6c-9e7a-d64cc928a719/Screenshot_2023-10-23_at_4.47.00_PM/w=1920,quality=90,fit=scale-down)
+    4. On the new popped-up window, enter Client Id from app overview, enter a description and enable it.
+    ![Business Central Azure Entra App details](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/86afd756-1d51-4856-a5ac-bea6aba80490/Untitled/w=1920,quality=90,fit=scale-down)
+    5. On the User Permission Sets section below add 3 permissions mentioned below and save it.
+    ![Business Central User Permission Sets](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/50b22ef5-cf0f-48ed-9765-851fe960d9f6/Untitled/w=1920,quality=90,fit=scale-down)
+    6. Make sure the application should be enabled.
+    ![Business Central App enabled](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/25277c54-76d8-4af0-86ba-a0b8e615e8ef/Untitled/w=1920,quality=90,fit=scale-down)
+12. **Get Environment details:**
+    1. Select settings icon and select admin center:
+    ![Business Central Settings Admin Center](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/56f7fdd0-7499-4dab-98d2-a6d320434e1a/Untitled/w=1920,quality=90,fit=scale-down)
+    2. On admin center you will be able to find the environment details:
+    ![Business Central Admin Center environment details](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/bce2839b-26d0-422d-b7fe-b408b76bc9cd/Untitled/w=1920,quality=90,fit=scale-down)
+    3. Get your company name using company icon on Business Central Homepage:
+    ![Business Central Company Name](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9bf5fc52-223d-4906-8acb-0a025f093571/Screenshot_2023-10-23_at_5.01.03_PM/w=1920,quality=90,fit=scale-down)
+
+## Sync data from Custom APIs
+
+You can fetch data from Custom APIs that have been published in your Business Central tenant. Click here for more info:
+
+[MS Dynamics 365 Business Central - Custom API](/microsoft-dynamics-365-business-central-custom-api-getting-started-in-peliqan)
+
+## Sync data using Peliqan's extension for Microsoft Business Central
+
+If you need to sync e.g. custom objects or custom fields, you can do this by installing Peliqan's extension in your Business Central environment. Next, use the connector named "MS Business Central (Peliqan Extension)". More info:
+
+[MS Business Central extension](/connect-to-data/microsoft-dynamics-365-business-central/ms-business-central-extension)
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](/).

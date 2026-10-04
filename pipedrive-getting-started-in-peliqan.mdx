@@ -1,0 +1,249 @@
+---
+title: "Pipedrive - Getting started in Peliqan"
+sidebarTitle: "Pipedrive"
+description: "Learn how to connect Pipedrive to Peliqan with an API token, query deal stage timelines with SQL, and write back contacts using Python scripts."
+---
+
+_Pipedrive is a CRM that lets you track your sales pipeline, optimize leads, manage deals with AI and automate your entire sales process so you can focus on selling._
+
+This article provides an overview to get started with the **Pipedrive** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect Pipedrive
+
+In Peliqan, go to Connections > Add Connection > Select Pipedrive in the list > Enter the details of your Pipedrive instance.
+
+Steps to fetch your API Key in Pipedrive:
+
+1. Login to your [Pipedrive Instance](https://app.pipedrive.com/auth/login)
+2. Navigate to MyAccount > Personal Preference
+3. Click on "API" tab.
+4. Copy the Personal API Token.
+
+## Example queries
+
+Below are two example queries that show how to get the the timelines from deal stages from Pipedrive (number of days that deals were in a specific deal stage).
+
+<Accordion title="SQL Queries for Pipedrive deal stage timelines">
+  ```sql
+  # Get list of deal stage changes (one row per change):
+  
+  SELECT
+    d.id AS deal_id,
+    d.title AS deal_title,
+    f.data_old_value AS old_stage_id,
+    f.data_new_value AS new_stage_id,
+    s_old.name AS old_stage,
+    s_new.name AS new_stage,
+    s_new.order_nr AS new_stage_order_nr,
+    f.data_log_time AS change_time
+  FROM deals_flow AS f
+  INNER JOIN deals AS d
+    ON d.id = f.data_item_id
+  INNER JOIN stages AS s_old
+    ON CAST(f.data_old_value AS INT) = s_old.id
+  INNER JOIN stages AS s_new
+    ON CAST(f.data_new_value AS INT) = s_new.id
+  WHERE
+    f.data_field_key = 'stage_id'
+  ORDER BY
+    d.id,
+    f.data_log_time
+  
+  
+  # Get number of days for certain deal stages (since deal creation):
+  
+  SELECT
+    d.id AS deal_id,
+    d.title AS deal_title,
+    CAST(f1.data_log_time AS DATE) - CAST(d.add_time AS DATE) AS stage1_after_days,
+    CAST(f2.data_log_time AS DATE) - CAST(d.add_time AS DATE) AS stage2_after_days,
+    CAST(f3.data_log_time AS DATE) - CAST(d.add_time AS DATE) AS stage3_after_days,
+    d.add_time AS deal_created_time
+  FROM deals AS d
+  
+  LEFT JOIN deals_flow AS f1
+    ON d.id = f1.data_item_id
+    AND f1.data_field_key = 'stage_id'
+    AND CAST(f1.data_new_value AS INT) = 1         # fill in deal stage id 1
+  
+  LEFT JOIN deals_flow AS f2
+    ON d.id = f2.data_item_id
+    AND f2.data_field_key = 'stage_id'
+    AND CAST(f2.data_new_value AS INT) = 3         # fill in deal stage id 2
+  
+  LEFT JOIN deals_flow AS f3
+    ON d.id = f3.data_item_id
+    AND f3.data_field_key = 'stage_id'
+    AND CAST(f3.data_new_value AS INT) = 5    # fill in deal stage id 3
+  ```
+</Accordion>
+
+## Writeback to Pipedrive from Python scripts
+
+### Basic writeback functions
+
+Example to add a Person to Pipedrive:
+
+```python
+pipedrive_api = pq.connect('Pipedrive')
+
+person = {
+    'name': "Lee James",
+    'emails': [{'label': 'work', 'value': 'lee@gmail.com', 'primary': True}],
+    'org_id': 2,
+}
+result = pipedrive_api.add('person', person)
+st.json(result)
+```
+
+### Working with custom fields in Pipedrive
+
+#### Read data from Pipedrive
+
+Example function to convert custom fields from a Pipedrive object to readable field names:
+
+```python
+import json
+
+def pipedrive_add_custom_field_labels(obj, type):
+    dbconn = pq.dbconnect(pq.DW_NAME)
+    custom_field_defs = dbconn.fetch(pq.DW_NAME, 'pipedrive', type + 'fields')
+    if "custom_fields" in obj:
+        custom_fields = obj["custom_fields"]
+    else:
+        custom_fields = obj.copy() # when fetching contacts of a company, the custom fields are just keys, not under "custom_fields"
+    for key, val in custom_fields.items():
+        for custom_field_def in custom_field_defs:
+            if custom_field_def["key"] == key and custom_field_def["created_by_user_id"]:
+                if custom_field_def["field_type"] == "enum":
+                    for option in json.loads(custom_field_def["options"]):
+                        if val and int(option["id"]) == int(val):
+                            obj[custom_field_def["name"]] = option["label"]
+                elif custom_field_def["field_type"] == "set": # multiple options
+                    if not val:
+                        val_list = []
+                    elif isinstance(val, list):
+                        val_list = val
+                    else:
+                        val_list = val.split(',')
+                    l = []
+                    for v in val_list:
+                        for option in json.loads(custom_field_def["options"]):
+                            if int(option["id"]) == int(v):
+                               l.append(option["label"])
+                    obj[custom_field_def["name"]] = ", ".join(l)
+                else:
+                    obj[custom_field_def["name"]] = val    
+    return obj
+
+pipedrive_api = pq.connect('Pipedrive') 
+contacts = pipedrive_api.get('organization_contacts', organization_id = 2)
+first_contact = contacts[0]
+
+st.header("Contact before mapping custom fields")
+st.json(first_contact)
+
+contact_mapped_custom_fields = pipedrive_add_custom_field_labels(first_contact, "person")
+
+st.header("Contact after mapping custom fields")
+st.json(contact_mapped_custom_fields)
+```
+
+Example person from Pipedrive, before mapping custom fields to readable field names:
+
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "8b3515571bcce7dfbaef9613aa48c1d6369c79b6": "VIP",
+  "4810cd3354b0caa934ea97a01351ed294f7b8bdb": "APAC",
+  "...": "..."
+}
+```
+
+Example after applying the above function:
+
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "Customer category": "VIP",
+  "Sales region": "APAC",
+  "...": "..."
+}
+```
+
+#### Writing to Pipedrive
+
+Example function to convert field names to the actual custom field keys from Pipedrive, when writing to Pipedrive (e.g. Adding or Updating a Contact or Organization):
+
+```python
+import json
+
+def pipedrive_add_custom_field_keys(obj, type):
+    custom_field_defs = dw.fetch(pq.DW_NAME, 'pipedrive', type + 'fields')
+    for key, val in obj.copy().items():
+        for custom_field_def in custom_field_defs:
+            if custom_field_def["name"] == key and custom_field_def["created_by_user_id"]:
+                if not "custom_fields" in obj:
+                    obj["custom_fields"] = {}
+                obj["custom_fields"][custom_field_def["key"]] = val
+                obj.pop(key)
+    return obj
+
+pipedrive_api = pq.connect('Pipedrive')
+
+contact_to_update = {
+  "id": 1,
+  "name": "John Doe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "Customer category": "VIP",
+  "Sales region": "APAC",
+  "...": "..."
+}
+
+st.header("Contact before mapping custom fields")
+st.json(contact_to_update)
+
+contact_to_update = pipedrive_add_custom_field_keys(contact_to_update, "person")
+
+st.header("Contact after mapping custom fields")
+st.json(contact_to_update)
+
+result = pipedrive_api.update("person", contact_to_update)
+```
+
+Example contact to add/update in Pipedrive, before mapping field names to custom field keys:
+
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "Customer category": "VIP",
+  "Sales region": "APAC",
+  "...": "..."
+}
+```
+
+Example after applying the above function (object ready to be sent to Pipedrive):
+
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "custom_fields": {
+      "8b3515571bcce7dfbaef9613aa48c1d6369c79b6": "VIP",
+      "4810cd3354b0caa934ea97a01351ed294f7b8bdb": "APAC",
+      "...": "..."
+  }
+}
+```

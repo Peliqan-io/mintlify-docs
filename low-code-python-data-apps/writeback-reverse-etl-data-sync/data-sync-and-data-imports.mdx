@@ -1,0 +1,63 @@
+---
+title: "Custom data syncs"
+sidebarTitle: "Custom Data Syncs"
+description: "Build robust custom data syncs and Reverse ETL pipelines in Peliqan using low-code Python scripts. Learn incremental processing and upsert patterns."
+---
+
+Data sync are patterns to sync data between a **source** and a **target**. In many cases the source and target are both SaaS applications, for example keeping Customer records in sync between a CRM and an accounting system.
+
+Data syncs are implemented in Peliqan by [writing low-code Python scripts](/low-code-python-data-apps) ("Data apps") that are scheduled to run for example every 5 minutes (near real-time), every hour or every day. These scripts are also referred to as "Custom data pipelines" and they use the [Peliqan SaaS API wrapper functions](/low-code-python-data-apps/writeback-reverse-etl-data-sync) to do so called writebacks to a target.
+
+<Note>
+  You can also use the Peliqan Reverse ETL app, which allows setting up Reverse ETL flows with field mapping, using a no-code UI. For more information visit:
+
+  [Reverse ETL](/reverse-etl)
+</Note>
+
+## Patterns for data sync
+
+Peliqan provides a wide range of features to implement robust, stable and efficient data syncs, by offering a set of _patterns_ to implement these data syncs.
+
+The basic pattern is to read data from a **Source**, and write the data in destination or **Target**.
+
+From the Source, the data needs to be read **incrementally**.
+
+In the Target, the data needs to be written using an **upsert**.
+
+![Data sync patterns](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7b651ec5-b620-4cae-b0a8-7de4ad308c38/data_sync_patterns/w=1920,quality=90,fit=scale-down)
+
+### Data warehouse as central hub for data syncs
+
+The patterns in Peliqan use the **data warehouse (DWH)** as a **central data hub**, which means the **source** is usually the data warehouse (which holds the data from the source SaaS application).
+
+Below is an example that syncs data from a CRM source to an Accounting target. First you add a connection to the **source** in Peliqan. This will automatically create an ETL pipeline and sync the data from the source into the **DWH**. Your **data sync scripts** read from the DWH tables and write to the target.
+
+![Data sync with DWH as central data hub](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5b5fe25b-4188-4290-b1dc-783a6d971bdf/Data_sync_with_DWH_as_central_data_hub/w=1920,quality=90,fit=scale-down)
+
+Note that Peliqan will also sync the data from the **target** to the DWH (in grey in the picture). This allows for verification of the data in the target, e.g. check if all additions or updates were executed correctly, if no data is missing etc.
+
+<Note>
+  It is important to notice that not every pattern can be used for every source or destination because of the limitations of the APIs from the connected platforms. However, because Peliqan uses the **data warehouse** as the **central hub**, the patterns are more generic and much more robust compared to direct data syncs between A and B, which are typical for no-code iPaaS automation platforms (without a DWH).
+</Note>
+
+## More info
+
+<CardGroup cols={2}>
+  <Card title="Incremental processing from source" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/incremental-processing">
+    Read data incrementally from the source
+  </Card>
+
+  <Card title="Avoiding duplicates (upsert in target)" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/matching-records-avoiding-duplicates">
+    Prevent duplicates when writing to targets
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card title="Keeping track with link tables" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports/data-sync-pattern-with-link-table">
+    Use link tables to track sync state
+  </Card>
+
+  <Card title="Parent child relations" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports/parent-child-relations">
+    Handle parent-child relationships in syncs
+  </Card>
+</CardGroup>

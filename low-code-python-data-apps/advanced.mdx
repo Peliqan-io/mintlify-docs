@@ -1,0 +1,27 @@
+---
+title: "Working with metadata in scripts"
+description: "Access and update metadata such as table definitions, column lists, and descriptions in Peliqan using the pq Python functions list_databases, update_table, update_database, and update_field."
+sidebarTitle: "Metadata"
+---
+
+You can access metadata (for example table definitions, list of columns per table etc.) from your scripts. It's also possible to update metadata, for example update a table definition such as the query of a table.
+
+Examples:
+
+```python
+# Get a list of all databases in your account.
+# The result will include all tables per DB and all fields (columns) per table.
+databases = pq.list_databases()
+st.json(databases)
+
+# Update a table, e.g. set a new query for a table.
+# Note: in this example table id 123 must exist and should have table_type="query".
+pq.update_table(id = 123, query = "SELECT * FROM mytable")
+
+# Update a database, e.g. set the description (data catalog meta data)
+pq.update_database(id = 123, description = "Sales orders from accounting")
+
+# Update a column (field), e.g. set the description (data catalog meta data)
+# Do not confuse with update_cell which is used to update one cell of one record
+pq.update_field(id = 123, description = "Curreny of the order")
+```

@@ -1,0 +1,53 @@
+---
+title: "IBM Db2 (AS/400) - Getting started in Peliqan"
+sidebarTitle: "IBM Db2"
+description: "Learn how to connect IBM Db2 on IBM i (AS/400) to Peliqan by installing the ibm_db module and using a low-code Python data app to read data into your warehouse."
+---
+
+This article provides you an overview to connect **IBM Db2** in **Peliqan**. Please [contact support](https://peliqan.io/support) if you have any additional questions or remarks.
+
+## How to connect
+
+Make sure to install the `ibm_db` Python pip module first in your Peliqan account.
+
+In Peliqan, go to **Admin > Data apps > Custom pip modules**.
+
+Search for ibm_db and click on "Apply & Restart":
+
+![Installing ibm_db custom pip module in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c9d0e043-922a-42f0-93c8-9937c6df1875/screenshot_2026-05-15_at_11.23.39/w=1920,quality=90,fit=scale-down)
+
+Next, implement a Data App (Python script) to read data from Db2 and e.g. write that data into tables in the data warehouse. Example:
+
+```python
+import ibm_db
+
+try:
+    conn = ibm_db.connect(
+        "DATABASE=SAMPLE;"
+        "HOSTNAME=1.2.3.4;"
+        "PORT=448;"
+        "PROTOCOL=SOCKETS;"
+        "UID=APLPELIQAN;"
+        f"PWD={pq.get_secret('IBM Db2 Password')};",
+    )
+
+    st.success("Connected to IBM Dd2 successfully!")
+
+    sql = "SELECT * FROM MYTABLE FETCH FIRST 10 ROWS ONLY"
+
+    stmt = ibm_db.exec_immediate(conn, sql)
+
+    rows = []
+
+    result = ibm_db.fetch_assoc(stmt)
+    while result:
+        rows.append(result)
+        result = ibm_db.fetch_assoc(stmt)
+
+    st.write(rows)
+
+    ibm_db.close(conn)
+
+except Exception as e:
+    st.error(f"Connection failed: {str(e)}")
+```

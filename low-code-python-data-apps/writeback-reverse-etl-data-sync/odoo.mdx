@@ -1,0 +1,1188 @@
+---
+title: "Odoo - Getting started in Peliqan"
+sidebarTitle: "Odoo"
+description: "Learn how to connect Odoo to Peliqan, sync standard and custom models, explore fields, and write back data using low-code Python scripts."
+---
+
+_Odoo is a suite of open source business apps that cover all your company needs: CRM, eCommerce, accounting, inventory, point of sale, project management, etc._
+
+This article provides an overview to get started with the **Odoo** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect Odoo
+
+In Peliqan, go to Connections > Add Connection > Select Odoo in the list > Enter the details of your Odoo instance.
+
+### Authentication
+
+You can choose to authenticate with your username and password or with your username and an API key.
+
+If 2FA (2-factor authentication) is enabled on your Odoo instance, you have to use an API key.
+
+To create an API key in Odoo go to > My profile > Account Security > API keys.
+
+### Database name
+
+If you don't know your database name, you can make an unauthenticated API call, e.g. in Postman, to list your database names:
+
+```none
+GET https://{domain}/web/database/list
+GET https://{sub_domain}.odoo.com/web/database/list   (for Odoo.sh)
+
+Headers:
+Accept: application/json
+Content-Type: application/json
+
+Body:
+{}
+```
+
+The body must contain an empty JSON object !
+
+Or you can reach out to Peliqan Support ([support@peliqan.io](mailto:support@peliqan.io)) to retrieve the name of your Odoo database.
+
+## Sync additional standard and/or custom models
+
+You can include additional modules in the ETL pipeline, by adding a comma-separated list with the names of your standard and/or custom models, in the field "Additional models". These models will now also be synced to the data warehouse as tables.
+
+![Odoo additional models field](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f69fdac4-f083-4614-a9a5-f85c572811bc/additional_models/w=1920,quality=90,fit=scale-down)
+
+You can find the model names by doing an initial sync of table "models" (under Advanced in the connect form):
+
+![Odoo models table selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9ec12aca-e842-4379-9883-542d8e552a58/image/w=1920,quality=90,fit=scale-down)
+
+The models table contains a list of all your Odoo models:
+
+![Odoo models table data](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5f0eaf49-0ee6-48aa-b9cf-60199f754f98/image/w=1920,quality=90,fit=scale-down)
+
+## Odoo model explorer
+
+You can also run a script to get a list of models, and all fields of a selected model.
+
+<Accordion title="Click to expand the script">
+  ```python
+  odoo_api = pq.connect('Odoo')
+  result = odoo_api.list('ir_model')##use 'model' for odoo V1 peliqan connections
+  models = result["detail"]
+  models = [{k: v for k, v in m.items() if k == "name" or k == "model"} for m in models]
+  
+  model_names = [str(d["model"]) for d in models]
+  model_names.insert(0, "")
+  
+  selected_model = st.selectbox("Select a model to get a list of fields", model_names)
+  
+  if selected_model and selected_model != "":
+      st.header(f"Fields of model {selected_model}")
+      result = odoo_api.get('fields', model = selected_model)
+      fields = [{"name": k, "string": v["string"], "type": v["type"]} for k, v in result.items()]
+      st.table(fields)
+      
+  st.header("Models")
+  st.table(models)
+  ```
+</Accordion>
+
+## Sync custom fields
+
+Custom fields will automatically be added as columns in the tables in the data warehouse. If you add new custom fields in Odoo, perform a "Full resync" to include them in the data warehouse.
+
+## Sync Charts of accounts in a specific language
+
+Use the below custom pipeline script to sync the charts of accounts with a specific language (e.g. French or Dutch).
+
+<Accordion title="Click to expand script">
+  ```python
+  # 1. Get all connections and filter Odoo v2 connections with a target schema
+  all_connections = pq.list_connections()
+  odoo_connections = []
+  for c in all_connections:
+     # Check type and presence of target_schema with schema_name
+     if (
+         c.get("server_type") == "odoo_v2"
+         and c.get("target_schema")
+         and c["target_schema"].get("schema_name")
+     ):
+         odoo_connections.append({
+             "connection_name": c["name"],
+             "schema_name": c["target_schema"]["schema_name"]
+         })
+  
+  if not odoo_connections:
+     st.warning("No Odoo (v2) connections with target_schema found in your account.")
+     st.stop()
+  
+  st.write("Processing these Odoo connections and schemas:")
+  st.table(odoo_connections)
+  
+  lang = "fr_BE"   # or "nl_BE"
+  
+  for entry in odoo_connections:
+     connection_name = entry["connection_name"]
+     schema_name = entry["schema_name"]
+     st.subheader(f"Processing: {connection_name} → schema: {schema_name}")
+  
+     # Connect to Odoo API and DWH
+     odoo_api = pq.connect(connection_name)
+     dbconn = pq.dbconnect(pq.DW_NAME)
+  
+     params = {
+         'model': "account.account",
+         'payload': [],
+         'additional_params': {
+             'limit': 100000,
+             'offset': 0,
+             'fields': ["id", "code", "name", "display_name"],
+             'context': {'lang': lang}
+         }
+     }
+  
+     st.info(f"Fetching accounts from '{connection_name}' in language: {lang} ...")
+     result = odoo_api.get('object', params)
+     records = result if isinstance(result, list) else []
+  
+     st.success(f"Fetched {len(records)} records from '{connection_name}'.")
+  
+     if records:
+         st.dataframe(records[:10])
+         write_result = dbconn.write(
+             schema_name=schema_name,
+             table_name='accounts_lang',
+             records=records,
+             pk='id'
+         )
+         st.write("Write result:")
+         st.json(write_result)
+     else:
+         st.warning(f"No records fetched for '{connection_name}'.")
+  ```
+</Accordion>
+
+## Custom pipelines for Odoo
+
+Peliqan will sync all fields of the selected models, except for calculated fields:
+
+- field property `store=True`: field is included in Peliqan
+- field property `store=False`: field is not included in Peliqan (calculated field)
+
+Use below custom pipeline to sync a table with a custom selection of fields (e.g. all fields except a given set of fields to exclude because they cause errors).
+
+<Accordion title="Click here to see an example custom pipeline for Odoo">
+  ```python
+  odoo_api = pq.connect("Odoo")
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  
+  model = "sale.order"
+  fields_to_exclude = [ "field1", "field2" ] 
+  
+  schema = "odoo"
+  table = "sales_orders"
+  
+  
+  def get_fields(model):
+      result = odoo_api.get('fields', model = model)
+      return list(result.keys())
+  
+  
+  def get_data(model, offset):
+      request = {
+          'model': model,
+          'payload': [],
+          'additional_params': {
+              'limit': limit,
+              'offset': offset,
+              'fields': filtered_fields
+          },
+      }
+      data = odoo_api.get('object', request)
+      return data
+  
+  
+  fields = get_fields(model)
+  filtered_fields = [i for i in fields if i not in fields_to_exclude]
+  
+  offset = 0
+  limit = 1000
+  while True:
+      st.write(f"Fetching data with offset {offset}")
+      records = get_data(model, offset)
+      if not records:
+          break
+      result = dbconn.write(schema, table, records = records, pk = 'id')
+      if result["status"] != "success":
+          st.write(result)
+      offset += limit
+  st.write("Done")
+  ```
+</Accordion>
+
+## Odoo data model
+
+Use the below data app to explore models and fields in your Odoo instance.
+
+<Accordion title="Odoo data model explorer">
+  ```python
+  import json
+  
+  odoo_api = pq.connect('Odoo')
+  result = odoo_api.list('ir_model')
+  models = result["detail"]
+  models = [{k: v for k, v in m.items() if k == "name" or k == "model"} for m in models]
+  
+  model_names = [str(d["model"]) for d in models]
+  model_names.insert(0, "")
+  
+  selected_model = st.selectbox("Select a model to get a list of fields", model_names)
+  
+  if selected_model and selected_model != "":
+      st.header(f"Fields of model {selected_model}")
+      result = odoo_api.get('fields', model = selected_model)
+      fields = [{"name": k, "string": v["string"], "type": v["type"]} for k, v in result.items()]
+      st.table(fields)
+      field_names = []
+      for field in fields:
+          field_names.append(field["name"])
+      fields_json = json.dumps(field_names)
+      st.code(fields_json)
+      
+  st.header("Models")
+  st.table(models)
+  ```
+</Accordion>
+
+Use the below custom pipeline script, to sync the **fields** of a selected model, as well as the options of **"Selection" fields**, to tables in the data warehouse
+
+<Accordion title="Click to expand script">
+  ```python
+  # This script gets all fields of a given model in Odoo, of type "Selection" (Drop down)
+  # And stores them in a table in the DWH, and the options in a second table
+  import json
+  
+  model = 'res.partner'
+  schema = 'odoo_v2'
+  
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  odoo_api = pq.connect('Odoo V2')
+  
+  result = odoo_api.get('fields', model = model)
+  fields_all_details = [{"name": v["name"], "string": v["string"], "type": v["type"], "store": v["store"], "selection": v.get("selection",[])} for k, v in result.items()]
+  fields = [{"name": v["name"], "string": v["string"], "type": v["type"], "store": v["store"]} for k, v in result.items()]
+  
+  field_options = []
+  
+  for field in fields_all_details:
+      if "selection" in field:
+          options = field["selection"]
+          for option in options:
+              value = option[0]
+              name = option[1]
+              id = field["name"] + "_" + value
+              field_options.append({ "id": id, "field_name": field["name"], "option_value": value, "option_name": name })
+  
+  st.header(f"Odoo fields for model {model}")
+  st.write(fields)
+  
+  st.subheader("Select field options")
+  st.write(field_options)
+  
+  table = f"fields_" + model.replace(".", "_")
+  dbconn.write(schema, table, records = fields, pk = 'name')
+  
+  table = f"fields_options_" + model.replace(".", "_")
+  dbconn.write(schema, table, records = field_options, pk = 'id')
+  ```
+</Accordion>
+
+### Check completeness of data in DWH
+
+The below script will compare the number of records (count) in the data warehouse with the actual count in Odoo.
+
+![Odoo data completeness check output](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b1b31bae-7947-4fb9-9aa3-031b3c5d8de1/image/w=1920,quality=90,fit=scale-down)
+
+<Accordion title="Click here to expand script">
+  ```python
+  odoo_api = pq.connect('Odoo')
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  schema = 'odoo'
+  
+  # Add your tables here
+  tables = [
+      {
+          "table": "partners",
+          "model": "res.partner"
+      },
+          {
+          "table": "sales_orders",
+          "model": "sale.order"
+      }
+  ]
+  
+  counts = []
+  for table in tables:
+      api_count = odoo_api.get('count', model = table["model"])
+      count_query_result = dbconn.execute(pq.DW_NAME, query=f'SELECT COUNT(*) FROM "{schema}"."{table["table"]}"')
+      dwh_count = count_query_result["detail"][1][0]
+      
+      missing = api_count - dwh_count
+      if api_count>0:
+          missing_percentage = str(int((api_count - dwh_count) / api_count * 100)) + " %"
+      else:
+          missing_percentage = "0 %"
+      
+      counts.append(
+          {
+              "Model": table["model"],
+              "Table": table["table"],
+              "API count": api_count,
+              "DWH count": dwh_count,
+              "Missing in DWH": missing,
+              "Missing in DWH %": missing_percentage
+          }
+      )
+  
+  st.table(counts)
+  st.info("More records in API than DWH ? Do a full resync, check errors in pipeline. \n\nLess records in API than DWH ? Enable a delete script, that removes records in the DWH that are deleted in the source.")
+  ```
+</Accordion>
+
+### Resync an Odoo table
+
+Resync an Odoo table, e.g. when fields were added in Odoo (schema is updated), using the below script.
+
+<Accordion title="Click to expand script">
+  ```python
+  import time
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  
+  connection_name = 'Odoo V2'
+  schema_name = 'odoo_v2'
+  table_name = 'sale_order'
+  
+  #1: Drop table (clear all data from table)
+  st.write('Remove table')
+  result = dbconn.execute(pq.DW_NAME, query=f'DROP TABLE {schema_name}.{table_name}')
+  
+  #2: Re-discover schema
+  st.write('Re-discover schema (fields)')
+  pq.discover_pipeline(connection_name=connection_name, streams=[table_name], merge_schema=False)
+  
+  #3: Reset state for table
+  st.write('Reset state')
+  state = pq.get_connection_state(connection_name=connection_name)
+  table_state = state.get("bookmarks").get(table_name)
+  if table_state:
+      for key, _ in table_state.items():
+          table_state[key] = None
+  bookmarks = state.get("bookmarks", {})
+  new_state = pq.set_connection_state(connection_name=connection_name, state=state)
+  
+  #4: Run pipeline
+  st.write('Run pipeline')
+  time.sleep(10)
+  result = pq.run_pipeline(connection_name=connection_name, tables=[table_name], is_async=False)
+  st.write(result)
+  ```
+</Accordion>
+
+### Remove deleted records from the data warehouse
+
+If records are deleted in Odoo, they are not automatically deleted in the data warehouse. Use below custom pipeline to delete records in the data warehouse, when they are no longer present in Odoo.
+
+<Accordion title="Click to expand script">
+  ```python
+  # This script will delete rows in the data warehouse, that were deleted in Odoo.
+  # For each table, it fetches all IDs from the API and compares them with the IDs in the DWH.
+  # IDs that are no longer in the API will be deleted in the DWH.
+  # Safety: If more than max_to_delete rows are to be deleted from any table, that table will be skipped.
+  # Add a schedule to run this script daily.
+  
+  ############## Settings
+  connection_name = "Odoo V2"
+  schema_name = "odoo_v2"
+  pk = "id"
+  max_to_delete = 100  # Safety threshold per table
+  ##############
+  
+  # Get all tables in the schema using list_databases()
+  databases = pq.list_databases()
+  tables = []
+  for db in databases:
+      for schema in db.get("schemas", []):
+          if schema["name"].lower() == schema_name:
+              for table in db.get("tables", []):
+                  if table["schema_id"] == schema["id"]:
+                      tables.append(table["name"])
+  
+  st.write(f"Tables found in schema '{schema_name}':")
+  st.table(tables)
+  
+  # Connect to API and DWH
+  api = pq.connect(connection_name)
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  
+  for table_name in tables:
+      model_name = table_name.replace("_", ".")
+      st.subheader(f"Processing table: {table_name} (model {model_name})")
+  
+      # Step 1: Fetch IDs from the API
+      try:
+          #Get full list of records from source API (use this if below endpoint to only get IDs is not available)
+          #result = api.list(table_name)
+          #ids_from_api = [item[pk] for item in result.get("detail", []) if pk in item]
+  
+          # Get only ids from Odoo API (faster)
+          params = {
+              'model': model_name,
+              'payload': [[]],
+              'additional_params': {
+                  "offset": 0,
+                  "limit": 100000,
+                  "fields": ["id"]
+              },
+          }
+          result=api.get('object', params)
+          ids_from_api = [item["id"] for item in result]
+          
+      except Exception as e:
+          st.error(f"Error fetching from API for table {table_name}: {e}")
+          continue
+  
+      # Step 2: Fetch IDs from the DWH
+      query = f"SELECT {pk} FROM {schema_name}.{table_name}"
+      try:
+          rows = dbconn.fetch(pq.DW_NAME, query=query)
+          ids_from_dwh = [row[pk] for row in rows if pk in row]
+      except Exception as e:
+          st.error(f"Error fetching from DWH for table {table_name}: {e}")
+          continue
+  
+      # Step 3: Compare and find IDs to delete
+      ids_to_delete = set(ids_from_dwh) - set(ids_from_api)
+  
+      st.write(f"IDs to delete in DWH ({table_name}): {len(ids_to_delete)}")
+  
+      # Step 4: Safety check and delete
+      if len(ids_to_delete) == 0:
+          st.write(f"Nothing to delete in the DWH for table {table_name}.")
+      elif len(ids_to_delete) > max_to_delete:
+          st.warning(f"Stopping, too many IDs to delete in table {table_name} ({len(ids_to_delete)}), max_to_delete={max_to_delete}. Skipping this table.")
+      else:
+          st.write(f"Deleting {len(ids_to_delete)} records in the DWH for table {table_name}.")
+          for id_to_delete in ids_to_delete:
+              try:
+                  dbconn.delete(pq.DW_NAME, schema_name, table_name, id_to_delete)
+              except Exception as e:
+                  st.error(f"Error deleting id {id_to_delete} in table {table_name}: {e}")
+          st.success(f"Done deleting in table {table_name}.")
+  
+  st.write("Script finished.")
+  ```
+</Accordion>
+
+## Writeback to Odoo from Python scripts
+
+### Basic writeback functions
+
+Example to add a Product to Odoo:
+
+```python
+odoo_api = pq.connect('Odoo')
+
+product = {
+    'name': "My new product"
+}
+result = odoo_api.add('product', product)
+st.json(result)
+```
+
+Example to update a Product in Odoo:
+
+```python
+odoo_api = pq.connect('Odoo')
+
+product = {
+    'id': 123,
+    'name': "My new product updated"
+}
+result = odoo_api.update('product', product)
+st.json(result)
+```
+
+### Generic functions
+
+These functions can be used to work with any model in Odoo, a standard or custom model.
+
+Add object from a given model:
+
+```python
+odoo_api = pq.connect('Odoo')
+
+object = {
+    "model": "product.template", # this could be a custom model
+    "payload": [
+            {
+                "name": "My new object"
+            }
+        ],
+    "additional_params": {}
+    }
+
+#result = odoo_api.add('object', object)
+#st.json(result)
+```
+
+Update object from a given model:
+
+```python
+object = {
+    "model": "product.template", # this could be a custom model
+    "payload": [ 
+            [123],               # id of the object to update
+            {
+                "name": "My new product updated",
+            }
+        ],
+    "additional_params": {}
+    }
+result = odoo_api.update('object', object)
+st.json(result)
+```
+
+Execute a custom method or action on an object, for example Confirm a quotation to turn it into a sales order:
+
+```python
+odoo_api = pq.connect('Odoo')
+object_method = {
+    'model': "sale.order",
+    'method': "action_confirm",
+    'payload': [[17]], # id of the quotation to update
+    'additional_params': {}
+}
+result = odoo_api.update('object_method', object_method)
+st.json(result)
+```
+
+Make a generic API call to Odoo:
+
+```python
+odoo_api = pq.connect('Odoo')
+request_payload = {
+    'payload': [[['id', '=', '1']]],
+    'odoo_model': "res.partner",
+    'odoo_method': "search_read",
+    'additional_params': {}
+}
+result = odoo_api.apicall(path = '', method = 'POST', **request_payload)
+st.json(result)
+```
+
+Get objects using paging, and a fields list (note that some Odoo models require a fields list to be given in order to get a response from the API):
+
+```python
+odoo_api = pq.connect('Odoo')
+object = {
+    'model': "product.product",
+    'payload': [
+        [
+           
+        ]
+    ],
+    'additional_params': {
+        "order": "id desc",
+        "offset": 0,
+        "limit": 50,      # maximum allowed by Odoo is 50
+        "fields": ["id", "name"]
+    },
+}
+result=odoo_api.get('object', object)
+st.write(result)
+```
+
+### Applying multiple filters in Odoo
+
+One can use generic _get_object_ endpoint which can help applying multiple filters in on API request with dynamically defining the Model name.
+
+This will return the first page only, max. 50 results
+
+Please find below the example of working with multiple filters:
+
+```python
+# AND operator
+odoo_api = pq.connect('Odoo')
+object = {    
+				'model': "product.product",    
+				'payload': 
+					[
+						    ['&',                                         
+										['id', '=', 200],             
+										['write_date', '>', '2024-09-01T00:00:00']
+	     ]  ],    
+				'additional_params': {   },
+				}
+result=odoo_api.get('object', object)
+st.write(result)
+
+# OR operator
+odoo_api = pq.connect('Odoo')
+object = {    
+				'model': "product.product",    
+				'payload': 
+					[
+						    ['|',                                         
+										['id', '=', 200],             
+										['write_date', '>', '2024-09-01T00:00:00'],
+										['display_name']. '=' ,'Sample Product']
+	     ]  ],    
+				'additional_params': {   },
+				}
+result=odoo_api.get('object', object)
+st.write(result)
+```
+
+### Custom fields
+
+Set value of a custom field:
+
+```python
+odoo_api = pq.connect('Odoo')
+
+product = {
+    'name': "My new product",
+    "x_my_custom_field": "Some value"
+}
+result = odoo_api.add('product', product)
+st.json(result)
+```
+
+### Fields of type One2Many
+
+Examples of working with fields (basic or custom) of type one2many:
+
+```python
+odoo_api = pq.connect('Odoo')
+
+ADD_LINK = 4
+REPLACE_LINKS = 6
+
+# Add new product with one one2many field value
+# Link this product to id 40
+odoo_api = pq.connect('Odoo')
+product = {
+    'name': "My new product",
+    "x_related_product": 40
+}
+result = odoo_api.add('product', product)
+st.json(result)
+```
+
+### Fields of type Many2Many and One2Many
+
+Examples of working with fields (basic or custom) of type many2many or one2many:
+
+```python
+odoo_api = pq.connect('Odoo')
+
+ADD_LINK = 4
+REPLACE_LINKS = 6
+
+# Add new product with one many2many field value
+# Link this product to id 40
+odoo_api = pq.connect('Odoo')
+product = {
+    'name': "My new product",
+    "x_related_product": [[ADD_LINK, 40]]
+}
+result = odoo_api.add('product', product)
+st.json(result)
+
+# Update product with id=47, replace many2many field values
+# Link this product to ids 41 and 42 
+odoo_api = pq.connect('Odoo')
+product = {
+    'id': 47,
+    'name': "My new product updated",
+    "x_related_product": [[REPLACE_LINKS, 0, [41, 42]]]
+}
+result = odoo_api.update('product', product)
+st.json(result)
+```
+
+For a **many2many** and **one2many** fields, following value format is required:
+
+- `[[ 0, 0, { values } ]]` link to a **new record** that needs to be created with the given values dictionary
+- `[[ 1, ID, { values } ]]` **update** the linked record with id = ID (write values on it)
+- `[[ 2, ID ]]` remove and **delete** the linked record with id = ID (calls unlink on ID, that will delete the object completely, and the link to it as well)
+- `[[ 3, ID ]]` cut the link to the linked record with id = ID (**delete the relationship** between the two objects but does not delete the target object itself)
+- `[[ 4, ID ]]` **link** to existing record with id = ID (adds a relationship)
+- `[[ 5 ]]` **unlink all**
+- `[[ 6, 0, [IDs] ]]` **replace** the list of linked IDs
+
+### Writing to Odoo in batch
+
+Example to insert new records in Odoo in batch, to speed up large data migrations or data syncs:
+
+```python
+dbconn = pq.dbconnect(pq.DW_NAME)
+odoo_api = pq.connect('Odoo V2')
+
+partners = [
+    {"name": "Partner 1"},
+    {"name": "Partner 2"},
+    {"name": "Partner 3"}
+]
+
+params = {
+    'model': "res.partner",
+    'payload': [partners],
+    'additional_params': {}
+}
+result = odoo_api.add('object', params)
+insert_ids = result["detail"]["result"]
+
+merged_list = [ {**partner, "odoo_id": insert_id} for partner, insert_id in zip(partners, insert_ids) ]
+
+sql_inserts = []
+for item in merged_list:
+    sql_insert = f"({item['odoo_id']}, '{item['name']}')"
+    sql_inserts.append(sql_insert)
+sql_inserts_str = ", ".join(sql_inserts)
+
+insert_query = f"INSERT INTO logs.partner_log (odoo_id, name) VALUES {sql_inserts_str};"
+dbconn.execute(pq.DW_NAME, query = insert_query)
+```
+
+Here's a second example, that creates invoices in Odoo in batch:
+
+```python
+odoo_api = pq.connect('Odoo V2')
+
+command = 0    # Create new invoice line (needed in invoice lines, see below)
+command_id = 0 # Not used when command = 0
+
+def odoo_create_invoices_in_bulk(invoices):
+    params = {
+        'model': "account.move",
+        'payload': [invoices],
+        'additional_params': {}
+    }
+    result = odoo_api.add('object', params)
+    insert_ids = result["detail"]["result"]
+    st.text("List of Odoo ids after inserts:")
+    st.write(insert_ids)
+
+    # Merge source list with odoo ids created in target
+    merged_list = [ {**invoice, "odoo_id": insert_id} for invoice, insert_id in zip(invoices, insert_ids) ]
+    st.text("Original list of invoices with Odoo id added:")
+    st.write(merged_list)
+    return merged_list
+
+
+######### Invoice 1 #########
+######### Example adding lines one by one to the invoice #########
+
+invoice1 = {
+    "move_type": "out_invoice",
+    "partner_id": 1
+}
+
+invoice_line1 = {
+    'name': 'Shoes',
+    'quantity': 2,
+    'product_id': 1,
+    'price_unit': 150,
+}
+
+invoice_line2 = {
+    'name': 'Socks',
+    'quantity': 4,
+    'product_id': 2,
+    'price_unit': 30,
+}
+
+invoice_line_ids = []
+invoice_line_ids.append((command, command_id, invoice_line1))
+invoice_line_ids.append((command, command_id, invoice_line2))
+invoice1["invoice_line_ids"] = invoice_line_ids
+
+######### Invoice 2 #########
+######### Example with invoice lines inside invoice object #########
+
+invoice2 = {
+    "move_type": "out_invoice",
+    "partner_id": 1,
+    'invoice_line_ids': [
+        (command, command_id, {
+            'name': 'Shirts',
+            'quantity': 6,
+            'product_id': 3,
+            'price_unit': 100,
+        }),
+         (command, command_id, {
+            'name': 'Rings',
+            'quantity': 1,
+            'product_id': 4,
+            'price_unit': 130,
+        })
+    ]
+}
+
+######### Make list of invoices #########
+
+invoices = []
+invoices.append(invoice1)
+invoices.append(invoice2)
+
+######### Example processing a list in batch #########
+
+def split_list_in_batches(arr, batch_size=100):
+    return [arr[i:i+batch_size] for i in range(0, len(arr), batch_size)]
+
+invoice_batches = split_list_in_batches(invoices, 100)
+
+for invoice_batch in invoice_batches:
+    odoo_create_invoices_in_bulk(invoice_batch)
+```
+
+### Working with product template & attributes
+
+Example to link attribute values (e.g. Small, Medium, Large) for an attribute (e.g. "Size") to a product template (e.g. "Shoe"):
+
+```python
+odoo_api = pq.connect('Odoo')
+
+ADD_LINK = 4
+REPLACE_LINKS = 6
+
+# Create product template attribute line (= link attribute values to template)
+# Odoo will automatically create product.template.attribute.value items and product variants (product.product)
+obj = {
+    'model': 'product.template.attribute.line',
+    'payload': [{
+            'product_tmpl_id': product_tmpl_id, # e.g. Shoe
+            'attribute_id': attribute_id,       # e.g. Size
+            'value_ids': [[ REPLACE_LINKS, 0, [value1_id, value2_id] ]]  # e.g. Small, Medium
+        }],
+    'additional_params': {}
+}
+result = odoo_api.add('object', obj)
+st.json(result)
+line_id = result["detail"]["result"]
+
+
+# Add additional attribute value
+obj = {
+    'model': "product.template.attribute.line",
+    'payload': [[line_id], {'value_ids': [[ ADD_LINK, value3_id ]]}],   # e.g. Large
+    'additional_params': {},
+}
+result = odoo_api.update('object', obj)
+st.json(result)
+
+
+# Get details of created line
+search = {
+    'model': "product.template.attribute.line",
+    'payload': [[ 
+            ['id', '=', line_id] 
+        ]],
+    'additional_params': {},
+}
+result = odoo_api.get('object', search)
+st.json(result)
+product_template_attribute_value1_id = result["product_template_value_ids_0"]
+product_template_attribute_value2_id = result["product_template_value_ids_1"]
+
+
+# Get details of attribute value 1 (to extract id of created product variant)
+search = {
+    'model': "product.template.attribute.value",
+    'payload': [[ 
+            ['id', '=', product_template_attribute_value1_id] 
+        ]],
+    'additional_params': {},
+}
+result = odoo_api.get('object', search)
+st.json(result)
+product_variant1_id = result["ptav_product_variant_ids_0"]
+```
+
+<Accordion title="Click here to see the code of an end-to-end script including creation of product template, attributes, linking attributes to the template, updating the attributes and the automatically created product variants.">
+  ```python
+  odoo_api = pq.connect('Odoo')
+  
+  product_name = 'Shoe'
+  REPLACE = 6
+  LINK = 4
+  
+  #### Create product template
+  obj = {
+      'model': 'product.template',
+      'payload': [{
+              'name': product_name
+          }],
+      'additional_params': {}
+  }
+  result = odoo_api.add('object', obj)
+  st.header("Create product template")
+  st.json(result)
+  product_tmpl_id = result["detail"]["result"]
+  
+  
+  #### Create attribute
+  obj = {
+      'model': 'product.attribute',
+      'payload': [{
+              'name': 'Size of ' + product_name
+          }],
+      'additional_params': {}
+  }
+  result = odoo_api.add('object', obj)
+  st.header("Create attribute")
+  st.json(result)
+  attribute_id = result["detail"]["result"]
+  
+  
+  #### Create attribute value 1
+  obj = {
+      'model': 'product.attribute.value',
+      'payload': [{
+              'attribute_id': attribute_id,
+              'name': 'Small ' + product_name
+          }],
+      'additional_params': {}
+  }
+  result = odoo_api.add('object', obj)
+  st.header("Create attribute value 1")
+  st.json(result)
+  value1_id = result["detail"]["result"]
+  
+  
+  #### Create attribute value 2
+  obj = {
+      'model': 'product.attribute.value',
+      'payload': [{
+              'attribute_id': attribute_id,
+              'name': 'Medium ' + product_name
+          }],
+      'additional_params': {}
+  }
+  result = odoo_api.add('object', obj)
+  st.header("Create attribute value 2")
+  st.json(result)
+  value2_id = result["detail"]["result"]
+  
+  
+  #### Create attribute value 3
+  obj = {
+      'model': 'product.attribute.value',
+      'payload': [{
+              'attribute_id': attribute_id,
+              'name': 'Large ' + product_name
+          }],
+      'additional_params': {}
+  }
+  result = odoo_api.add('object', obj)
+  st.header("Create attribute value 3")
+  st.json(result)
+  value3_id = result["detail"]["result"]
+  
+  
+  # Create product template attribute line (= link selected attribute values to template)
+  # Odoo will automatically create product.template.attribute.value items and product variants (product.product)
+  obj = {
+      'model': 'product.template.attribute.line',
+      'payload': [{
+              'product_tmpl_id': product_tmpl_id,
+              'attribute_id': attribute_id,
+              'value_ids': [[ REPLACE, 0, [value1_id, value2_id] ]]
+          }],
+      'additional_params': {}
+  }
+  result = odoo_api.add('object', obj)
+  st.header("Create product template attribute line")
+  st.json(result)
+  line_id = result["detail"]["result"]
+  
+  
+  # Get details of new line
+  search = {
+      'model': "product.template.attribute.line",
+      'payload': [[ 
+              ['id', '=', line_id] 
+          ]],
+      'additional_params': {},
+  }
+  result = odoo_api.get('object', search)
+  st.header("Details of created product template attribute line")
+  st.json(result)
+  product_template_attribute_value1_id = result["product_template_value_ids_0"]
+  product_template_attribute_value2_id = result["product_template_value_ids_1"]
+  
+  
+  # Set price 1
+  obj = {
+      'model': "product.template.attribute.value",
+      'payload': [
+              [product_template_attribute_value1_id], 
+              {
+                  'price_extra': 1777
+              }
+          ],
+      'additional_params': {}
+  }
+  result = odoo_api.update('object', obj)
+  st.header("Set price 1")
+  st.json(result)
+  
+  
+  # Set price 2
+  obj = {
+      'model': "product.template.attribute.value",
+      'payload': [
+              [product_template_attribute_value2_id], 
+              {
+                  'price_extra': 1788
+              }
+          ],
+      'additional_params': {}
+  }
+  result = odoo_api.update('object', obj)
+  st.header("Set price 2")
+  st.json(result)
+  
+  
+  # Get details of product template attribute value 1 (to extract id of created product variant 1)
+  search = {
+      'model': "product.template.attribute.value",
+      'payload': [[ 
+              ['id', '=', product_template_attribute_value1_id] 
+          ]],
+      'additional_params': {},
+  }
+  result = odoo_api.get('object', search)
+  st.header("Details of created product template attribute value 1")
+  st.json(result)
+  product_variant1_id = result["ptav_product_variant_ids_0"]
+  st.text(f"Product variant 1: %s" % product_variant1_id)
+  
+  
+  # Get details of product template attribute value 2 (to extract id of created product variant 2)
+  search = {
+      'model': "product.template.attribute.value",
+      'payload': [[ 
+              ['id', '=', product_template_attribute_value2_id] 
+          ]],
+      'additional_params': {},
+  }
+  result = odoo_api.get('object', search)
+  st.header("Details of created product template attribute value 2")
+  st.json(result)
+  product_variant2_id = result["ptav_product_variant_ids_0"]
+  st.text(f"Product variant 2: %s" % product_variant2_id)
+  
+  
+  # Get details of product template attribute value 3 (to extract id of created product variant 3)
+  search = {
+      'model': "product.template.attribute.value",
+      'payload': [[ 
+              ['id', '=', product_template_attribute_value3_id] 
+          ]],
+      'additional_params': {},
+  }
+  result = odoo_api.get('object', search)
+  st.header("Details of created product template attribute value 3")
+  st.json(result)
+  product_variant3_id = result["ptav_product_variant_ids_0"]
+  st.text(f"Product variant 3: %s" % product_variant3_id)
+  
+  
+  # Update product variant 1
+  obj = {
+      'model': "product.product",
+      'payload': [
+              [product_variant1_id], 
+              {
+                  'barcode': '112233445566'
+              }
+          ],
+      'additional_params': {}
+  }
+  result = odoo_api.update('object', obj)
+  st.header("Update product variant 1")
+  st.json(result)
+  
+  
+  # Add additional attribute value Large (= value3_id, was not included above)
+  obj = {
+      'model': "product.template.attribute.line",
+      'payload': [[line_id], {'value_ids': [[ LINK, value3_id ]]}],
+      'additional_params': {},
+  }
+  result = odoo_api.update('object', obj)
+  st.header("Add extra value to attribute line")
+  st.json(result)
+  
+  
+  # Get details of new line
+  search = {
+      'model': "product.template.attribute.line",
+      'payload': [[ 
+              ['id', '=', line_id] 
+          ]],
+      'additional_params': {},
+  }
+  result = odoo_api.get('object', search)
+  st.header("Details of updated product template attribute line")
+  st.json(result)
+  product_template_attribute_value1_id = result["product_template_value_ids_0"]
+  product_template_attribute_value2_id = result["product_template_value_ids_1"]
+  product_template_attribute_value3_id = result["product_template_value_ids_2"]
+  
+  
+  # Get details of product template attribute value 1 (to extract id of created product variant 1)
+  search = {
+      'model': "product.template.attribute.value",
+      'payload': [[ 
+              ['id', '=', product_template_attribute_value1_id] 
+          ]],
+      'additional_params': {},
+  }
+  result = odoo_api.get('object', search)
+  st.header("Details of created product template attribute value 1")
+  st.json(result)
+  product_variant1_id = result["ptav_product_variant_ids_0"]
+  st.text(f"Product variant 1: %s" % product_variant1_id)
+  
+  
+  # Get details of product template attribute value 2 (to extract id of created product variant 2)
+  search = {
+      'model': "product.template.attribute.value",
+      'payload': [[ 
+              ['id', '=', product_template_attribute_value2_id] 
+          ]],
+      'additional_params': {},
+  }
+  result = odoo_api.get('object', search)
+  st.header("Details of created product template attribute value 2")
+  st.json(result)
+  product_variant2_id = result["ptav_product_variant_ids_0"]
+  st.text(f"Product variant 2: %s" % product_variant2_id)
+  
+  
+  # Get details of product template attribute value 3 (to extract id of created product variant 3)
+  search = {
+      'model': "product.template.attribute.value",
+      'payload': [[ 
+              ['id', '=', product_template_attribute_value3_id] 
+          ]],
+      'additional_params': {},
+  }
+  result = odoo_api.get('object', search)
+  st.header("Details of created product template attribute value 3")
+  st.json(result)
+  product_variant3_id = result["ptav_product_variant_ids_0"]
+  st.text(f"Product variant 3: %s" % product_variant3_id)
+  ```
+</Accordion>
+
+Odoo data model:
+
+![Odoo product templates and attributes data model](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/73f541cc-b01d-4aed-a73e-6a121b03be89/Odoo_data_model_product_templates_and_attributes/w=1920,quality=90,fit=scale-down)

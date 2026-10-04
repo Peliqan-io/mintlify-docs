@@ -1,0 +1,30 @@
+---
+title: "Google Analytics - Getting started in Peliqan"
+sidebarTitle: "Google Analytics"
+description: "Sync Google Analytics GA4 data into Peliqan including events, traffic sources and user reports, then explore and analyze website performance in your data warehouse."
+---
+
+Google Analytics is the go-to platform for millions of website and app owners seeking to gain a deeper understanding of their website and app performance. With Google Analytics, you can fine-tune your digital strategy, optimize your campaigns, and take your online presence to new heights.
+
+This article provides an overview to get started with the **Google Analytics GA4** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect GA4
+
+In Peliqan, go to Connections > Add Connection > Select Google Analytics in the list > Enter the details of the property you want to sync:
+
+- Account id
+- Property id
+
+Complete the oAuth flow, authorize access for Peliqan to your account.
+
+The data will now start to sync. Keep in mind that this could take several hours because of quotas on the Google Analytics API.
+
+## GA4 data
+
+A number of reports will be synced into tables in the data warehouse:
+
+![Google Analytics synced reports table](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b26ac72b-e444-4616-b10e-e7941ec9097f/Screenshot_2025-01-06_at_19.51.03/w=1920,quality=90,fit=scale-down)
+
+For example use the table **events_report**, filtered on **event_name = first_visit** and ordered by **date**, in order to see the count of new visitors per day on your website:
+
+![Google Analytics events report example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1402b139-9fb7-44e4-b221-dfce7caad788/Screenshot_2025-01-06_at_19.44.08/w=1920,quality=90,fit=scale-down)

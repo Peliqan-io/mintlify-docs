@@ -1,0 +1,141 @@
+---
+title: "Writeback to SaaS APIs"
+sidebarTitle: "Writeback APIs"
+description: "Write data to SaaS APIs from Peliqan using single-line Python functions. Learn about retries, timeouts, and how to sync data back to HubSpot, Slack, and more."
+---
+
+The Peliqan low-code Python environment provides single line functions to interact with APIs from connected SaaS applications. These functions abstract away the complexities of working with a specific API (authentication, error handling etc).
+
+These writeback functions (for example "CRM Update contact" or "Accounting Create Invoice") are the fundamentals for data syncs and [Reverse ETL](/reverse-etl).
+
+Here's an example to write a contact to Hubspot (CRM):
+
+```python
+hubspot_api.add('contact', {"email": "john@acme.com", "name": "John Doe"})
+```
+
+And here's an example to send a message to Slack:
+
+```python
+slack_api.add('message', channel = 'QA', text = 'Data quality alert')
+```
+
+## Retries & Timeouts
+
+Every writeback function will automatically do retries, e.g. when the API responds with a `429 Rate Limit` response code. Retries will be executed with a pause in between. This means that one insert or update could take multiple minutes to complete if rate limiting occurs.
+
+Peliqan will wait for a **maximum of 120 seconds for one individual API call** to complete. If an API does not respond within 120 seconds, Peliqan will retry (if `timeout=False`) or throw a Timeout error (if `timeout=True)`.
+
+Add the optional parameter `timeout=True` to lower the amount of retries, which will reduce the maximum execution time of one writeback function to complete.
+
+**timeout=False:**
+
+- Retries on 429 rate limit: 8 retries up to 30 minutes
+- Retries on Timeout (120 seconds max per API call): 5 retries up to 50 seconds
+- Retries on Connection error & Chunk encoding error: 2 retries up to 60 seconds
+
+**timeout=True:**
+
+- Retries on 429 rate limit: 2 retries up to 30 seconds
+- No retry on Timeout (120 seconds max per API call)
+- No retry on Connection error & Chunk encoding error
+
+## Use cases: data activation
+
+The Peliqan SaaS API wrapper functions can be used for various use cases. We refer to these use cases as "Data Activation". Here are a few examples:
+
+- Send alerts to Slack
+- Send an email with a report attached
+- Write data to a Google Sheet
+- Add a contact to a CRM such as Hubspot or Salesforce
+- Create an invoice in an accounting system
+- Import a CSV file
+- Writebacks from the data warehouse to SaaS applications
+- Data syncs (Reverse ETL, custom data pipelines, custom data exports etc.). More info: [Custom data syncs](/low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports)
+
+## Connecting a SaaS API
+
+First, add a connection in Peliqan under My Connections, for example Hubspot. Note that a SaaS connection in Peliqan is used for 2 things:
+
+1. **READ**: Sync data from the source (e.g. Hubspot) into the data warehouse
+2. **WRITE**: Enable interactions with the SaaS API: e.g. adding data into Hubspot
+
+Next, click on "Build" in the left navigation bar, and add a "data app" (Python script). Expand "Connected SaaS APIs" in the right pane and click on the function that you want to use, for example "Add contact" for Hubspot. The code snippet will be inserted into your script:
+
+![HubSpot add contact snippet](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8f5ef696-864c-4999-a4ad-5583f2b36382/snippet_hubspot_add_contact/w=1920,quality=90,fit=scale-down)
+
+Note that the actual insert of a new contact in Hubspot is only one line of code:
+
+```python
+hubspot_api.add('contact', {"email": "john@acme.com", "name": "John Doe"})
+```
+
+You can now run your script (click on "Save & Run") and the contact will be added to Hubspot.
+
+## Write updates to a SaaS connection: add, update, delete records
+
+Here's an example using to add, update and delete records (invoices, products etc.) in the ERP system Odoo:
+
+```python
+
+Odoo = pq.connect("Odoo") # use your name of the connection
+
+result = Odoo.update("product", id = 1, name = "New product name")
+st.text("Result: %s" % result)
+
+Odoo.add("product", name="My product", price=100.05) 
+Odoo.update("invoice", id=123, payment_state = "in_payment", note = "...")
+Odoo.delete("product", id=456)
+
+pq.refresh_connection(connection_name = "Odoo") # see below
+```
+
+## Refresh data in the data warehouse after writeback
+
+After doing updates in a SaaS platform (e.g. Hubspot), you typically want to refresh the data in the Peliqan data warehouse, in order to see the updated data. This is a great way to verify that the data was added or updated successfully in the SaaS platform.
+
+Examples to trigger a sync of the SaaS platform into the data warehouse:
+
+```python
+pq.refresh_connection(connection_name = "Odoo", is_async = False)
+pq.refresh_connection(connection_id = 789)
+```
+
+`is_async` is an optional parameter:
+
+- `is_async = True` (Default): do not wait for refresh to complete
+- `is_async = False`: wait for refresh to complete
+
+<Warning>
+  Do not execute multiple refreshes within one script execution. Avoid using refresh in a loop. Instead call this function only at the end of your script.
+</Warning>
+
+## Looping over rows and writing to a SaaS API
+
+Example looping over rows of a table in Peliqan and using this to update records in Odoo:
+
+```python
+dbconn = pq.dbconnect(pq.DW_NAME)
+rows = dbconn.fetch(pq.DW_NAME, 'schema_name', 'table_name')
+
+for row in rows:
+   Odoo.update("product", id = row["id"], name = row["name"])
+```
+
+## Troubleshooting
+
+<Note>
+  If a SaaS API function throws an error "unknown function" in your Python script, this could be because you are on an old version of the connector. In that case do a "Full Resync" under Connections. This will resync all data in the DWH but it will also load the most recent version of the SaaS API connector in your account.
+</Note>
+
+## Making raw API calls
+
+If you want to work with an API for which Peliqan does not provide a connector, you can make "raw" API calls. More info:
+
+<Card title="Making raw API calls" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/making-raw-api-calls">
+  Work with APIs that don't have a Peliqan connector
+</Card>
+
+<Note>
+  Note: you can also request Peliqan to build a connector for the API you want to use. [Contact us](https://peliqan.io/contact) for more information.
+</Note>

@@ -1,0 +1,143 @@
+---
+title: Embed apps in Sharepoint
+sidebarTitle: SharePoint
+description: Embed public Peliqan apps in SharePoint using the built-in Embed web part or a custom SPFx web part with session-based SSO.
+---
+
+Public Peliqan apps can be embedded in Sharepoint using the **"Embed" web part**. In Sharepoint go to a page &gt; Edit &gt; find the "Embed" Web Part in the Right Pane. Add it to the page and set the public URL of the app in the web part.
+
+The above embedding URL using a session token, can also be used to embed apps in Sharepoint using a custom built Web Part. This scenario also allows to e.g. send context from Sharepoint into the Peliqan app.
+
+We will use the SharePoint Framework (SPFx) below to build a **custom web part**, that embeds a Peliqan app in Sharepoint.
+
+## Prerequisites
+
+Make sure you have installed on your local computer:
+
+- Node.js LTS
+- Yeoman: `npm install -g yo`
+- Yeoman SharePoint Generator: `npm install -g @microsoft/generator-sharepoint`
+- Gulp: `npm install -g gulp`
+
+## Steps to create a custom web part
+
+### 1. Create your project
+
+Open a terminal and run: `yo @microsoft/sharepoint`
+
+The generator will ask questions:
+
+- **Solution name**: e.g. `PeliqanAppEmbed`
+- **Target framework**: SharePoint Online only
+- **Place of files**: Use current folder
+- **Framework**: Choose "*No JavaScript Framework"*
+- **Web part name**: e.g. `PeliqanAppEmbed`
+- **Description**: Peliqan App Embed
+
+### 2. Run the project locally (optional)
+
+Inside your project folder: `gulp serve`
+
+This will start the **SharePoint Workbench** in your browser where you can test your web part:
+
+`https://localhost:4321/temp/workbench.html`
+
+### 3. Edit the web part code
+
+Open the following `.ts` file, add the below function `getUrl()` and update the `render()` function as defined below:
+`src/webparts/peliqanAppEmbed/PeliqanAppEmbedWebPart.ts`
+
+```javascript
+public async getUrl(): Promise<string> {
+
+	// Get currently logged-in Sharepoint user (for SSO in Peliqan app)
+	const user = this.context.pageContext.user;
+  const userEmail: string = user.email;
+  const userName: string = user.displayName;
+
+  // Update these app settings
+  const appId = 123;
+  const secretKey = "xxx"; // See App Embed Secret Key
+  let appUrl = "https://app.eu.peliqan.io/apps/UnVGZW...lONA==/?embed=true";
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const message = `${appId}_${timestamp}`;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(secretKey), { name: "HMAC", hash: { name: "SHA-1" } }, false, ["sign"]);
+  const signature = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  const digestBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  const token = { digest: digestBase64, timestamp };
+  const tokenJson = JSON.stringify(token).replace(/:/g, ': ').replace(/,/g, ', ');
+  const sessionToken = btoa(unescape(encodeURIComponent(tokenJson)));
+  appUrl += `&session_token=${sessionToken}`;
+  appUrl += `&userEmail=${userEmail}&userName=${userName}`;
+  return appUrl;
+  
+  // Note: in the Peliqan app, use st.query_params.get("userEmail")
+  // to read the currently logged-in Sharepoint user for SSO
+}
+
+public render(): void {
+  this.getUrl().then( (appUrl) => {  
+     this.domElement.innerHTML = `
+      <div style="width:100%; height:400px;">
+        <iframe src="${appUrl}" 
+                width="100%" 
+                height="100%" 
+                style="border:1px solid black;" 
+                frameborder="0" 
+                scrolling="yes"></iframe>
+      </div>
+    `;
+  } ).catch( (e) => { console.log(e) } );
+}
+```
+
+Make below changes to `tsconfig.json`.
+
+```json
+{
+  "compilerOptions": {
+    "target": "es2015",
+     "downlevelIteration": true
+  },
+  "lib": [
+    "es2015",
+    "dom",
+    "es2015.collection",
+    "es2015.promise"
+  ]
+}
+```
+
+<Note>
+  You can further extend the web part code to send context from Sharepoint into the embedded Peliqan app, for example the currently logged in user in Sharepoint, the current Sharepoint page etc. Add these as params to the querystring of the app and read the querystring within the app to retrieve this information in the app.
+</Note>
+
+### 4. Package the solution
+
+When ready, bundle and package:
+
+`gulp bundle --ship`
+
+`gulp package-solution --ship`
+
+This creates a `.sppkg` file in: `/sharepoint/solution/`
+
+### 5. Deploy to App Catalog
+
+- Go to your **SharePoint App Catalog** (must be enabled by your admin), URL: `https://<your_sub_domain>.sharepoint.com/sites/AppCatalog`
+- Upload the `.sppkg` file.
+- Approve deployment.
+- Make sure to check the checkbox "Enable in all Sharepoint sites"
+- Now your web part is available in your Sharepoint sites.
+
+Example uploaded .sppkg file:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d9591dae-8c2a-4c58-90e0-435afe38dcc7/Screenshot_2025-10-10_at_10.36.42/w=1920,quality=90,fit=scale-down)
+
+### 6. Add the web part to a page
+
+- Edit a SharePoint page.
+- Click **+ Add web part** (right pane)
+- You'll see your custom web part under "Custom"

@@ -1,0 +1,102 @@
+---
+title: "Google Docs - Getting started in Peliqan"
+sidebarTitle: "Google Docs"
+description: "Connect Google Docs to Peliqan for writeback operations, then create, read, update, and delete documents programmatically using low-code Python scripts."
+---
+
+This article provides an overview to get started with the **Google Docs** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+# Contents
+
+- [Contents](#contents)
+- [Connect](#connect)
+- [Explore & Combine](#explore--combine)
+- [Activate](#activate)
+
+# Connect
+
+In peliqan, go to Connections, click on Add new. Find **Google Docs** in the list and select it. Click on the Connect button. This will redirect to Google and allow you to authorize access for Peliqan. Once that is done, you will return to Peliqan.
+
+![Google Docs connection screen](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/980ed47f-f3f3-4189-bd4a-e88f3a71ea4d/Screenshot_2024-06-12_at_11.03.04/w=1920,quality=90,fit=scale-down)
+
+# Explore & Combine
+
+The Google Docs connector is a "writeback" only connector, used in Python scripts. There are no ETL pipelines created that sync data into the data warehouse.
+
+# Activate
+
+You can use Peliqan's low-code Python scripts to interact with **Google Docs** using the Google Docs API. With a single line of code, you can for example add or update a doc on Google Drive.
+
+In Peliqan, click on "Build" in the left navigation pane. Now add a new "App" or Python script.
+
+In the right pane, expand the "Connected SaaS APIs", and expand Google Docs. You will now see the available functions to interact with Google Docs. Click on a function to insert it into your script.
+
+<Note>
+  Note: you can only access and update Google Docs that were created from a Peliqan script. You will not have access to Google Docs that already existed or that were created outside of your Peliqan script !
+</Note>
+
+Example to get a doc in Google Docs:
+
+```python
+google_docs_writeback_api = pq.connect('Google Docs Writeback')
+
+doc = {
+    'document_id': "110QQZcXoQdh4h7F2-qMAQGgCTlWdoqpTOq_PvLBglLI",
+}
+result = google_docs_writeback_api.get('doc', doc)
+st.json(result)
+```
+
+Example to add text to a Google Doc:
+
+```python
+google_docs_writeback_api = pq.connect('Google Docs Writeback')
+doc = {
+    'payload': {
+        'requests': [
+			       { 'insertText': {
+						       'text': 'Hi there !', 
+						       'location': {'index': 1}
+						    }
+			       }
+	       ]
+    },
+    'document_id': "110QQZcXoQdh4h7F2-qMAQGgCTlWdoqpTOq_PvLBglLI",
+}
+result = google_docs_writeback_api.update('doc', doc)
+st.json(result)
+```
+
+Example to remove text from a Google Doc:
+
+```python
+google_docs_writeback_api = pq.connect('Google Docs Writeback')
+doc = {
+    'payload': {
+        'requests': [
+			       {
+                  "deleteContentRange": {
+                      "range": {
+                          "startIndex": 20,
+                          "endIndex": 30,
+                      }
+                  }
+             }
+	       ]
+    },
+    'document_id': "110QQZcXoQdh4h7F2-qMAQGgCTlWdoqpTOq_PvLBglLI",
+}
+result = google_docs_writeback_api.update('doc', doc)
+st.json(result)
+```
+
+Example to add a new Google Doc:
+
+```python
+google_docs_writeback_api = pq.connect('Google Docs Writeback')
+doc = {
+    'title': "My new doc",
+}
+result = google_docs_writeback_api.add('doc', doc)
+st.json(result)
+```

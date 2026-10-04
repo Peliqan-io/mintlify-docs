@@ -1,0 +1,76 @@
+---
+title: "Running apps (manual, schedule etc.)"
+description: "Learn how to run Peliqan data apps interactively, on a schedule, as API endpoints, or locally, and how to view and write logs for each run mode."
+sidebarTitle: "Running Apps"
+---
+
+## Run modes
+
+You can run a Peliqan script (data app) in different ways:
+
+- **Interactive run**: click the "Save & Run" button in the top menu above the script editor in Peliqan > Run interactively (Streamlit)
+- **Background run (manual or scheduled)**: configure a schedule for your script or use the "Run in background" option from the "Save & Run" button
+- **Publish API endpoint**: make your script available as a public API endpoint. More info: [Publish APIs](/publish-apis)
+- **Run outside of Peliqan**: use the Peliqan pip module. [Click here for more info on local development](/low-code-python-data-apps/peliqan-python-client).
+- **Published apps & apps pinned to homepage**: these also use Interactive runs (Streamlit).
+
+![Run modes in Peliqan script editor](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d1e23a90-f54f-4eab-a677-84dedf591a8c/run_app/w=1920,quality=90,fit=scale-down)
+
+## Scheduling runs
+
+Use the "Schedule" menu option in the top menu of the script editor, activate the schedule and choose an interval:
+
+- 1 minute
+- 5 minutes
+- 15 minutes
+- 30 minutes
+- 1 hour
+- 6 hours
+- 12 hours
+- 24 hours
+
+![Schedule configuration in Peliqan script editor](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/03b948c1-47f5-4392-84da-5625dea0c4de/schedule/w=1920,quality=90,fit=scale-down)
+
+If your script takes a long time to complete and is still running when the next interval arrives, the next run will be queued. The scheduler will make sure that your script is never running twice at the same time (no parallel runs).
+
+## View logs
+
+For each run of your script, you can view the logs under the "Logs" menu item:
+
+![View logs for Peliqan script runs](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6fb0884f-31a8-453e-a1f8-ffcba9ead3bb/logs_python_scripts/w=1920,quality=90,fit=scale-down)
+
+## Write to logs
+
+Use `print()` statements in your apps to write to the logs. This will work in any type of app: Streamlit interactive apps, background runs, API handlers scripts.
+
+Inside Peliqan, Streamlit is automatically imported as `st`. If you use Streamlit for output in your script, it will automatically be converted to `print()` statements when using background runs. Examples:
+
+- `st.write()`
+- `st.json()`
+- `st.text()`
+- `st.title()`
+- `st.header()`
+- `st.subheader()`
+- `st.table()`
+
+All these Streamlit functions will be converted to a `print()` statement which writes to the logs, when using a background run. If you want to also do logging in interactive mode, you need to add additional `print()` statements in your code.
+
+`print()` statements in interactive Streamlit runs will write to the log, but will not show up to the user in the UI so you need to use a combination of both if needed.
+
+## Detect run mode inside a script
+
+You can use the predefined constant RUN_CONTEXT in your script to detect the run mode (run context):
+
+```python
+if RUN_CONTEXT == 'scheduled':
+	st.write("We are in a scheduled run") # goes into logs
+
+if RUN_CONTEXT == 'interactive':
+	st.write("You are running this script manually") # displayed to use
+
+if RUN_CONTEXT == 'api_handler':
+	st.write("Script invoked via a published API endpoint") # goes into logs
+
+if 'RUN_CONTEXT' not in globals():
+	print("Running outside of Peliqan)
+```

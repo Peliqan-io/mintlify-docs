@@ -1,0 +1,88 @@
+---
+title: "Google Drive - Getting Started in Peliqan"
+sidebarTitle: "Google Drive"
+description: "Connect Google Drive to Peliqan by creating OAuth credentials in Google Cloud, sync file metadata to your data warehouse, and access files through Python data apps."
+---
+
+_Google Drive is a cloud-based file storage and collaboration service that helps organizations manage documents, spreadsheets, and other files centrally. It supports secure sharing, real-time collaboration, and seamless integration with external applications and workflows._
+
+This article provides an overview to get started with the Google Drive connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+# Pre-Requisites
+
+### 1. Create a Google Cloud Project
+
+- Sign in to **Google Cloud Console**.
+- Create a **new Google Cloud Project** (or select an existing one).
+- Ensure the project is linked to your **Google Workspace** (required for Internal apps).
+
+### 2. Enable Google Drive API
+
+- Google Cloud Console, on left corner navigate to **Menu → More products → Google Workspace → Product Library**
+- Locate **Drive API** and click **Enable.** This allows your project to access Google Drive resources.
+
+### 3. Configure OAuth Consent Screen
+
+- In Google Cloud Console, go to **OAuth Consent Screen**.
+
+![Google Cloud OAuth Consent Screen](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7be08b96-b5a8-4a41-88f5-a0a4c839bede/image/w=1920,quality=90,fit=scale-down)
+
+- Under **App Information,** provide an application name and support email. Click **Next**
+- Under **Audience,** Select **Internal** (recommended for Workspace-only usage). Click **Next**.
+- Under **Contact Information,** Enter an email address for Google notifications. Click **Next**.
+- Review the **Google API Services User Data Policy**, click **Continue** and then **Create.** OAuth consent screen is now configured.
+
+### 4. Create OAuth 2.0 Client Credentials
+
+- Go to: **Google Auth Platform → Clients**
+
+![Google Auth Platform Clients](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3aa88a54-fe38-49e8-a956-ad2a3e1da136/image/w=1920,quality=90,fit=scale-down)
+
+- Click **Create Client** and Choose **Application type** → **Web application.** Provide a unique name for your application.
+- Under Redirect URI/Callback URI, add: `https://oauth.peliqan.io` and click **Create.**
+- Save the generated `client_id` and `client_secret`
+
+# Connect Google Drive
+
+In Peliqan, go to Connections → Add Connection → Select _Google Drive_ in the list → Enter the Generated `client_id` and `client_secret`
+
+![Google Drive connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2b1a99c7-cb38-4c93-a3f6-d68cd2773efd/image/w=1920,quality=90,fit=scale-down)
+
+Click **Connect Google Drive** to get the OAuth Flow initiated and the data of Google Drive to get synced to Peliqan.
+
+## Google Drive data sync to a data warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync Google Drive data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![Google Drive synced tables](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b1838829-fd6c-4782-8de3-373efc4eeae1/image/w=1920,quality=90,fit=scale-down)
+
+# Python functions in Data Apps
+
+## Get file details
+
+```python
+googledrive_api = pq.connect('Google Drive')
+file_id = "190yWcjVhyg2CfiSq0GIeoRJg84AhgVjQ"
+result = googledrive_api.get('file_details', file_id = file_id)
+st.json(result)
+```
+
+## Get file download URL
+
+```python
+googledrive_api = pq.connect('Google Drive')
+file_id = "190yWcjVhyg2CfiSq0GIeoRJg84AhgVjQ"
+result = googledrive_api.get('file_download_url', file_id = file_id)
+st.json(result)
+```
+
+## Get file Content
+
+```python
+googledrive_api = pq.connect('Google Drive')
+download_uri = "https://docs.google.com/fee/vhie4&exportFormat=docx"
+result = googledrive_api.get('file_content', download_uri = download_uri)
+st.json(result)
+```

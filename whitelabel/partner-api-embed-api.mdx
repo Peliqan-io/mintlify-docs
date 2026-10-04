@@ -1,0 +1,324 @@
+---
+title: "Partner API"
+sidebarTitle: "Partner API"
+description: "The Peliqan Partner API is used by SaaS software companies and ISVs to integrate data solutions running on the Peliqan platform into their own platform."
+---
+
+The Peliqan Partner API is used by SaaS software companies and ISVs to integrate data solutions running on the Peliqan platform into their own platform. The Partner API is used to automate the _provisioning_ and _hydration_ of end-customer tenants on Peliqan.io. With _hydration_ we mean automatically adding data source, creating data pipelines, enabling automations etc. inside the tenant of the end-customer in Peliqan.
+
+There are 2 options:
+
+1. Peliqan **REST API** for integration with external systems (e.g. a portal), see below
+2. Peliqan `pq` functions to use in scripts running on Peliqan in the partner account. More info: [pq Functions for partners](/pq-functions-for-partners)
+
+# Naming conventions
+
+- Partner: SaaS company or ISV
+- End-customer: the customer of the Partner
+- Partner account: the Peliqan.io account to which the Partner logs in, also called the "parent" account
+- End-customer account: a Peliqan account for the End-customer, als referred to as a "sub account"
+
+# Peliqan Partner REST API
+
+## Base URL
+
+The base URL depends on your region, e.g. for the EU region, the base URL is:
+
+`https://app.eu.peliqan.io`
+
+## Authentication
+
+Use the JWT token from your Partner account, to create new end-customer accounts and to fetch a JWT token per end-customer tenant.
+
+All other API calls (adding a connection inside a sub account etc.) will happen with the JWT token of the sub account.
+
+## List and create end-customer accounts
+
+List sub accounts:
+
+`GET /api/partner/sub-accounts/`
+
+Authorization: JWT `partner_token`
+
+Create a sub account:
+
+`POST /api/partner/sub-account/`
+
+Authorization: JWT `partner_token`
+
+Example body payload:
+
+```json
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john@woodsolutions.com",
+  "password": "l2AdN^PXO%Qxg$#I",
+  "language": "en",
+  "company_name": "Wood Solutions Ltd",
+  "external_id": "wood_123"          // required, your unique customer id
+}
+```
+
+## Get JWT token for end-customer account
+
+For server-side implementations, a **non-expiring JWT token** can be requested:
+
+Using the id of the sub account:
+
+`GET /api/partner/sub-account/identity/?account_id=1234`
+
+Using the external_id:
+
+`GET /api/partner/sub-account/identity?external_id=wood_123`
+
+Authorization: JWT `partner_token`
+
+For client-side implementations (in JS), a **short lived JWT token** can be requested:
+
+Using the id of the sub account:
+
+`POST /api/partner/sub-account/integrate/?account_id=1234`
+
+Using the external_id:
+
+`POST /api/partner/sub-account/integrate/?external_id=wood_123`
+
+Authorization: JWT `partner_token`
+
+## Get connector definitions
+
+`GET /api/servertypes`
+
+Authorization: JWT `partner_token`
+
+<Accordion title="Example response (click to expand)">
+  ```json
+  [
+      {
+          "id": 123,
+          "name": "Customer.io",
+          "connector_name": "SINGER",
+          "adapter_name": "tap-peliqan",
+          "server_type": "customerio",
+          "auth_type": "basic",
+          "ui": {
+              "fields": {
+                  "host": {
+                      "show": false,
+                      "type": "input",
+                      "label": "Host",
+                      "helptext": "",
+                      "required": false,
+                      "defaultvalue": ""
+                  },
+                  "port": {
+                      "show": false,
+                      "type": "input",
+                      "label": "Port",
+                      "helptext": "",
+                      "required": false,
+                      "defaultvalue": ""
+                  },
+                  "param1": {
+                      "show": true,
+                      "type": "input",
+                      "label": "Region",
+                      "helptext": "",
+                      "required": true,
+                      "defaultvalue": "US"
+                  }, 
+                  "..."
+              }
+          },
+          "available_streams": [ "companies", "contacts", "products" ]
+      }
+  ]
+  ```
+</Accordion>
+
+The response includes the "connect form" for each connector (see `ui.fields` in the response). This is needed to know which params are required to add a connection, e.g. for Hubspot or Pipedrive.
+
+The response also includes a list of available tables (see `available_streams`) which can be used in the setting `selected_tables` when creating a new connection.
+
+[Full API documentation](https://app.eu.peliqan.io/api/redoc/#tag/Connections-%5C\(servers%5C\))
+
+## Add a connection
+
+Get the "connect form" first (see above), and include the required connection fields when creating a new connection on behalve of an end-customer. A connection is called a "server" in the API.
+
+API endpoint:
+
+`POST /api/servers`
+
+Authorization: JWT `end_customer_token`
+
+[Full API documentation](https://app.eu.peliqan.io/api/redoc/#tag/Connections-%5C\(servers%5C\)/operation/create_server)
+
+### Connector with API key or login/password as credentials
+
+Body (assuming the required fields for the connect form are "login", "password", "param1" and "param2"):
+
+```json
+{
+   "servertype_id": 123,  // e.g. Pipedrive.
+   "login": "xxx",        // see response from /api/servertypes
+   "password": "xxx",     // for the correct list of parameters per connector
+   "param1": "xxx",       
+   "param2": "xxx",
+   "selected_tables": ["companies", "contacts"]  // Optional, if omitted all tables will be included
+}
+```
+
+The property `selected_tables` is optional. If omitted, all tables will be included. Use `available_streams` from the connector definition (see above) to get a list of available tables that can be included here.
+
+### Connector with oAuth2 flow
+
+**Initiate oAuth flow**
+
+For connectors that use an oAuth flow, the response of `POST /api/servers` will contain a redirect URL.
+
+Example redirect URL provided to the partner:
+
+```json
+{
+  "id": 12345,  // id of the connection, see below, needed to fetch status
+  "auth_uri": "https://api.some_crm.com/oauth2/authorize?..."
+}
+```
+
+The redirect URL (`auth_uri`) needs to be opened from the Partner UI, in a new browser tab or window, so that the end-customer can complete the oAuth flow. Make sure to provide a "Powered by Peliqan" message prior to the oAuth flow, because the user will be asked to allow Peliqan to access their data (unless you have configured a private oAuth app).
+
+**Continue after redirect**
+
+From the Partner UI, you need to listen to the **window on close event,** and when this event occurs, make an API call to Peliqan to check if the connection was added successfully:
+
+`GET /api/server/connection_id`
+
+Authorization: JWT `end_customer_token`
+
+## List connections
+
+`GET /api/servers`
+
+Authorization: JWT `end_customer_token`
+
+## Get status of a connection
+
+`GET /api/server/connection_id`
+
+Authorization: JWT `end_customer_token`
+
+## Get logs of a connection
+
+`GET /api/server/connection_id/logs`
+
+Authorization: JWT `end_customer_token`
+
+## Create a query table in an end-customer account
+
+`POST /table`
+
+Authorization: JWT `end_customer_token`
+
+[Click here for the full API documentation](https://app.eu.peliqan.io/api/redoc/).
+
+## Add a scheduled Python script in an end-customer account
+
+`POST /interface`
+
+Authorization: JWT `end_customer_token`
+
+```json
+{
+  "name": "Sync script",
+  "raw_code": "...",       // copy this from a template
+  "schedule": 3600
+}
+```
+
+## Running a ELT pipeline in an end-customer account
+
+`GET https://app.eu.peliqan.io/api/servers/connection_id/syncdb`
+
+Authorization: JWT `end_customer_token`
+
+Optional querystring parameters:
+
+- `tables`: comma-separated list of tables to sync
+- `is_async`: boolean (true or false)
+  - `is_async=true`: Asynchronous run, API call will not wait for pipeline to complete
+  - `is_async=false`: API call will wait for pipeline to complete (only use for short-running pipelines)
+- `pipeline`: boolean (true or false)
+  - `pipeline=true`: run a sync pipeline for a SaaS source (use this to run an ELT pipeline)
+  - `pipeline=false`: discover tables, schemas, tables in a connected database
+- `skip_refresh`: boolean (true or false)
+  - `skip_refresh=true`: do not rediscover tables in target dchema
+  - `skip_refresh=false`: do a rediscover of target schema
+
+Example running an ELT pipeline for one table:
+
+`GET https://app.eu.peliqan.io/api/servers/connection_id/syncdb?tables=table_name&is_async=true&pipeline=true&skip_refresh=true`
+
+Authorization: JWT `end_customer_token`
+
+## Adding a new table to an existing connection in an end-customer account
+
+**1. Enable the new table for the connection**
+
+A connection is called a "server" in the API. Get the details of the existing connection (server) to retrieve `selected_tables`:
+
+`GET https://app.eu.peliqan.io/api/servers/connection_id/`
+
+Authorization: JWT `end_customer_token`
+
+See the section `selected_tables` from the response. Example:
+
+```json
+"selected_tables": {
+    "tables": [
+        "deals",
+        "organizations"
+    ]
+}
+```
+
+Add the new table to `selected_tables` and update the connection (server):
+
+`PATCH https://app.eu.peliqan.io/api/servers/connection_id/`
+
+Authorization: JWT `end_customer_token`
+
+Body:
+
+```json
+{
+    "selected_tables": {
+        "tables": [
+            "deals",
+            "organizations",
+            "new_table_name"
+        ]
+    }
+}
+```
+
+**2. Run a discovery for the new table**
+
+`POST https://app.eu.peliqan.io/api/servers/connection_id/pipeline/discover/`
+
+Authorization: JWT `end_customer_token`
+
+Body:
+
+```json
+{
+  "streams": ["new_table_name"]
+}
+```
+
+**3. Run the ELT pipeline for the new table**
+
+`GET https://app.eu.peliqan.io/api/servers/connection_id/syncdb?tables=new_table_name&is_async=true&pipeline=true&skip_refresh=true`
+
+Authorization: JWT `end_customer_token`

@@ -1,0 +1,41 @@
+---
+title: "Basic ML prediction example"
+sidebarTitle: "Basic ML Prediction"
+description: "Here’s a basic example of doing predictions using machine learning in Peliqan, using a low-code Python script. We are predicting if certain invoices will get paid (field “status”), based on historical data:"
+---
+
+Here’s a basic example of doing predictions using machine learning in Peliqan, using a low-code Python script. We are predicting if certain invoices will get paid (field “status”), based on historical data:
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeRegressor
+
+# Load a table from Peliqan
+dbconn = pq.dbconnect(pq.DW_NAME)
+df_full = dbconn.fetch(pq.DW_NAME, 'accounting', 'invoices', df=True)
+
+# Select columns for prediction 
+df = df_full[["first_name","product_id","qty", "amount", "status"]]
+
+# Input columns to make predictions (remove predict column and first name)
+X = df.drop(['first_name', 'status'], axis=1)
+
+# Column to predict
+Y = df['status']
+
+# Split the data in a training data set, and a test data set
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=.20, random_state=0)
+
+# Train the model on historical data (training data set)
+model = DecisionTreeRegressor(max_depth=5).fit(X_train,Y_train)
+
+# Make prediction and add as new column
+# We are using our test dataset but we could also apply this on new invoices
+X_test["prediction"] = model.predict(X_test)
+
+# Merge result with original list to include invoice name etc.
+df_final = X_test.merge(df)
+
+# Show result using Streamlit
+st.dataframe(df_final[["first_name","prediction"]], use_container_width=True)
+```

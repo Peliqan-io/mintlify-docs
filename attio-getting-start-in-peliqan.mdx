@@ -1,0 +1,62 @@
+---
+title: "Attio - Getting start in Peliqan"
+sidebarTitle: "Attio"
+description: "Learn how to connect Attio CRM to Peliqan using OAuth to sync data to your data warehouse and perform federated queries."
+---
+
+Attio is the **CRM** for modern go-to-market teams. It has a highly flexible data model and is easy to build with, allowing you to tailor your CRM exactly to your business model. Whether you run a high-growth PLG startup, a B2B marketplace, or sell products to distributors globally. Website: [https://attio.com/](https://attio.com/)
+
+This article provides an overview to get started with the **Attio** connector in Peliqan. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Attio Data Pipeline
+
+### Guide to Build an App
+
+To start building, go to the [Attio Developer Dashboard](https://build.attio.com/)
+
+1. **Sign in Developer Dashboard and Create Developer Account**
+   1. Visit [https://build.attio.com/auth/login](https://build.attio.com/auth/login)
+   2. Log in using your Attio account or Sign up
+   3. Create a new developer account.
+   ![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2a97a0f4-a4ee-4984-8333-d14c177d33ea/image/w=1920,quality=90,fit=scale-down)
+   4. Provide details such as Account name (the Attio App Store displays this as your app's creator) & Slug (Slug is a unique identifier for your account)
+   ![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e8cbe35e-cf6c-45b7-944c-cc8517d877dd/image/w=1920,quality=90,fit=scale-down)
+2. **Create new App**
+   1. Click on **Create App**
+   2. Enter a unique name for your app and click on **Create.**
+   3. Your app is now created!
+   ![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b2477d21-ae99-4452-8ba8-92e932d75cd8/image/w=1920,quality=90,fit=scale-down)
+3. **Configure Oath Settings**
+   1. Click on **Configure OAuth** & Navigate to **OAuth** Tab.
+   2. Under OAuth Tab, copy the **Client ID** and **Client Secret.** Keep them safe, they are required to connect your app.
+   3. Provide **Redirect Uri** as: `https://oauth.peliqan.io/` This is required for apps that authenticate through Peliqan. Without this URI, the app won't complete the OAuth2 flow successfully.
+4. **Configure App Scopes**
+   1. Please select **Configure Scopes** add appropriate scopes as per your requirements
+   ![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/81bf9f58-06d1-46fb-bf9d-dc5b2004ce1f/image/w=1920,quality=90,fit=scale-down)
+6. Once done, please click on **Save Changes**
+
+### Connect Attio
+
+Connect Attio through the Peliqan Connectivity Module:
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/01bc6298-7c74-4537-be6d-001e2fdacb65/image/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- App Client ID
+- App Client Secret
+- (Optional) table selection via 'Advanced'
+
+Once filled, click on **Connect to Attio** to initiate the OAuth Flow and get the data synced in.
+
+## Attio Data Sync to Data Warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync Attio data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a6ce3d7e-7b5b-4a23-bc83-f94a09ec0209/image/w=1920,quality=90,fit=scale-down)
+
+With the Peliqan federated query engine, queries on the Attio data can be written and data can be transformed and combined with other sources.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0462347b-0dcb-40d6-be2e-1cf3c4ab0b29/image/w=1920,quality=90,fit=scale-down)

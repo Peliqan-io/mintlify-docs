@@ -1,0 +1,167 @@
+---
+title: "Detect Anomalies - Fraud Detection"
+sidebarTitle: "Detect Anomalies"
+description: "Detect anomalies in your data."
+---
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/de825897-e06e-4d91-ba3d-24ff89023b88/Untitled/w=1920,quality=90,fit=scale-down)
+
+Detect anomalies in your data.
+
+Anomaly detection, such as fraud detection is crucial for **preventing financial losses**. ML models can be **trained on e.g. historical credit card transaction data**, and then used to identify and **prevent fraudulent transactions**. Peliqan's platform also **supports the regular updating** and **fine-tuning of models** to ensure their effectiveness in detecting fraud.
+
+Here is an example on how to build an ML model in Peliqan.io with a few lines of Python code.
+
+### Import required modules
+
+We will be using **IsolationForest Algorithm** to perform the anomaly detection. More on IsolationForest [here](https://www.youtube.com/watch?v=RyFQXQf4w4w).
+
+```python
+import numpy as np
+import pandas as pd
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.ensemble import IsolationForest
+from joblib import dump
+```
+
+### Load a dataset
+
+Load data from a table into a dataframe (df).
+
+```python
+# Load Data
+dbconn = pq.dbconnect(pq.DW_NAME)
+df = dbconn.fetch(pq.DW_NAME, 'schema_name', 'transactions', df = True)
+```
+
+### Using Streamlit to build an app
+
+We use the [Streamlit](https://docs.streamlit.io/library/api-reference/text) module (st), built into Peliqan.io, to build a UI and show data.
+
+```python
+# Show a title (st = Streamlit module)
+st.title("Anomaly/fraud detection")
+
+# Show some text
+st.text("Sample data")
+
+# Show the dataframe
+st.dataframe(df.head(), use_container_width=True)
+```
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b395df7e-4531-4763-a03b-a7af0dab371e/Untitled/w=1920,quality=90,fit=scale-down)
+
+### Understanding data
+
+the dataset we are using contained **28 compressed features** which are the result of a PCA transformation. Feature 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The feature 'Amount' is the transaction Amount. Feature 'Class' is the response variable and it takes the value 1 in case of fraud and 0 otherwise.
+
+Let's have a look if the data is balanced by plotting the Number of frauds in transactions vs non-frauds.
+
+```python
+st.header('Target variable distribution')
+
+# Ploting distribution of target variable
+count_classes = pd.value_counts(df['Class'], sort = True)
+st.bar_chart(count_classes)
+```
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/637afb0e-ada4-487a-ae55-d6830de2c611/Untitled/w=1920,quality=90,fit=scale-down)
+
+### Training the model & predicting
+
+```python
+fraud = df[df['Class'] == 1] # Number of fraudulent transactions
+valid = df[df['Class'] == 0] # Number of valid transactions
+outlier_fraction = len(fraud)/float(len(valid))
+
+X = df.drop(['Class', 'Prediction'],axis = 1) # X is input
+Y = df['Class'] # y is output
+
+model = IsolationForest(max_samples = len(X),contamination = outlier_fraction).fit(X) # Fitting the model.
+pred = model.predict(X) # Prediction using trained model.
+
+#Reshape the prediction values to 0 for Valid transactions, 1 for Fraud transactions
+pred[pred == 1] = 0
+pred[pred == -1] = 1
+```
+
+**Note:** It's important that we drop any NaN values of Impute them before training IsolationForest, more on it [here](https://scikit-learn.org/stable/modules/impute.html).
+
+### Evaluation & Saving the model
+
+```python
+st.header('Evaluation')
+
+accuracy = accuracy_score(Y, pred)
+st.text("Accuracy: " + str(accuracy))
+st.text("Report:" + classification_report(Y, pred))
+
+# Saving the model
+dump(model, '/data_app/model_credit_card')
+st.success('Model saved successfully!')
+```
+
+More on understanding classification report function [here](https://muthu.co/understanding-the-classification-report-in-sklearn/).
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c180ced4-0d14-43d2-9330-dd16997d0f1e/Untitled/w=1920,quality=90,fit=scale-down)
+
+Peliqan's platform enables businesses to **create anomaly detection systems**, improving **operational efficiency** and **preventing financial losses**. By detecting anomalies in **real time**, businesses can make **informed decision**s and take proactive measures to prevent issues before they occur.
+
+Expand this to see the full code
+
+```python
+import numpy as np
+import pandas as pd
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.ensemble import IsolationForest
+from joblib import dump
+
+# Load Data
+dbconn = pq.dbconnect('dw_123')
+df = dbconn.fetch('db_name', 'schema_name', 'transactions', df = True)
+
+# Show a title (st = Streamlit module)
+st.title("Anomaly/fraud detection")
+
+# Show some text
+st.text("Sample data")
+
+# Show the dataframe
+st.dataframe(df.head(), use_container_width=True)
+
+st.header('Target variable distribution')
+
+# Ploting distribution of target variable
+count_classes = pd.value_counts(df['Class'], sort = True)
+st.bar_chart(count_classes)
+
+fraud = df[df['Class'] == 1] # Number of fraudulent transactions
+valid = df[df['Class'] == 0] # Number of valid transactions
+outlier_fraction = len(fraud)/float(len(valid))
+
+X = df.drop(['Class', 'Prediction'],axis = 1) # X is input
+Y = df['Class'] # y is output
+
+model = IsolationForest(max_samples = len(X),contamination = outlier_fraction).fit(X) # Fitting the model.
+pred = model.predict(X) # Prediction using trained model.
+
+#Reshape the prediction values to 0 for Valid transactions, 1 for Fraud transactions
+pred[pred == 1] = 0
+pred[pred == -1] = 1
+
+st.header('Evaluation')
+
+accuracy = accuracy_score(Y, pred)
+st.text("Accuracy: " + str(accuracy))
+st.text("Report:" + classification_report(Y, pred))
+
+# Saving the model
+dump(model, '/data_app/model_credit_card')
+st.success('Model saved successfully!')
+```
+
+## Next Steps
+
+1. You can make real-time predictions on new incoming data and send [**alerts to slack**](/low-code-python-data-apps/predictions-machine-learning-templates/send-alerts-to-slack) if the model makes a prediction **above a certain threshold**.
+2. You can make **predictions on real-time incoming data** using the saved model. Learn more about [making real-time predictions on new incoming data.](/low-code-python-data-apps/predictions-machine-learning-templates/write-predictions-to-a-table)
+3. Using **Peliqan** you can **create an app for your users to consume** the model you have created in a **simple and intuitive UI**. Learn more about [creating apps for users to consume your model](/low-code-python-data-apps/predictions-machine-learning-templates/create-an-app-for-business-users-to-get-predictions)**.**

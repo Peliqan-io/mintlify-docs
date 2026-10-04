@@ -1,0 +1,40 @@
+---
+title: "Feature list and Architecture"
+sidebarTitle: "Features"
+description: "Explore Peliqan's complete feature list and microservices architecture deployed on Kubernetes, including federated queries, connectors, data apps, and more."
+---
+
+## Feature list
+
+| Feature | Description |
+| --- | --- |
+| Federated query engine | Realtime & federated queries |
+| Spreadsheet UI | "Spreadsheet" interface to work with data: view, sort, filter etc. |
+| Database & data warehouse connectors | Connectivity to relational and non-relational databases and data warehouses. |
+| SaaS connectors | Connectivity to a wide range of business applications (using API connections) |
+| Schema discovery | Automatic schema discovery for each source |
+| Query editor SQL on anything | Write custom SQL queries, combine data from multiple sources (joins), share the result as new tables |
+| Build data apps (low-code) | Build data apps using low-code Python scripting: interactive dashboards, writebacks (reverse ETL), machine learning (predictions, outliers etc.), data monitoring with Slack alerts, etc. |
+| BI | Connect any BI tool (Power BI, Tableau, Qlik, Looker, Metabase...) or deploy Metabase from Peliqan Market Place |
+| Built-in data warehouse | Set up ETL flows, materialize tables and make them available for access by external BI-tools |
+| Bring your own data warehouse | Connect your existing data warehouse (Snowflake, BigQuery, Redshift, Microsoft Fabric etc.) and combine with Peliqan's built-in data warehouse |
+| Writeback (reverse ETL) | Write back data updates using low-code Python scripts (implement reverse ETL flows). |
+| Connector builder | Build your own ETL and writeback connectors or rely on Peliqan connector services to build them for you. |
+| On-prem connectivity | Connect to your on-premise data sources using a secure VPN tunnel. |
+| Lineage | Show provenance of data and impact analysis |
+| Publish data APIs | Share data products (built in Peliqan) with other teams as consumable APIs |
+| Data masking (PII) | Obfuscate sensitive data using transformations in SQL queries. |
+| Import & export data from and to files | Import & export CSV, JSON, Excel, Google Sheet etc. |
+| Market place | One-click install of Metabase, Airflow, Apache SuperSet, SuperAgent (build private LLMs), Qdrant vector database etc. |
+| Incoming webhook events | Capture incoming webhook events |
+| Custom connector builder | Bespoke UI to build custom connectors (private instances only). Missing a connector? [Contact us](/contact-support), our connector team can build a new connector in a few business days. |
+| Relational model discovery | Detect relational models (FKs) from DB sources and SaaS sources. |
+| MCP Servers | Governed access from any AI client to all business tools |
+
+## Architecture
+
+Peliqan's all-in-one data platform architecture consists of multiple layers, deployed as micro-services in a cloud-agnostic Kubernetes environment:
+
+![Peliqan architecture diagram](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9bb4f6d6-e484-415e-93b5-9c8678c5fba2/peliqan_architecture/w=1920,quality=90,fit=scale-down)
+
+The UI layer converts all data access to SQL queries that are executed in real-time using Peliqan's federated query engine (Trino) or as direct queries on the DB or DW.

@@ -1,0 +1,185 @@
+---
+title: "Zoho Creator - Getting started in Peliqan"
+sidebarTitle: "Zoho Creator"
+description: "Connect Zoho Creator low-code applications to Peliqan using OAuth. Sync form data from custom reports to Peliqan and use Python scripts to read, create, and update records."
+---
+
+_Zoho Creator is **a low-code application development platform** that allows users to create custom business applications without extensive programming knowledge. It is an online application builder featuring an intuitive drag-and-drop interface that allows you to create custom applications effortlessly. This cloud-based database solution empowers organizations to design tailored applications, automate workflows, and securely store application data. Zoho creator can be integrated with multiple third-party software such as Zoho Apps, Google Apps, QuickBooks, Paypal and Salesforce._
+
+This article provides an overview to get started with the **ZOHO Creator** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Content
+
+- [Content](#content)
+- [Zoho Creator Data Pipeline](#zoho-creator-data-pipeline)
+  - [Connect Zoho Creator](#connect-zoho-creator)
+    - [Zoho Creator data sync to Data Warehouse](#zoho-creator-data-sync-to-data-warehouse)
+      - [Custom Report list data sync](#custom-report-list-data-sync)
+- [Zoho Creator Data Activation](#zoho-creator-data-activation)
+  - [Data API Endpoints](#data-api-endpoints)
+    - [Get all form Fields](#get-all-form-fields)
+    - [Get Records by Id](#get-records-by-id)
+    - [Add Records in Zoho Creator](#add-records-in-zoho-creator)
+    - [Update Records in Zoho Creator](#update-records-in-zoho-creator)
+- [Need further help](#need-further-help)
+
+## Zoho Creator Data Pipeline
+
+### Connect Zoho Creator
+
+Connect Zoho Creator through the Peliqan Connectivity Module:
+
+![Zoho Creator connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/cd5b4331-d79a-41af-a626-88f170f95ab7/image/w=1920,quality=90,fit=scale-down)
+
+Configuration Options:
+
+1. **Account Owner Name :** Owner name present in the URL after Domain.
+2. **Application Link Name :** App name present at the end of App instance URL.
+
+![Zoho Creator URL showing account owner name and application link name](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/17f77469-94d3-468b-99d1-982311d77828/image/w=1920,quality=90,fit=scale-down)
+
+5. **Domain :** Country domain where the account instance has been created.
+6. (Optional) **Report Name :** Comma-separated list if report name to data fetch for.
+7. (Optional) table selection via '**Advanced**'
+
+Once filled, Start the oAuth connection flow by selecting "**Connect Zoho Creator"** :
+
+- Provide your username and password.
+- Authorize Peliqan to access your data.
+
+#### Zoho Creator data sync to Data Warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync Zoho Creator data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![Zoho Creator data in Peliqan gridview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/332f786c-e8ed-47dd-ae60-5d2d112ea0ba/image/w=1920,quality=90,fit=scale-down)
+
+With the Peliqan federated query engine, queries on the Zoho Creator data can be written and data can be transformed and combined with other sources.
+
+![Peliqan SQL query on Zoho Creator data](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/149114e2-a173-4b2b-821b-023bbf56c1df/image/w=1920,quality=90,fit=scale-down)
+
+#### Custom Report list data sync
+
+Peliqan allows users to provide comma separated list of reports to access data for.
+
+![Zoho Creator report link name input in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/07adb118-d107-4031-9b65-c42cc0e473a1/image/w=1920,quality=90,fit=scale-down)
+
+![Zoho Creator report link name in Zoho UI](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6289f7b8-9217-493c-b2aa-36539daa2665/image/w=1920,quality=90,fit=scale-down)
+
+<Tip>
+  If report link names are provided as a comma-separated list, only the data for those specific reports will be retrieved
+</Tip>
+
+## Zoho Creator Data Activation
+
+### Data API Endpoints
+
+#### Get all form Fields
+
+- With "Get Form Fields" function under Zoho Creator, one can fetch fields related to form available in Zoho Creator. Form_link_name has to be provided.
+- This function is useful for viewing all available fields when creating records in a Zoho Creator Form.
+
+![Zoho Creator "Get Form Fields" function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a8b118a7-7e04-4119-a2ac-bbf08f0bb07b/image/w=1920,quality=90,fit=scale-down)
+
+#### Get Records by Id
+
+- With "Get Record" method provides details of record by id under any report. _report_link_name_ and _record_id_ has to be provided.
+- This function is useful for viewing available record data when updating records in a Zoho Creator report.
+
+![Zoho Creator "Get Record" function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0a608bde-221e-4402-a7cd-55f1309d9faf/image/w=1920,quality=90,fit=scale-down)
+
+#### Add Records in Zoho Creator
+
+- "Add records" function allows to create records in Zoho Creator Instance.
+- Simple process is to fetch all fields and create a object payload to be created.
+
+<Accordion title="Related Script">
+  ```python
+  # Required Inputs
+  report_link_name = "All_Orders"
+  form_link_name = "Customer_Order_Form"
+  
+  # Required Connection
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  zoho_creator_api = pq.connect('Zoho Creator')
+  
+  
+  # Fetching fields of the form
+  form_fields = {
+      'form_link_name': form_link_name
+  }
+  result = zoho_creator_api.get('form_fields', form_fields)
+  # st.json(result)
+  
+  # analyze the fiel available in form and type of fields.
+  
+  # Creating Record through form
+  records = {
+    'payload': {
+        'Customer_ID_Admin_Only': '7634',
+        'Email_Admin_Only': "test@example.com",
+        'Support_Ticket_ID': "2930",
+        'Product_Name': "RehaVib",
+        'Purchase_Date': "10-Jan-2020", # date field
+        'Ticket_Status': 'Open', # single choice field
+        'Account_Status_Admin_Only': "Inactive",  # single choice field
+    },
+    'form_link_name': form_link_name,
+  }
+  result = zoho_creator_api.add('records', records)
+  st.json(result)
+  ```
+</Accordion>
+
+![Zoho Creator add records function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/10cf8b0c-ec56-4395-8627-304a00ff4c31/image/w=1920,quality=90,fit=scale-down)
+
+#### Update Records in Zoho Creator
+
+- "Update Records" function allows to update records in Zoho Creator Instance.
+
+<Accordion title="Related Script">
+  ```python
+  # Required Inputs
+  report_link_name = "All_Orders"
+  form_link_name = "Customer_Order_Form"
+  record_id = '258987000000009003'
+  
+  # Required Connection
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  zoho_creator_api = pq.connect('Zoho Creator')
+  
+  # Fetching object by record_id
+  records = {
+      'record_id': record_id,
+      'report_link_name': report_link_name
+  }
+  result = zoho_creator_api.get('records', records)
+  st.json(result)
+  
+  # updating values and updating record in Zoho creator
+  records = {
+      'payload': {
+          "Account_Status_Admin_Only":"Inactive",
+          "Email_Admin_Only":"test@example.com",
+          "Delivery_Status":"In Transit",
+          "Support_Ticket_ID":"2930",
+          "Product_Name":"RehaVib",
+          "ID":"258987000000009003",
+          "Customer_ID_Admin_Only":"7634",
+          "Ticket_Status":"Open",
+          "Purchase_Date":"11-Jan-2020"
+      },
+      'record_id': record_id,
+      'report_link_name': report_link_name
+  }
+  result = zoho_creator_api.update('records', records)
+  st.json(result)
+  ```
+</Accordion>
+
+![Zoho Creator update records function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/22030f5d-131e-43d0-b1ac-36c3b35b8921/image/w=1920,quality=90,fit=scale-down)
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](mailto:support@peliqan.io).

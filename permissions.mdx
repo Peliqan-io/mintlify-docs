@@ -1,0 +1,296 @@
+---
+title: "Permissions"
+sidebarTitle: "Permissions"
+description: "Learn how Peliqan's permission model works across the UI, data warehouse, BI tools, data apps, and API endpoints."
+---
+
+Peliqan's permission model can be configured at different layers:
+
+- Peliqan UI
+- Data warehouse layer
+- BI layer
+- Published Data apps, API's and MCP Servers layer
+
+![Peliqan permissions overview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/969fe733-c2f5-46a3-a01b-ebc11f53f21c/permissions/w=1920,quality=90,fit=scale-down)
+
+## Permissions in the Peliqan UI
+
+### Groups
+
+The Peliqan UI user permission model is based on groups. You can manage **Users** and **Groups** in Peliqan under Admin.
+
+Users can be added as member to multiple groups. Users have a role within each group.
+
+Available **group roles**:
+
+- **Admin**:
+  - Can access and edit resources in the group (schemas, connections, data apps etc.)
+  - Can invite new users to group (this will create a new user and make them member of the group)
+  - Can change role of users within group
+- **Member**:
+  - Can access and edit resources in the group (schemas, connections, data apps etc.)
+- **Viewer**:
+  - Has read-only access to resources in the group
+
+Following **resources** can be added to a group (resources can only belong to one group):
+
+- Schemas (collection of tables within a DB or DWH)
+- ELT Connections
+- Data apps
+
+Users have access to the resources in the groups for which they are a member. If a user has access to a schema, the user also has access to all tables/queries in that schema. Note that permissions cannot be set on the DB level or table level, only at the schema level.
+
+Note that labels can be used to organize resources in Peliqan, but labels are not used for permissions.
+
+Example on using groups to organize resources and assigning users to multiple groups:
+
+![Permissions groups example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/057d2c41-6f2c-4d9c-ade1-cb897dad09ce/permissions_-_groups/w=1920,quality=90,fit=scale-down)
+
+### Account admins
+
+Account admins have access to following features in Peliqan:
+
+- Get API key of the account
+- Configure Account Security Settings
+- Configure AI
+- Create, invite and edit users
+- Create new groups and add users to groups
+- Partner settings
+- Data app settings (e.g. install Python pip modules)
+- Billing (account owner only)
+
+<Note>
+  Only Account Owners can turn normal users into Account Admins.
+</Note>
+
+### Account owner
+
+The account owner receives billing emails.
+
+The account owner also has all the permissions of an Account Admin.
+
+Only the account owner can add and remove Account Admins.
+
+### Permission matrix
+
+| Resource/Operation | ACCOUNT ADMIN | GROUP ADMIN | GROUP MEMBER | GROUP VIEWER |
+| --- | --- | --- | --- | --- |
+| **Account Management** |
+| Manage Account API Key & Webhooks (note: each user can get a personal API key from User Settings) | Yes | Yes | Yes | Yes |
+| Account Security Settings (enforce 2FA etc.) | Yes | No | No | No |
+| Configure Data Apps (install Python pip modules etc.) | Yes | No | No | No |
+| Partner settings (whitelabel settings etc.) | Yes | No | No | No |
+| Account Preferences (AI configuration etc.) | Yes | No | No | No |
+| **Sub Account Management (in Partner Account)** |
+| Create Sub Account (button "+ Add customer") | Yes | Yes | Yes | Yes |
+| Login to Sub Account (button "Login as") | Yes | Yes | Yes | Yes |
+| **User Management** |
+| Create New User | Yes | No | No | No |
+| Invite New User into a Group (creates new user + adds user to group as member) | Yes | Yes | No | No |
+| Edit user | Yes | No | No | No |
+| Delete user | Yes | No | No | No |
+| Set user to active/inactive | Yes | No | No | No |
+| **Group Management** |
+| Edit Group Name | Yes | Yes | No | No |
+| Edit Group Users (Members) | Yes | Yes | No | No |
+| Invite New User into a Group (creates new user + adds user to group as member) | Yes | Yes | No | No |
+| Remove User from Group | Yes | Yes | No | No |
+| Create new Group | Yes | No | No | No |
+| Delete Group | Yes | No | No | No |
+| **Connections** |
+| View Connection | Yes | Yes | Yes | Yes |
+| Create Connection | Yes | Yes | Yes | No |
+| Update Connection | Yes | Yes | Yes | No |
+| Delete Connection | Yes | Yes | Yes | No |
+| **Data Apps** |
+| View Data App Source Code | Yes | Yes | Yes | Yes |
+| Run Data App | Yes | Yes | Yes | Yes |
+| Create Data App | Yes | Yes | Yes | No |
+| Update Data App (edit source code) | Yes | Yes | Yes | No |
+| Publish Data App | Yes | Yes | Yes | No |
+| Delete Data App | Yes | Yes | No | No |
+| Viewing a Published Data App (depends on publish settings) | — | — | — | — |
+| **API Endpoints** |
+| View API Endpoint | Yes | Yes | Yes | Yes |
+| Create API Endpoint | Yes | Yes | Yes | No |
+| Update API Endpoint | Yes | Yes | Yes | No |
+| Delete API Endpoint | Yes | Yes | Yes | No |
+| Call API Endpoints (depends on settings of API endpoint e.g. JWT token, public access, custom API key in source code) | Yes | Yes | Yes | Yes |
+| **Schemas** |
+| View Schema | Yes | Yes | Yes | Yes |
+| Create Schema | Yes | Yes | Yes | No |
+| Update Schema | Yes | Yes | Yes | No |
+| Delete Schema | Yes | Yes | Yes | No |
+| **Tables (based on schema)** |
+| View Table Data | Yes | Yes | Yes | Yes |
+| Create Table | Yes | Yes | Yes | No |
+| Update Table | Yes | Yes | Yes | No |
+| Delete Table | Yes | Yes | Yes | No |
+| **Views/Queries (based on schema)** |
+| See View Data | Yes | Yes | Yes | Yes |
+| Create View | Yes | Yes | Yes | No |
+| Update View | Yes | Yes | Yes | No |
+| Delete View | Yes | Yes | Yes | No |
+| **Rows (based on schema of table)** |
+| View Row | Yes | Yes | Yes | Yes |
+| Create Row | Yes | Yes | Yes | No |
+| Update Row | Yes | Yes | Yes | No |
+| Delete Row | Yes | Yes | Yes | No |
+| **Fields (Columns)** |
+| View Field | Yes | Yes | Yes | Yes |
+| Create Field | Yes | Yes | Yes | No |
+| Update Field | Yes | Yes | Yes | No |
+| Delete Field | Yes | Yes | Yes | No |
+| **Webhooks** |
+| View Webhook URL | Yes | Yes | Yes | Yes |
+| **API Token (JWT at account level)** |
+| View Token | Yes | Yes | Yes | Yes |
+| Create Token | Yes | Yes | Yes | No |
+| Rotate Token | Yes | Yes | Yes | No |
+| Delete Token | Yes | Yes | Yes | No |
+| **Direct Queries** |
+| Execute Direct Query | Yes | Yes | Yes | No |
+
+| Resource/Operation | ACCOUNT ADMIN | GROUP ADMIN | GROUP MEMBER | GROUP VIEWER |
+| --- | --- | --- | --- | --- |
+| **Account Management** |
+| Manage Account API Key & Webhooks (note: each user can get a personal API key from User Settings) | Yes | Yes | Yes | Yes |
+| Account Security Settings (enforce 2FA etc.) | Yes | No | No | No |
+| Configure Data Apps (install Python pip modules etc.) | Yes | No | No | No |
+| Partner settings (whitelabel settings etc.) | Yes | No | No | No |
+| Account Preferences (AI configuration etc.) | Yes | No | No | No |
+| **Sub Account Management (in Partner Account)** |
+| Create Sub Account (button "+ Add customer") | Yes | Yes | Yes | Yes |
+| Login to Sub Account (button "Login as") | Yes | Yes | Yes | Yes |
+| **User Management** |
+| Create New User | Yes | No | No | No |
+| Invite New User into a Group (creates new user + adds user to group as member) | Yes | Yes | No | No |
+| Edit user | Yes | No | No | No |
+| Delete user | Yes | No | No | No |
+| Set user to active/inactive | Yes | No | No | No |
+| **Group Management** |
+| Edit Group Name | Yes | Yes | No | No |
+| Edit Group Users (Members) | Yes | Yes | No | No |
+| Invite New User into a Group (creates new user + adds user to group as member) | Yes | Yes | No | No |
+| Remove User from Group | Yes | Yes | No | No |
+| Create new Group | Yes | No | No | No |
+| Delete Group | Yes | No | No | No |
+| **Connections** |
+| View Connection | Yes | Yes | Yes | Yes |
+| Create Connection | Yes | Yes | Yes | No |
+| Update Connection | Yes | Yes | Yes | No |
+| Delete Connection | Yes | Yes | Yes | No |
+| **Data Apps** |
+| View Data App Source Code | Yes | Yes | Yes | Yes |
+| Run Data App | Yes | Yes | Yes | Yes |
+| Create Data App | Yes | Yes | Yes | No |
+| Update Data App (edit source code) | Yes | Yes | Yes | No |
+| Publish Data App | Yes | Yes | Yes | No |
+| Delete Data App | Yes | Yes | No | No |
+| Viewing a Published Data App (depends on publish settings) | — | — | — | — |
+| **API Endpoints** |
+| View API Endpoint | Yes | Yes | Yes | Yes |
+| Create API Endpoint | Yes | Yes | Yes | No |
+| Update API Endpoint | Yes | Yes | Yes | No |
+| Delete API Endpoint | Yes | Yes | Yes | No |
+| Call API Endpoints (depends on settings of API endpoint e.g. JWT token, public access, custom API key in source code) | Yes | Yes | Yes | Yes |
+| **Schemas** |
+| View Schema | Yes | Yes | Yes | Yes |
+| Create Schema | Yes | Yes | Yes | No |
+| Update Schema | Yes | Yes | Yes | No |
+| Delete Schema | Yes | Yes | Yes | No |
+| **Tables (based on schema)** |
+| View Table Data | Yes | Yes | Yes | Yes |
+| Create Table | Yes | Yes | Yes | No |
+| Update Table | Yes | Yes | Yes | No |
+| Delete Table | Yes | Yes | Yes | No |
+| **Views/Queries (based on schema)** |
+| See View Data | Yes | Yes | Yes | Yes |
+| Create View | Yes | Yes | Yes | No |
+| Update View | Yes | Yes | Yes | No |
+| Delete View | Yes | Yes | Yes | No |
+| **Rows (based on schema of table)** |
+| View Row | Yes | Yes | Yes | Yes |
+| Create Row | Yes | Yes | Yes | No |
+| Update Row | Yes | Yes | Yes | No |
+| Delete Row | Yes | Yes | Yes | No |
+| **Fields (Columns)** |
+| View Field | Yes | Yes | Yes | Yes |
+| Create Field | Yes | Yes | Yes | No |
+| Update Field | Yes | Yes | Yes | No |
+| Delete Field | Yes | Yes | Yes | No |
+| **Webhooks** |
+| View Webhook URL | Yes | Yes | Yes | Yes |
+| **API Token (JWT at account level)** |
+| View Token | Yes | Yes | Yes | Yes |
+| Create Token | Yes | Yes | Yes | No |
+| Rotate Token | Yes | Yes | Yes | No |
+| Delete Token | Yes | Yes | Yes | No |
+| **Direct Queries** |
+| Execute Direct Query | Yes | Yes | Yes | No |
+
+### Peliqan accounts & sub accounts
+
+Access to data and other resources, can also be managed by using separate Peliqan accounts and sharing data between accounts.
+
+For example, Partner accounts in Peliqan can create sub accounts per end-customer. Sub accounts can also be used to provide controlled access to individual teams, divisions or other groups of users. More info on managing sub accounts:
+
+[Manage sub accounts](/manage-sub-accounts)
+
+Customers with Enterprise licences can contact [Peliqan Support](https://peliqan.io/support), to request the setup of a separate Peliqan account for testing (dev), staging and production. More info on sharing data between Peliqan accounts:
+
+[Sync data between parent & sub accounts](/low-code-python-data-apps/sync-data-between-parent-sub-accounts)
+
+### Logging in to sub accounts
+
+<Note>
+  Every user in a Partner Account has access to the sub accounts via the "Login as" button, except if Support access is disabled inside the sub account.
+
+  Every user in the partner account can create new sub accounts.
+
+  After logging in to the sub account with the "Login as" feature, the user will be an Account Admin in the sub account (full access to all features in the sub account).
+</Note>
+
+If you want users to have access to only a selection of sub accounts, create a user in each sub account separately. Note that logins (email addresses) have to be unique. A typical pattern is to use [john.doe+subaccount1@acme.com](mailto:john.doe+subaccount1@acme.com), [john.doe+subaccount2@acme.com](mailto:john.doe+subaccount2@acme.com) etc.
+
+When using the "Login as" feature, a new user is automatically created in the sub account, with username `support+<sub_account_name>+<sub_account_id>@<domain.com>` (e.g. your whitelabel domain or peliqan.io), for example for customer ACME from MySaaS.com this will become `support+acme+123@mysaas.com`.
+
+### Permissions in the Peliqan AI assistant
+
+Every user has access to the Peliqan AI Assistant. The AI Assistant has access to all **metadata** of the entire account, e.g. the list of all tables (regardless of the groups). However, access to the actual tables is still governed by the groups.
+
+You can disable the AI assistant under Admin > Account settings.
+
+Peliqan uses OpenAI in its AI assistant. Metadata is sent to the LLM but not the actual data.
+
+## Permissions in the data warehouse layer
+
+You can create separate users in the data warehouse for controlled access to datasets in your data warehouse. This is useful to enforce access control at the data warehouse level, so that it also applies to any data consumer connected to the DWH (e.g. a BI tool).
+
+- Peliqan built-in data warehouse: contact [Peliqan Support](https://peliqan.io/support)
+- External data warehouse (Bigquery, Snowflake etc.): configure users in the UI of your data warehouse
+
+## Permissions in the BI layer
+
+Data access control is often implemented in the BI layer, so that individual users can access the data they are entitled to see in dashboards and reports.
+
+It's common to configure "Row Level Access" (or Row Level Security, RLS) in BI tools, which filters data in dashboards and datasets, based on the role of the current user. This is often combined with SSO (Single Sign On) using e.g. Microsoft Entra ID, so that Row Level Access can be applied based on the groups to which the user belongs in Entra.
+
+More info:
+
+- [Row-Level Permissions in Metabase](https://www.metabase.com/learn/metabase-basics/administration/permissions/row-permissions)
+- [Row-Level Security (RLS) in Power BI](https://learn.microsoft.com/en-us/fabric/security/service-admin-row-level-security)
+
+## Permissions in the Data App layer
+
+Data Apps are interactive apps, built in Peliqan using low-code Python. Data Apps can be used inside Peliqan, and they can be [published or embedded](/low-code-python-data-apps/publish-apps) for external access.
+
+User permissions (including SSO) can be added in the source code of Data Apps. More info:
+
+[Adding a login to your app](/low-code-python-data-apps/adding-login-to-your-app)
+
+## Permissions in the API Endpoint layer
+
+In Peliqan you can publish API endpoints, e.g. to share data with external partners. Permissions can be implemented in the source code API handler of each API endpoint. More info:
+
+[Publish APIs](/publish-apis)

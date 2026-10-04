@@ -1,0 +1,53 @@
+---
+title: "MQTT"
+sidebarTitle: "MQTT"
+description: "Example script sending MQTT messages to a broker from Peliqan."
+---
+
+Example script sending MQTT messages to a broker from Peliqan:
+
+```python
+import paho.mqtt.client as mqtt
+import json
+
+def on_connect(client, userdata, flags, rc):
+    if   rc==0:
+        st.text("Connect successful")
+    elif rc==1:
+        st.text("incorrect protocol version")
+    elif rc==2:
+        st.text("invalid client identifier")
+    elif rc==3:
+        st.text("server unavailable")
+    elif rc==4:
+        st.text("bad username or password")
+    elif rc==5:
+        st.text("not authorised")
+    elif 6<rc<255:
+        st.text("Currently unused")
+    else:
+        st.text("Connect failed")
+
+def on_log(client, userdata, level, buf):
+    st.text("Log: " + buf)
+
+username = "user_name"
+password = "xxx"
+broker = "host_name"
+port = 1883
+topic = "my_topic"
+client_id = "my_client_name"
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id, transport = "tcp")
+client.on_connect = on_connect
+client.on_log = on_log
+client.username_pw_set(username, password)
+client.tls_set()
+client.connect(broker, port, keepalive = 10)
+#client.subscribe(topic)
+
+publish_result = client.publish(topic, "my message")
+st.text(publish_result) # tuple, first number 0 = MQTT_ERR_SUCCESS means messages is successfully sent
+
+client.loop(.1) # needed for on_connect callback to be invoked
+```

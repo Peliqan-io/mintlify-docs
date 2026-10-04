@@ -1,0 +1,181 @@
+---
+title: "Slack - Getting started in Peliqan"
+sidebarTitle: "Slack"
+description: "Learn how to connect Slack to Peliqan, send messages and data visualizations to channels, and share reports from your data warehouse with your team."
+---
+
+The Slack connector can be used to send messages to channels or individuals in Slack from your scripts in Peliqan. For example, you can implement data monitoring apps that send alerts to Slack in case of data problems such as missing data.
+
+## Connect Slack
+
+In Peliqan, go to Connections, click "Add connection", and select Slack from the list.
+
+Complete the authorization flow by granting the Peliqan app access to your Slack account.
+
+## Send a message to Slack
+
+Here's an example on how to send a message to a Slack channel:
+
+```python
+slack = pq.connect("Slack") # use your name of the connection
+slack.add("message", channel = "QA", text = "Data quality alert")
+```
+
+Example with a custom bot name:
+
+```python
+slack.add("message", 
+    channel = "QA", 
+    text = "Data quality alert",
+    username = "my bot" 
+    )
+```
+
+Example sending a message to an individual on Slack (not a channel):
+
+```python
+slack.add("message", 
+    channel = "@some_user_name",  # don't forget the "@" sign
+    text = "Data quality alert",
+    username = "my bot" 
+    )
+```
+
+## Send a chart or other data visualisation to a Slack channel
+
+Sending an image (file) to Slack is done in 3 steps:
+
+1. Get an upload URL from Slack and provide the file size: `slack_api.get('uploadurl', { 'length': file_size, 'filename': "chart.png" })`
+2. Upload the file to the received upload URL: `requests.post(upload_url, files = {'file': open('chart.png', 'rb')})`
+3. Tell Slack that the upload completed and post in a channel: `slack_api.add('uploadcomplete', { 'file_id': file_id, 'title': 'My chart', 'channel_id': channel_id })`
+
+```python
+# Send chart to Slack
+# Using pyplot to create the chart image
+# Make sure to invite your private app (bot) to the channel first, in the channel type: /invite @Private app for testing
+
+import matplotlib.pyplot as plt
+import base64
+import io
+import requests
+import os
+
+# Example data
+fruits = ['apple', 'blueberry', 'cherry', 'orange']
+counts = [40, 100, 30, 55]
+bar_labels = ['green', 'blue', 'red', 'orange']
+bar_colors = ['tab:green', 'tab:blue', 'tab:red', 'tab:orange']
+
+fig, ax = plt.subplots()
+ax.bar(fruits, counts, label=bar_labels, color=bar_colors)
+ax.set_ylabel('fruit supply')
+ax.set_title('Fruit supply by kind and color')
+ax.legend(title='Fruit color')
+
+st.pyplot(fig)
+plt.savefig('out.png', format='jpg')
+st.image('out.png')
+
+slack_api = pq.connect('Slack private app')
+
+# Find channel id (or see in Slack channel > View Channel Details)
+# channels = slack_api.get('channels')
+# st.write(channels)
+
+file_size = os.path.getsize('out.png')
+st.write(f"File size: %s" % file_size)
+
+# Get upload URL from Slack
+result = slack_api.get('uploadurl', { 'length': file_size, 'filename': "chart.png" })
+st.json(result)
+
+upload_url = result['upload_url']
+file_id = result['file_id']
+channel_id = 'C037T8XSGGM' # Make sure to invite your private app (bot) to the channel first, in channel type: /invite @Private app for testing
+
+# Upload binary file
+response = requests.post(upload_url, files = {'file': open('out.png', 'rb')})
+st.write("Upload file response: " + response.text)
+
+# Complete upload and share file in channel
+result = slack_api.add('uploadcomplete', { 'file_id': file_id, 'title': 'My chart', 'channel_id': channel_id })
+st.json(result)
+```
+
+## Share a report in Slack
+
+Similar to the above example, where we build an image of a report which was prepared in HTML.
+
+```python
+# Create image (PNG) with a report built in HTML (having charts, tables etc.), and send to a Slack channel
+# Make sure to invite your private app (bot) to the channel first, in the channel type: /invite @Private app for testing
+
+import imgkit
+import requests
+import os
+
+slack_api = pq.connect('Slack private app')
+
+# Find channel id (or see in Slack channel > View Channel Details)
+# channels = slack_api.get('channels')
+# st.write(channels)
+
+# Example data
+dbconn = pq.dbconnect(pq.DW_NAME)
+df = dbconn.fetch(pq.DW_NAME, query = "SELECT customer_id, customer_company, customer_channel FROM chargebee.customers LIMIT 5", df=True)
+table = df.to_html(justify = 'left')
+
+# Overall report layout
+body = f"""
+<html>
+    <head>
+        <meta content="png"/>
+    </head>
+    <style>
+        td, th {{
+            border: 1px solid;
+            border-color: #000;
+            padding: 20px;
+        }}
+        table {{
+            width: 100%;
+            border: 0px;
+            padding: 0px;
+            margin: 0px;
+        }}
+        body {{
+            padding: 50px;
+        }}
+    </style>
+    <body>
+        <h1>Your weekly sales figures</h1>
+        <h2>Top new customers</h2>
+        {table}
+    </body>
+</html>
+"""
+
+# Generate PNG image from HTML
+imgkit.from_string(body, 'out.png')
+st.image('out.png')
+
+file_size = os.path.getsize('out.png')
+#st.write(f"File size: %s" % file_size)
+
+# Get upload URL from Slack
+result = slack_api.get('uploadurl', { 'length': file_size, 'filename': "chart.png" })
+#st.json(result)
+
+upload_url = result['upload_url']
+file_id = result['file_id']
+channel_id = 'C037T8XSGGM' # Make sure to invite your private app (bot) to the channel first, in channel type: /invite @Private app for testing
+
+# Upload binary file to Slack
+response = requests.post(upload_url, files = {'file': open('out.png', 'rb')})
+#st.write("Upload file response: " + response.text)
+
+# Complete upload and share file in Slack channel
+result = slack_api.add('uploadcomplete', { 'file_id': file_id, 'title': 'My chart', 'channel_id': channel_id })
+#st.json(result)
+st.text(f"Send to Slack succeeded: %s" % result["detail"]["ok"])
+```

@@ -1,0 +1,123 @@
+---
+title: "Uniconta - Getting started in Peliqan"
+sidebarTitle: "Uniconta"
+description: "Connect Uniconta to Peliqan using a server user to sync ERP data. Add custom tables and write back invoices, customers, and more with low-code Python scripts."
+---
+
+**_Uniconta_** _is a modern ERP system that keeps track of finances, inventory, projects, production and logistics, and helps your business become digital._
+
+This article provides an overview to get started with the Uniconta connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect Uniconta
+
+In Peliqan, go to Connections > Add Connection > Select Uniconta in the list.
+
+Enter the **username** and **password** of a Server User.
+
+<Note>
+  Make sure to create a "Server User" in Uniconta.
+</Note>
+
+## How to Get Additional Tables
+
+Not all Uniconta tables are available within Peliqan by default.
+
+The connect form includes an Additional Tables field where you can manually specify extra Uniconta tables you want to sync.
+
+This is especially useful if you rely on less common modules or custom tables.
+
+**Steps to add additional tables**
+
+1. Open your Uniconta connection
+2. Find the Additional Tables field
+3. Enter a comma-separated list of table names
+4. If a table requires a primary key, add `|pk` after the table name, for example `|id` if the primary key is id or `|CustomerId` if the primary key is `CustomerId`
+5. Save the connection
+6. Perform a Full Resync to load the new tables into Peliqan
+
+![Uniconta connection form showing Additional Tables field](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0e4b8ad6-6f2f-4736-80ed-455d738d1a2b/Screenshot_2025-11-20_121122/w=1920,quality=90,fit=scale-down)
+
+Examples:
+
+Single table:
+
+```javascript
+CreditorInvoiceLines
+```
+
+Multiple tables with primary keys:
+
+```javascript
+CreditorClientUser|id, ContactClientUser|id
+```
+
+After syncing, the newly added tables will appear in your Peliqan data warehouse under the Uniconta schema.
+
+## Writeback
+
+You can use Peliqan's low-code scripts to perform writeback to Uniconta, for example create an invoice, update a customer (debtor), delete a supplier (creditor) etc.
+
+Examples:
+
+```python
+uniconta_api = pq.connect('Uniconta')
+
+# Find projects
+Object = {
+    'field_name': 'Account',
+    'field_value': "K0006",
+    'object_type': "Project",
+}
+result = uniconta_api.get('Objects', Object)
+st.json(result)
+
+
+# Get project by id
+Object = {
+    'field_name': 'RowId',
+    'field_value': 6,
+    'object_type': "Project",
+}
+result = uniconta_api.get('Object', Object)
+st.json(result)
+
+
+# Update project
+Object = {
+    'RowId': 6,
+    'Name': "My updated project",
+    'Account': "K0006", # Customer id, required even if you only want to update the project name
+    'object_type': "Project",
+}
+result = uniconta_api.update('Object', Object)
+st.json(result)
+
+
+# Create project
+Object = {
+    'Name': "My new project",
+    'Number': 'P123',
+    'Account': "K0006",
+    'object_type': "Project",
+}
+result = uniconta_api.add('Object', Object)
+st.json(result)
+
+
+# Create customer (Debtor)
+Object = {
+    'Name': "My new customer",
+    'object_type': "Debtor",
+}
+result = uniconta_api.add('Object', Object)
+st.json(result)
+
+# Delete project
+Object = {
+    'RowId': 5,
+    'object_type': "Project",
+}
+result = uniconta_api.delete('Object', Object)
+st.json(result)
+exit()
+```

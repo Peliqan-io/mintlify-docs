@@ -1,0 +1,156 @@
+---
+title: "Row-level data access"
+sidebarTitle: "Row-Level Access"
+description: "Implement row-level permissions in Peliqan for Data Apps, AI Chatbots, and MCP Servers using views, CTEs, and role-based filtering."
+---
+
+This page describes how row-level-access can be implemented in Peliqan, for example in a Data App, in an AI Chatbot, in an MCP Server or in any other client that uses SQL queries to retrieve data (a.k.a. conversational analytics).
+
+Example clients using row-level data access:
+
+- Data apps
+- MCP Servers with Text-To-SQL
+- AI Chatbots
+
+## User authentication
+
+In order to apply row-level permissions, each individual user in the client must be authenticated and known to Peliqan. This means that e.g. a shared API key cannot be used. Instead SSO (Single Sign On) with e.g. oAuth is appropriate.
+
+### User authentication in Data Apps
+
+More info:
+
+[Publish & Embed apps](/low-code-python-data-apps/publish-apps)
+
+### User authentication in MCP Servers using oAuth
+
+More info:
+
+[Build a custom MCP Server on Peliqan with OAuth](https://help.peliqan.io/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan/build-a-custom-mcp-server-on-peliqan-with-google-oauth)
+
+### User authentication in AI Chatbots
+
+In order to apply permissions, the user id must be captured from the chat. Here's an example setup in n8n using the n8n Chat Embed Widget:
+
+- Parent webpage with login screen
+- After login, send `user_id` into n8n **Chat Embed Widget**
+- Retrieve `user_id` in n8n workflow
+- Execute SQL query (for Text-to-SQL and RAG) via a Peliqan custom API endpoint
+- Make sure the `user_id` is also sent to the API endpoint
+- Peliqan applies permissions (row level access) in the API handler script
+- Peliqan executes the query and sends the result back to the AI Agent
+
+## Applying row-level permissions in queries
+
+Row level access is implemented by providing the client with a set of **views**, making sure each **view** has a fixed column on which permissions can be applied (e.g. `user_role`).
+
+The **views** are invoked with a filter (e.g. a filter on `user_role`) and then prepended to the SQL query that the client wants to execute as CTEs.
+
+### Example with user mappings
+
+Coming soon.
+
+### Example with group mappings
+
+In this example, we assume that users have one single user role, user roles have permissions on zero, one or more departments and all resources are linked to one single department.
+
+Example description of the **Data model** which is exposed to the client:
+
+```none
+* Table invoices:     id, amount, date, department etc.
+* Table customers:    id, name, department etc.
+* Table payments:     id, amount, department etc.
+* etc.
+```
+
+Example table **invoices**:
+
+| id | amount | date | department |
+| --- | --- | --- | --- |
+| INV-101 | \$100 | 2026-10-01 | HRM |
+| INV-102 | \$200 | 2026-10-05 | HRM |
+| INV-103 | \$150 | 2026-10-08 | Sales |
+| INV-104 | \$70 | 2026-10-08 | Finance |
+
+Example table with mapping of **permissions**:
+
+| **department** | **allowed_role** |
+| --- | --- |
+| HRM | HR Manager |
+| HRM | Finance Manager |
+| Sales | Sales Manager |
+| Sales | Finance Manager |
+
+Example table with **users**, each user has one **user_role**:
+
+| **user** | **user_role** |
+| --- | --- |
+| Bob | HR Manager |
+| Anne | Finance Manager |
+
+Example **access views** to apply permissions:
+
+```sql
+CREATE VIEW invoices_view AS
+   SELECT 
+       invoices.*,
+       permissions.allowed_role
+   FROM invoices
+   INNER JOIN permissions ON invoices.department = permissions.department;
+
+CREATE VIEW customers_view AS ...
+CREATE VIEW payments_view AS ...
+```
+
+Example using an MCP Server where the user asks for "Sum of invoices" and the MCP Server converts this using text-to-SQL into the following SQL query:
+
+```sql
+SELECT SUM(amount) FROM invoices;
+```
+
+Query from the client, with all views prepended and permissions applied:
+
+```sql
+WITH 
+  invoices   AS (SELECT * FROM invoices_view  WHERE allowed_role = '{user_role}'),
+  customers  AS (SELECT * FROM customers_view WHERE allowed_role = '{user_role}'),
+  payments   AS (SELECT * FROM payments_view  WHERE allowed_role = '{user_role}')
+SELECT SUM(amount) FROM invoices;
+```
+
+Final executed query for **Bob**, with **user_role** = 'HR Manager':
+
+```sql
+WITH 
+  invoices   AS (SELECT * FROM invoices_view  WHERE allowed_role = 'HR Manager'),
+  customers  AS (SELECT * FROM customers_view WHERE allowed_role = 'HR Manager'),
+  payments   AS (SELECT * FROM payments_view  WHERE allowed_role = 'HR Manager')
+SELECT SUM(amount) FROM invoices;
+```
+
+Result for Bob:
+
+| id | amount | date | department |
+| --- | --- | --- | --- |
+| INV-101 | \$100 | 2026-10-01 | HRM |
+| INV-102 | \$200 | 2026-10-05 | HRM |
+| **SUM:** | **\$300** |  |  |
+
+Final executed query for **Anne**, with **user_role** = 'Finance Manager':
+
+```sql
+WITH 
+  invoices   AS (SELECT * FROM invoices_view  WHERE allowed_role = 'Finance Manager'),
+  customers  AS (SELECT * FROM customers_view WHERE allowed_role = 'Finance Manager'),
+  payments   AS (SELECT * FROM payments_view  WHERE allowed_role = 'Finance Manager')
+SELECT SUM(amount) FROM invoices;
+```
+
+Result for Anne:
+
+| id | amount | date | department |
+| --- | --- | --- | --- |
+| INV-101 | \$100 | 2026-10-01 | HRM |
+| INV-102 | \$200 | 2026-10-05 | HRM |
+| INV-103 | \$150 | 2026-10-08 | Sales |
+| **SUM:** | **\$450** |  |  |

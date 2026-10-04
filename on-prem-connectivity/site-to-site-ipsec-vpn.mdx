@@ -1,0 +1,54 @@
+---
+title: "Site-to-site IPSec VPN"
+sidebarTitle: "Site-to-site IPSec VPN"
+description: "Peliqan supports connectivity to private clouds and on-prem environments through an IPSec site-to-site VPN, for example with a Fortigate VPN gateway."
+---
+
+Peliqan supports connectivity to private clouds and on-prem environments through an IPSec site-to-site VPN.
+
+Use this scenario if you already have a VPN gateway, for example Fortigate. You can use the below settings for your tunnel:
+
+| IPSec Site-to-Site VPN | Peliqan settings | Customer settings |
+| --- | --- | --- |
+| VPN Brand | AWS IPSec Site-to-Site VPN | E.g. Fortigate |
+| VPN Gateway IP | Will be provided by Peliqan Support | **Provide this to Peliqan** |
+| VPN type | Route based (static) | Route based (static) |
+| **IKE Phase 1** | | |
+| IKE version | version 2 | version 2 |
+| PSK | Will be provided by Peliqan (securely) | Will be provided by Peliqan (securely) |
+| Hashing algorithm | SHA512 | SHA512 |
+| Encryption algorithm | AES-256 | AES-256 |
+| DH Group | Group 21 | Group 21 |
+| Key timeouts | 28800 seconds | 28800 seconds |
+| **IPSec phase 2** | | |
+| Hashing algorithm | SHA512 | SHA512 |
+| Encryption algorithm | AES-256 | AES-256 |
+| PFS | Group 20 | Group 20 |
+| Lifetime | 3600 seconds | 3600 seconds |
+| Routed subnet | 10.0.16.0/20 | **Provide this to Peliqan** |
+
+Please provide following information to Peliqan support:
+
+| **VPN tunnel** | |
+| --- | --- |
+| VPN Brand | E.g. Fortigate |
+| VPN Gateway IP | xx.xx.xx.xx |
+| Routed subnet | xx.xx.xx.xx/20 |
+| **IT Technical Contact** | |
+| Company name | |
+| Contact name | |
+| Email | |
+| Phone | |
+| Timezone / working hours | |
+| **On-prem data source** | |
+| Type | e.g. SQL Server |
+| Host (internal IP address) | xx.xx.xx.xx |
+| Port | e.g. 1433 |
+| Credentials (e.g. login & password) | Send using e.g. [OneTimeSecret](https://onetimesecret.com/en/) |
+
+Once Peliqan has received this information, Peliqan will set up a VPN custom gateway and provide a setup file to you, based on your VPN Gateway brand (e.g. Fortigate).
+
+Optional configuration (please inform Peliqan if you want to configure any of these settings):
+
+- BGP (dynamic routing) instead of static routes
+- Set up a second (fallback) tunnel

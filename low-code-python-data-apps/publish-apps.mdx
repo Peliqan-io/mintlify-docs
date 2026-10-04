@@ -1,0 +1,111 @@
+---
+title: "Publish & Embed apps"
+description: "Learn how to publish Peliqan data apps publicly, for Peliqan users only, or embedded in an intranet with session tokens and iframe integration."
+sidebarTitle: "Publish Apps"
+---
+
+You can publish data apps to make them available outside of the Peliqan platform.
+
+There are 3 modes to publish an app:
+
+- **Public**: everyone with the link can access the app
+- **Peliqan users**: only users logged in to Peliqan can access the app
+- **Embedded**: embed in an intranet or portal
+
+![Publish app modes in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b515422b-b917-4160-82f1-2046c08a80c7/Screenshot_2025-08-19_at_15.26.54/w=1920,quality=90,fit=scale-down)
+
+In each of the below scenarios you can add `embed=true` to the querystring of the URL of the app, in order to hide the Streamlit menu in the top right corner (with e.g. Rerun, Print etc.)
+
+## Public
+
+Click on Save & Publish. The public URL of the published app will be shown. Anyone with the link can access the app.
+
+You can still implement your own login mechanism in your app. [More info](/low-code-python-data-apps/adding-login-to-your-app).
+
+## Peliqan users
+
+Click on Save & Publish. The URL of the published app will be shown. Only users that are logged in to Peliqan will have access to the app.
+
+## Embedded
+
+Click on Save & Publish. The Embedding URL of the published app will be shown. Use this URL in an iframe to embed the app in an intranet or portal, with a session token added.
+
+You need to first generate a **session token** (server-side) and add it to the query string of the URL of the app. The session token is valid for 60 seconds, it's calculated based on the current timestamp and the **App Embed Secret Key.**
+
+Example final URL for embedding (e.g. in an iFrame):
+
+`https://app.eu.peliqan.io/apps/UnVXaW…sydmlONA==/?embed=true&session_token=xxx`
+
+Example Python code:
+
+```python
+import json
+import hmac
+import hashlib
+import base64
+from datetime import datetime, timezone
+
+app_id = 123 # Application id (see URL in Peliqan)
+secret_key = "xxx" # App Embed Secret Key (See app Embed settings in Peliqan)
+app_url = "https://app.eu.peliqan.io/apps/UnVG...lONA==/?embed=true"
+
+b_secret_key = secret_key.encode()
+timestamp = datetime.now(timezone.utc).timestamp()
+message = f"{app_id}_{timestamp}"
+b_message = message.encode() # utf-8 encoded binary string
+digest_obj = hmac.new(b_secret_key, b_message, hashlib.sha1)
+digest = digest_obj.digest() # convert to bytes
+digest_base64 = base64.b64encode(digest).decode() # Encode the digest in base64
+token = { "digest": digest_base64, "timestamp": timestamp }
+token_json = json.dumps(token) # base64 string
+session_token = base64.b64encode(token_json.encode()).decode()
+app_url = app_url + "&session_token=" + session_token
+```
+
+Example TypeScript code:
+
+```javascript
+async getUrl(): Promise<string> {
+  const appId = 123;
+  const secretKey = "xxx";
+  let appUrl = "https://app.eu.peliqan.io/apps/UnV...mlONA==/?embed=true";
+  
+  const timestamp = Math.floor(Date.now() / 1000);
+  const message = `${appId}_${timestamp}`;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(secretKey), { name: "HMAC", hash: { name: "SHA-1" } }, false, ["sign"]);
+  const signature = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  const digestBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  const token = { digest: digestBase64, timestamp };
+  const tokenJson = JSON.stringify(token).replace(/:/g, ': ').replace(/,/g, ', ');
+  const sessionToken = btoa(unescape(encodeURIComponent(tokenJson)));
+  appUrl += `&session_token=${sessionToken}`;
+  return appUrl;
+}
+
+getUrl().then( (appUrl) => { 
+   myHTML = `
+    <div style="width:100%; height:400px;">
+      <iframe src="${appUrl}" 
+              width="100%" 
+              height="100%" 
+              style="border:1px solid black;" 
+              frameborder="0" 
+              scrolling="yes">
+      </iframe>
+    </div>
+  `;
+} ).catch((e) => {console.log(e)});
+```
+
+<Note>
+  You can optionally add a login mechanism in your embedded app or SSO (Single Sign On). [More info](/low-code-python-data-apps/adding-login-to-your-app).
+</Note>
+
+## Embed in Sharepoint
+
+[Embed apps in Sharepoint](/low-code-python-data-apps/publish-apps/embed-apps-in-sharepoint)
+
+## Embed in Odoo
+
+[Embed apps in Odoo](/low-code-python-data-apps/publish-apps/embed-apps-in-odoo)

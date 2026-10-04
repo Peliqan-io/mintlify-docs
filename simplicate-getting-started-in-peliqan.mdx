@@ -1,0 +1,111 @@
+---
+title: "Simplicate - Getting started in Peliqan"
+sidebarTitle: "Simplicate"
+description: "Learn how to connect Simplicate to Peliqan using API credentials, sync CRM and project data to your warehouse, and use generic endpoints for custom data pipelines."
+---
+
+Simplicate is a Cloud-based all-inclusive Customer Relationship Management (CRM) platform that is designed to streamline and enhance various business processes. It focuses in managing customer interactions, facilitating communications and engagement, sales and strategies. It also facilitates features like sales management, project management, time tracking and invoicing making it a coalesced stage for managing client relationships and enhancing operational efficiency.
+
+This article provides an overview to get started with the **Simplicate** connector in Peliqan. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Simplicate Data Pipeline
+
+### Fetching API Key and API Secret
+
+To Authorize to your Simplicate Account, Peliqan requires an API Key (authorization token) and API Secret (authorization secret). Follow the steps below to fetch authorization credentials:
+
+- In your Simplicate account, navigate to **Settings** > **API.**
+- If no API token exists, click **New** to generate an API Key.
+- Copy **API Key** and **API Secret.**
+
+### Connect Simplicate
+
+Connect Simplicate through the Peliqan Connectivity Module:
+
+![Simplicate connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4ccf5b51-76e0-4bf6-90d3-97d06b68704f/image/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- API Key
+- API Secret
+- Domain - your account's Simplicate URL
+- Start Date in YYYY-MM-DD format
+- (Optional) table selection via 'Advanced'
+
+Once filled, click on **Save** to get the data synced in.
+
+## Simplicate Data Sync to Data Warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync Simplicate data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![Data warehouse view with Simplicate tables](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5566749a-e679-4bbe-9fc5-928e132a5e87/image/w=1920,quality=90,fit=scale-down)
+
+With the Peliqan federated query engine, queries on the Simplicate data can be written and data can be transformed and combined with other sources.
+
+![SQL query editor showing Simplicate data](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0c098124-6f03-436a-a102-df83e6e26cbe/image/w=1920,quality=90,fit=scale-down)
+
+## Generic GET in Simplicate
+
+Peliqan provides a generic _Get Generic Endpoint_ endpoint to get data from any domain and subsequent resource as custom pipeline.
+
+The Generic Endpoint gives you greater control over filtering data and choosing resources.
+
+### Fetch Paginated Data
+
+Below is example script to get data from resource **document** of domain **crm**:
+
+```python
+simplicate_api = pq.connect('Simplicate')
+offset_value = 0
+while True:
+    generic_endpoint = {
+        'domain': "crm",
+        'offset': offset_value, # increase by 100 for paged results
+        'resource': "document",
+    }
+    result = simplicate_api.get('generic_endpoint', generic_endpoint)
+    if not isinstance(result, list) or 'error' in result:
+        break
+    offset_value+=100
+```
+
+### Fetch Data for specific Object
+
+Below is example script to get data from **crm/document** for a specific document **Id**.
+
+```python
+simplicate_api = pq.connect('Simplicate')
+offset_value = 0
+generic_endpoint = {
+    'id' : 'bf1e7d7e-f3e9-43da-ac05-4b08ae5ff1db',
+    'domain': "crm",
+    'offset': offset_value, 
+    'resource': "document",
+}
+result = simplicate_api.get('generic_endpoint', generic_endpoint)
+st.json(result)
+```
+
+### Fetch Filtered paginated Data
+
+Below is example script to get data applying filters in API request to fetch filtered data.
+
+```python
+simplicate_api = pq.connect('Simplicate')
+offset_value = 0
+while True:
+    generic_endpoint = {
+        'filter' : 'sort=updated_at&q[updated_at][gt]=2024-08-02T07:22:41.000000Z&q[or][created_at][gt]=2024-08-02',
+        'domain': "crm",
+        'offset': offset_value, # increase by 100 for paged results
+        'resource': "document",
+    }
+    result = simplicate_api.get('generic_endpoint', generic_endpoint)
+    if not isinstance(result, list) or 'error' in result:
+        break
+    offset_value+=100
+```
+
+## Simplicate Data Activation

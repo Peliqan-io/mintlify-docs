@@ -1,0 +1,84 @@
+---
+title: "Facebook Ads - Getting started in Peliqan"
+sidebarTitle: "Facebook Ads"
+description: "Create a Meta developer app and system user token, then connect Facebook Ads to Peliqan to sync campaign and ad performance data into your data warehouse."
+---
+
+This article provides an overview to get started with the **Facebook Ads** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+# Contents
+
+- [Contents](#contents)
+- [How to connect Facebook Ads in Peliqan](#how-to-connect-facebook-ads-in-peliqan)
+  - [Step 1: Create a Meta Developer Account](#step-1-create-a-meta-developer-account)
+  - [Step 2: Create a New App](#step-2-create-a-new-app)
+  - [Step 3: Add the "Marketing API" product](#step-3-add-the-marketing-api-product)
+  - [Step 4: Create a System User and get a token](#step-4-create-a-system-user-and-get-a-token)
+  - [Step 5: Get your Ad Account ID](#step-5-get-your-ad-account-id)
+
+# How to connect Facebook Ads in Peliqan
+
+### Step 1: Create a Meta Developer Account
+
+1. Go to [https://developers.facebook.com](https://developers.facebook.com/)
+2. Log in with your Facebook account.
+3. Accept the Meta Developer Terms and set up your Developer profile
+
+### Step 2: Create a New App
+
+1. In the top-right corner, click **"My Apps" > "Create App"**.
+2. Enter the app name and your contact email:
+
+![Meta app creation form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ef6a0f13-5122-4629-b39f-64d8387b99d1/Screenshot_2025-05-07_at_08.17.46/w=1920,quality=90,fit=scale-down)
+
+3. Select **"Other"** as the use case:
+
+![Meta app use case selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1bf90b39-5457-4c9a-89a9-4c79088ad377/Screenshot_2025-05-07_at_08.20.54/w=1920,quality=90,fit=scale-down)
+
+4. Select **"Business"** as the app type:
+
+![Meta app type selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/877279ec-d610-46f0-b4de-f3c20bae9502/Screenshot_2025-05-07_at_08.18.25/w=1920,quality=90,fit=scale-down)
+
+5. Choose your **Business Manager account** (if you have one):
+
+![Meta Business Manager selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c2d4253e-3d35-4f45-83d4-dc3d2fada165/Screenshot_2025-05-07_at_08.18.42/w=1920,quality=90,fit=scale-down)
+
+6. Click **"Create App"**.
+
+### Step 3: Add the "Marketing API" product
+
+1. On the **Dashboard** of your app, in the center pane, scroll down to **"Add Products to Your App"** and Add the **Marketing API:**
+
+![Adding Marketing API product](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e83f9d3c-b0a6-4a72-9e85-cb0b8d43787f/Screenshot_2025-05-07_at_08.22.33/w=1920,quality=90,fit=scale-down)
+
+### Step 4: Create a System User and get a token
+
+Create a System User in the Facebook Business Manager and create a token for the System User.
+
+1. Create a System User (to have a permanent token):
+
+[Facebook Business Manager > System Users](https://business.facebook.com/settings)
+
+2. Assign assets to the System User:
+   - Add Facebook page(s) - e.g. for the \[/instagram-getting-started-in-peliqan\](Instagram connector), make sure to select a Facebook page which is linked to the Instagram Business Account
+   - Add the app (with permission "full access")
+3. Generate a token for the System User:
+   - Select your Facebook app
+   - Expiration: never
+   - Assign permissions: `pages_show_list`, `pages_read_engagement`, `instagram_basic`, `instagram_manage_insights`
+
+   _Note: the instagram scopes are only needed if you will re-use this token for the Instagram connector_
+
+### Step 5: Get your Ad Account ID
+
+1. Click on the **Tools** menu item in the top menu present on the top of the page and then click on the **VIEW ALL TOOLS** menu item:
+
+![Meta Tools menu](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9f299cb3-a045-478a-bcf0-3183ae2f7069/Screenshot_2025-05-19_at_21.36.47/w=1920,quality=90,fit=scale-down)
+
+2. On the **Developer Tools** page, click on **Business Tools > Ads Manager** on the right hand side of the page:
+
+![Meta Ads Manager selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ed73b2b4-746c-4db5-b6ac-10d77820f0ce/Screenshot_2025-05-19_at_21.38.33/w=1920,quality=90,fit=scale-down)
+
+3. Your Ad Account ID is visible in the top left corner, copy it and paste it in Peliqan:
+
+![Meta Ad Account ID](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/747b0caa-7ce8-47e1-9b6b-825a226aa924/Screenshot_2025-05-19_at_21.39.38/w=1920,quality=90,fit=scale-down)

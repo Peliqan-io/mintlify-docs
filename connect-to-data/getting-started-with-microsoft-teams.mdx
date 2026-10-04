@@ -1,0 +1,190 @@
+---
+title: "Microsoft Teams - Getting started in Peliqan"
+sidebarTitle: "Microsoft Teams"
+description: "Learn how to connect Microsoft Teams to Peliqan, discover Team, Channel and Chat IDs, and use low-code Python to send messages and create channels."
+---
+
+_Microsoft Teams is cloud-based **team collaboration software** that offers core capabilities, including business messaging, calling, video meetings and file sharing. Businesses of all sizes can use Teams, which can be accessed via desktop, any internet-connected device and the Teams mobile app. Microsoft Teams integrates with other Microsoft business applications, including Exchange, PowerPoint and SharePoint. Microsoft Teams provide features like chat, calls, video conferencing, screen sharing, polling, webinars, etc._
+
+This article provides you an overview to get started with the Microsoft Teams connector in Peliqan. Please [contact support](https://peliqan.io/support) if you have any additional questions or remarks.
+
+## Terminology
+
+1. **Team**: Teams are groups of people who connect and collaborate on work and other projects.
+2. **Channel**: Within each team, users can create channels to organize their communications by topic, like news items, monthly reports or more lighthearted chats. A channel can be public or private. Private channel is the most secured way to share confidential data.
+3. **Chat**: Chat lets you connect with others, stay up to date on projects, and express yourself. It helps directly reaching out to teammates or any external person directly. Chats can be **One-On-One** and **Group** Chats.
+4. **Mentions**: Users can use mentions to message and alert other users
+5. **Feeds**: The activity feed provides a summary of messages, replies, mentions and other activities happening within team channels
+6. **Threads**: A series of messages creates a thread. Users replying to a message should select the _Reply_ option instead of creating a new conversation and thread.
+
+### Discovering Team ID
+
+1. Open Microsoft Teams App.
+2. On the left toolbar, click on **Teams** icon.
+3. Once inside Teams, click on 3-dots at the right of the Team name and a pop-up menu will appear
+
+![Microsoft Teams menu with three dots next to team name](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/393b6f5b-7e1a-4864-974c-241cef019505/Untitled/w=1920,quality=90,fit=scale-down)
+
+4. On pop-up menu, click on "Get link to Team".
+5. A pop-up window will appear on the screen with Team URL. On the URL, copy value of **groupId**
+
+![Team URL popup showing groupId parameter](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7e48e9fc-0aa5-47a3-af1e-f6099e70d84d/Screenshot_2024-04-19_at_3.14.05_PM/w=1920,quality=90,fit=scale-down)
+
+### Discovering Channel ID
+
+1. Open Microsoft Teams App.
+2. On the left toolbar, click on **Teams** icon. Inside teams, select any Channel.
+3. On right side of Channel Name, click on 3-dots and a pop-up menu will appear. On pop-up menu click in "Get Link to Channel"
+
+![Channel menu with three dots next to channel name](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2c38dbf9-e2af-4bf8-a6c4-f1b18815f266/Untitled/w=1920,quality=90,fit=scale-down)
+
+4. A pop-up window will appear on the screen with Channel URL. On the URL, copy URL encoded Channel ID placed between **channel** and **general** in URL.
+
+![Channel URL popup showing channel ID parameter](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8da8feb1-700d-4940-867d-4187f3965d8c/Untitled/w=1920,quality=90,fit=scale-down)
+
+Sample URL : `https://teams.microsoft.com/l/channel/19%3Ad9Mcx84nowbsPcSgbvJwx7wKE-onikns_xxxxxE1%40thread.tacv2/General?groupId=\{team_id\}&tenantId=\{tenant_id\}`
+
+### Discovering Chat ID
+
+There are many ways to get Chat ID of a conversation, either Group Chat or one-to-one chat.
+
+**1. Using Microsoft Teams Web:**
+
+1. Open Microsoft Teams on browser. Use : [https://teams.microsoft.com](https://teams.microsoft.com/)
+2. Open the desired chat. In the URL, one can find the chat ID after "conversations". This feature is only supported in Classic Teams(v1)
+
+![Teams web URL showing chat ID after conversations](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/894e3f50-c5b9-4a20-92db-9a9c0a86f9bd/Untitled/w=1920,quality=90,fit=scale-down)
+
+**2. Using Peliqan Data Activation functions to get desired Chat providing the other user's display Name** (for one-to-one chat, like Peliqan Dev in the picture above) or Topic Name (for group chats).
+
+This method is detailed under Microsoft Teams Data Activation (see below)
+
+## Connecting Microsoft Teams in Peliqan
+
+Peliqan connects to Microsoft Teams performing OAuth flow. Peliqan App is verified by microsoft and signs in on behalf of the user once Authorization flow is completed.
+
+![Microsoft Teams connection screen in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a31f1443-1ff5-413b-a114-97f29021be7f/Untitled/w=1920,quality=90,fit=scale-down)
+
+### Authentication
+
+1. Start the OAuth Connection flow by clicking on '**Connect Microsoft Teams Writeback**'.
+2. If you are signed in with multiple Microsoft accounts on browser, select the Microsoft Teams account and authenticate yourself by entering credentials.
+3. Allow **Peliqan** app to login on your behalf and access Microsoft Teams Data.
+4. Once OAuth flow is completed, you will be redirected back to Peliqan to perform Writeback operations.
+
+## Microsoft Teams Data Activation
+
+Peliqan provides lot of data activation function which enables users to communicate with Microsoft Teams application through Python Scripts.
+
+Supposably, we have already a team account and we fetch Team ID using the method mentioned above.
+
+### Creating a Channel
+
+"Add Channel" data activation method helps creating a channel. It requires a team and compulsory details for the channel.
+
+![Add Channel data activation function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/125c0514-db99-4adb-86bb-6da3969ee78c/Untitled/w=1920,quality=90,fit=scale-down)
+
+### Retrieving all Channels
+
+"Get Channels" data activation method helps fetching all channels under the team. It requires a team ID.
+
+It returns list of channel objects present.
+
+![Get Channels data activation function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e79e6219-3b50-4452-a47f-7d871292aa8c/Untitled/w=1920,quality=90,fit=scale-down)
+
+### Sending message to a channel
+
+"Add Channel Message" data activation method is used to send a message to a chanel. It requires Team_Id, desired Channel ID and message content.
+
+![Add Channel Message function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7a40ae94-95e0-466e-b8f9-a72dd3ed3947/Untitled/w=1920,quality=90,fit=scale-down)
+
+![Sent message showing in Teams channel](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/fde4772d-4d1f-4122-97c8-e61a9844c82b/Untitled/w=1920,quality=90,fit=scale-down)
+
+### Get all users under the tenant
+
+"Get Users" function gets you all the users under the same tenant or organisations.
+
+Results from these functions are useful while creating a chat, fetching chat id or sending message into a chat.
+
+![Get Users data activation function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/02e8417c-4d25-4b6e-b3b3-12f453b12896/Untitled/w=1920,quality=90,fit=scale-down)
+
+### Finding a Chat
+
+Chat can be one-on-one (having two members) or group (with at least 2 members).
+
+**Find One One-On-One Chat**
+
+"Find OneonOne Chat" method is used to get one-on-one chat details by simply providing displayName of the other member. DisplayName of the user is unique and cannot be edited.
+
+![Find OneonOne Chat function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ee9406a4-ae2e-45e7-a78c-e0037870b250/Untitled/w=1920,quality=90,fit=scale-down)
+
+![OneonOne chat details result](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/657c3704-aecd-4d35-85a0-8ba1b5bfeceb/Untitled/w=1920,quality=90,fit=scale-down)
+
+**Find Group Chat**
+
+"Find Group Chat" method details about a group chat by providing the Topic name of the Group.
+
+![Find Group Chat function in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e0886527-91ee-4134-afa0-3bad4a375fdd/Untitled/w=1920,quality=90,fit=scale-down)
+
+![Group chat details result](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e13264c8-1b08-467c-a83a-81fe5d68a58d/Untitled_\(7\)/w=1920,quality=90,fit=scale-down)
+
+### Creating a Chat
+
+Chat can be one-to-one or in a group. To add people in a chat this function requires **user_id** of intended participants.
+
+"Add Chat" function required user ids of members in _user.binddata_ and type of chat (blue boxes). One can also decide the membership type of the user (red box). Additionally, one can define multiple roles for a user like _owner_ or _guest_ (green boxes).
+
+![Add Chat function configuration in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/524212b0-94bf-4662-9e61-f2b7c94ea18d/Untitled/w=1920,quality=90,fit=scale-down)
+
+**One-on-One Chat**
+
+'chatType' for one-to-one chat has 'chatType' as 'oneOnOne'. Point to remember, one-to-one chat can have at most 2 members
+
+![One-on-One chat configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e3611b23-cf8e-4c26-b420-4348489c42eb/Untitled/w=1920,quality=90,fit=scale-down)
+
+**Group Chat**
+
+For Group chat, chatType changes to "group" and a group must have at least 2 members.
+
+### Sending message to a chat
+
+"Add Chat Message" data activation function enables you to send message to a teams chat either oneOnOne or Group with Chat ID being provided.
+
+Peliqan provides two ways to find finding the chat ID which are:
+
+**1. Getting list of all the chats and fetching the required chat ID**
+
+1. "Get Chats" function provides a list of chats having chat object where each object contains chat metadata which includes Chat displayName, Chat ID, last message sent, type of chat, members involved, etc.
+2. Required chat ID can be pulled from the list.
+
+![Get Chats function result in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a4514778-1446-4665-8334-daf6a828fea2/Untitled/w=1920,quality=90,fit=scale-down)
+
+3. Now from the list, get the desired Chat ID and send a message using "Add Chat Message" activation function.
+
+![Add Chat Message function configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/225f6d32-a241-4548-a5d5-b048b35fcaae/Untitled/w=1920,quality=90,fit=scale-down)
+
+**2. Finding one specific Chat based on details provided by user and sending message.**
+
+This method is available for chatType as one-to-one where we provide other member displayName and in response we get chatDetails.
+
+![FindOne Chat function configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/472b50e7-0af3-4be4-bc29-a2560a850d5a/Untitled/w=1920,quality=90,fit=scale-down)
+
+"FindOne Chat" function is used which requires displayName to be passed as argument.
+
+![FindOne Chat function with displayName parameter](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6136476b-0d70-49c5-805a-885d73ca1843/Untitled/w=1920,quality=90,fit=scale-down)
+
+Now pulling chat_id from the same response we pass it to "Add Chat Message" method to send a message to the chat.
+
+![Sending message using Add Chat Message with chat_id](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3f54ebfc-0255-4cfc-a233-ebd119b379d4/Untitled/w=1920,quality=90,fit=scale-down)
+
+**3. Sending HyperLink in message to a chat**
+
+Use _add_chat_message_ method to send message. When sending a hyperlink message using the HTML **`<a></a>`** (Anchor) tag, please ensure "hyperlink reference" is not enclosed in quotes.
+
+![Hyperlink message configuration example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ebecd175-3833-439a-bc81-7f190cc30a17/image/w=1920,quality=90,fit=scale-down)
+
+## Template: send alert to MS Teams
+
+Click here for an example template on how to send an alert to MS Teams:
+
+[Send alert to MS Teams](/send-alert-to-msteams)

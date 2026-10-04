@@ -1,0 +1,35 @@
+---
+title: "Working with data in the Data Explorer"
+sidebarTitle: "Data Explorer"
+description: "Learn to view, sort, filter and edit data in Peliqan's Data Explorer, and understand the types of tables you can and cannot edit."
+---
+
+The Peliqan Data Explorer is a spreadsheet-like interface to view data from any source, as well as to "work" with the data including making changes, applying transformations and formulas, adding columns, adding rows and creating views.
+
+## Viewing data
+
+Click on any table in the left pane to open this table in the grid view. You can now view the data. You can re-arrange and resize columns, and hide columns. You can change the ordering (sorting) of the data and apply filters.
+
+You can create "Views" with a specific name, each view can have its own selection of columns, specific sorting and filtering.
+
+## Editing data
+
+You can edit data in connected databases and in tables created in Peliqan.
+
+Following data edits are possible:
+
+- Updating the value of a cell
+- Adding new rows
+- Deleting rows
+- Adding columns of different types
+- Deleting columns
+
+Data editing on external databases is only possible when you have write access on the underlying table.
+
+Editing data is not possible on following table types:
+
+- Target tables: tables created by Peliqan as part of an ETL pipeline. These tables are read-only and are only updated by the underlying pipeline. For example when you add a SaaS source (CRM, accounting, ERP) to Peliqan, the tables created in the data warehouse for this source are read-only.
+- Tables created from a Python script using the `dbconn.write()` function: these tables are also pipeline tables and data in these tables can only be updated via the `write()` function in a Python script.
+- Tables of type "Query": when you write an SQL query and view the result in the grid view, this data cannot be edited. Instead, you have to edit the underlying table that is referenced in the SQL query.
+- Trino connections (federated query engine): tables viewed via the Peliqan built-in federated query engine are read-only.
+- Tables in external databases when you don't have write permissions on that table

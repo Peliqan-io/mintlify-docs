@@ -1,0 +1,190 @@
+---
+title: "Local development"
+sidebarTitle: "Local Development"
+description: "Learn how to develop Peliqan Data Apps locally on your computer using the Peliqan pip module, including installation, Streamlit apps, the bundler, CI/CD deploy scripts, and sharing state with apps on Peliqan."
+---
+
+You can write Python scripts (data apps) directly inside Peliqan using Peliqan's built-in IDE, or you can develop locally on your computer and then deploy to Peliqan.
+
+## Peliqan pip module
+
+A Python module to connect to a Peliqan environment from a Python script running anywhere outside of the Peliqan environment. This module is a wrapper for the public Peliqan REST APIs.
+
+### Install
+
+```shell
+$ pip install peliqan
+```
+
+### Upgrade to latest version
+
+```shell
+$ pip install peliqan --upgrade
+```
+
+### Usage
+
+```python
+from peliqan import Peliqan
+
+jwt = "MY_JWT_TOKEN"             # see Admin > Security settings > API token
+backend_url = "MY_PELIQAN_URL"   # optional, default: https://app.eu.peliqan.io/
+
+pq = Peliqan(jwt, backend_url)
+
+# Example usage
+dbconn = pq.dbconnect('dw_xxx') # Enter the name of your Peliqan data warehouse
+data = dbconn.fetch('dw_xxx', 'schema_name', 'table_name')
+print(data)
+
+df = dbconn.fetch('db_name', 'schema_name', 'table_name', df=True)
+print(df)
+```
+
+### Peliqan class arguments
+
+The `**Peliqan**` class takes two arguments:
+
+- **jwt** (_required_): This is the JWT token used to authenticate requests from the client to the server. In Peliqan, see **Admin > Security settings > API token**.
+- **backend_url** (_optional_): This is the `instance_url` that points to a specific Peliqan environment. If no value is provided, the client will look for the `PELIQAN_URL` environment variable. If it is not set, then the value defaults to [_https://app.eu.peliqan.io/_](https://app.eu.peliqan.io/).
+
+More info on the Peliqan environment URL and JWT token [here](/peliqan-api).
+
+### Environment variables (optional)
+
+- **PELIQAN_URL**: If this variable is set, it is not needed to set the `backend_url` parameter while instantiating the client.
+
+### Useful Links
+
+See [here](/low-code-python-data-apps) to learn more about building data apps.
+
+### Streamlit apps
+
+If you want to run interactive Streamlit apps locally, install Streamlit first:
+
+```bash
+$ pip install streamlit
+```
+
+## Bundler
+
+Data apps in Peliqan are single file Python scripts. You can use the Peliqan bundler to combine a multi-file Python script (e.g. a multi-file Streamlit app) into a single file that can be deployed to Peliqan.
+
+<Note>
+  Note that the single file script must be tested. In some cases, changes to the source code are required to make the code compatible with the bundler.
+</Note>
+
+Download the bundler:
+
+[bundler.py](https://assets.super.so/35b4fd12-9269-4553-8b56-b54daf78bd41/files/4b4911e7-fdfe-474d-bb18-5b119cca414f/bundler.py) (18.5 KiB)
+
+Usage:
+
+`python bundler.py test-project/main.py`
+
+## Creating data apps that can run both locally and inside of Peliqan
+
+Inside Peliqan, the Peliqan module is automatically imported as `pq` and Streamlit is automatically imported as `st`. The constant `RUN_CONTEXT` is always set, e.g. with value "interactive" when the data app runs in interactive mode and "scheduled" or "background" otherwise.
+
+[Click here for more info on run modes (RUN_CONTEXT).](/low-code-python-data-apps/running-apps-manual-schedule-etc)
+
+Example Data App that can run both on Peliqan and outside of Peliqan (e.g. locally on your computer):
+
+```sql
+if 'RUN_CONTEXT' in globals(): # Running on Peliqan
+    RUN_ENV = 'peliqan'
+else: # Running outside of Peliqan
+    RUN_ENV = 'local'
+    from peliqan import Peliqan
+    import streamlit as st
+    import os
+    api_key = os.getenv("PELIQAN_API_KEY")
+    if not api_key:
+        st.error("PELIQAN_API_KEY environment variable is not set.")
+        st.stop()
+    interface_id = os.getenv("PELIQAN_INTERFACE_ID", 0) # script id in Peliqan, used to share state (see below)
+    pq = Peliqan(api_key)
+    try: # Check if running locally in Streamlit
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+        if get_script_run_ctx() is not None:
+            RUN_CONTEXT = "interactive"
+    except Exception:
+        RUN_CONTEXT = "background"
+
+# Your data app code goes here
+```
+
+Run this script locally on your computer as follows:
+
+- Background mode: `python script.py`
+- Interactive mode (Streamlit): `streamlit run script.py`.
+
+### Share state between a local Data App and a Data App on Peliqan
+
+Example code to share state with an app on Peliqan:
+
+```python
+def get_state():
+    if RUN_ENV == 'local': # Running outside of Peliqan
+        url = f"{pq.BACKEND_URL}/api/interfaces/{interface_id}/state/"
+        result = pq.__service_client__.call_backend(method="get", url=url, expected_status_code=200)
+        state = result["state"]
+        return state
+    else:
+        return pq.get_state()
+
+def set_state(state):
+    if RUN_ENV == 'local': # Running outside of Peliqan
+        url = f"{pq.BACKEND_URL}/api/interfaces/{interface_id}/state/"
+        payload = {"state": state}
+        result = pq.__service_client__.call_backend(method="post", url=url, json=payload, expected_status_code=200)
+        return result
+    else:
+        return pq.set_state(state)
+
+state = get_state()
+```
+
+<Note>
+  Note: when running a Data App outside of Peliqan, by default `pq.get_state()` and `pq.set_state(state)`will read and write the state locally in a temporary file. The above code however, shares the state with a Data App running on Peliqan. Make sure that `PELIQAN_INTERFACE_ID` is set as a local environment variable, with the id of the Data App on Peliqan.
+</Note>
+
+## Automated deploys (CI/CD)
+
+You can automate the deployment of Python data apps to Peliqan by using Peliqan's REST API as part of your CI/CD deployment pipeline - e.g. using Github actions - or by using a Python deploy script that you run locally to push data app updates to Peliqan.
+
+### Local deploy script
+
+```python
+from peliqan import Peliqan
+
+jwt = "..." # Get from env variable
+pq = Peliqan(jwt)
+
+group_id = 123  # See Peliqan > Admin > Groups
+
+with open("my_data_app.py", "r") as f:
+    raw_script = f.read()
+
+# Update an existing data app
+result = pq.update_script(script_id = 1234, raw_script = raw_script)
+print(result)
+
+# Deploy a new data app
+result = pq.add_script(
+        group_id = group_id, 
+        group_name = 'Production data', 
+        raw_script = raw_script, 
+        name = 'My newly deployed data app'
+    )
+print(result)
+```
+
+### Deploy using Peliqan's REST API
+
+Data apps are called "interfaces" in the Peliqan REST API.
+
+Relevant API endpoints:
+
+- [Create a data app](https://app.eu.peliqan.io/api/redoc/#tag/Data-apps-\(interfaces\)/operation/create_interface)
+- [Update a data app](https://app.eu.peliqan.io/api/redoc/#tag/Data-apps-\(interfaces\)/operation/update_interface)

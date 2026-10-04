@@ -1,0 +1,100 @@
+---
+title: "SAP - Getting started in Peliqan"
+sidebarTitle: "SAP"
+description: "Learn how Peliqan connects to SAP S/4HANA, SuccessFactors, and other SAP products via OData APIs, and how to get your SAP data synced and ready for analysis."
+---
+
+SAP is the world's leading provider of enterprise software. This article provides an overview to get started with **_SAP_** connectors in **_Peliqan_**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Supported SAP products
+
+Peliqan connects to SAP environments through their official, published APIs. You can set up and configure a connector for any SAP object that exposes an API, including:
+
+- **SAP S/4HANA Cloud Public Edition** (OData V2 / V4 APIs)
+- **SAP S/4HANA Cloud Private Edition** and **SAP S/4HANA on-premise** (OData APIs via SAP Gateway)
+- **SAP SuccessFactors** (HR / HXM data)
+- **SAP Ariba** (procurement)
+- **SAP Concur** (travel & expense)
+- **SAP Customer Experience** (sales, service, marketing, commerce)
+- **SAP Business Technology Platform (BTP)** services
+
+All of these products publish their APIs on the [SAP Business Accelerator Hub](https://api.sap.com). If an object is available there, Peliqan can build a connector for it.
+
+SAP connectors are **set up and configured by the Peliqan team for your specific SAP environment**: every SAP landscape differs in release, deployment model, activated services and custom objects, so we tailor the connector to your system rather than offering a one-size-fits-all connection. [Contact us](https://peliqan.io/contact) to discuss your SAP environment.
+
+<Info>
+  Peliqan uses SAP's **published OData APIs**, in line with SAP's guidelines for third-party data access. Peliqan does not use the ODP-RFC interface that SAP has restricted for third-party tools (SAP Note 3255746).
+</Info>
+
+## How it works
+
+Each SAP OData service describes its own schema via a `$metadata` document. Peliqan reads this metadata to discover entities, fields and data types, and syncs the data into your Peliqan data warehouse as regular tables. From there you can:
+
+- Query the data with SQL
+- Combine SAP data with data from your other applications (CRM, marketing, finance, support and 250+ other connectors)
+- Build reports and dashboards, or connect your existing BI tool
+- Chat with your SAP data from AI assistants via Peliqan's **MCP Server**
+
+## Example: Billing Documents (S/4HANA Cloud)
+
+As an example, the S/4HANA Cloud **Billing Document** API (`CE_BILLINGDOCUMENT_0001`, OData V4) covers customer invoices, credit memos, debit memos, pro forma invoices and their cancellation documents. Peliqan syncs the entities of this service into separate tables in the data warehouse:
+
+| Table in Peliqan | SAP entity | Contents |
+| --- | --- | --- |
+| `billing_document` | `BillingDocument` | Header: document type, billing date, payer, net value, currency |
+| `billing_document_item` | `BillingDocumentItem` | Line items: product, quantity, net amount, plant, profit center |
+| `billing_document_partner` | `_Partner` | Partner functions per document (payer, ship-to, ...) |
+| `billing_document_pricing_element` | `_PricingDocumentElement` | Pricing conditions: discounts, surcharges, taxes |
+| `billing_document_text` | `_Text` | Header and item texts |
+
+The same approach applies to any other SAP API: Business Partners, Products, Sales Orders, Purchase Orders, G/L Account Line Items, and so on.
+
+## How to connect SAP S/4HANA
+
+**S/4HANA Cloud Public Edition:**
+
+1. In S/4HANA, create a **Communication User** and a **Communication System** for Peliqan.
+2. Create a **Communication Arrangement** for the scenario of the API you want to sync (e.g. `SAP_COM_0008` for Business Partner).
+3. Note the **Service URL** shown under Inbound Services.
+4. In Peliqan, a new SAP connection will be added
+
+**S/4HANA on-premise / Private Edition:**
+
+1. Activate the required OData services in transaction `/IWFND/MAINT_SERVICE` (V2) or `/IWFND/V4_ADMIN` (V4).
+2. Create a technical user with read authorization for the relevant services. We recommend a dedicated user for the integration, with access limited to the services you want to sync.
+3. Make the SAP Gateway endpoint reachable for Peliqan (public endpoint, IP allowlisting, or via a secure tunnel).
+4. In Peliqan, a new SAP connection will be added
+
+**Our team assists with the setup and configuration of connectors for your specific SAP environment: which APIs to enable, which entities to sync, and how to schedule incremental syncs.**
+
+## Custom objects and Z-fields
+
+Custom SAP objects and custom fields (Z-fields) that are not part of a standard API can also be covered. In SAP, a custom **CDS view** can be exposed as an OData service (transaction `SEGW`, or via key user extensibility in S/4HANA Cloud). Once the service is active, Peliqan configures a connector for it like for any other SAP API and syncs the custom data into the data warehouse.
+
+This means the full scope is: **any SAP object with a standard API, plus any custom object that can be exposed as a CDS view.**
+
+## AI insights on SAP data with MCP
+
+Once SAP data is synced into Peliqan, you can enable the **Peliqan MCP Server** and connect AI assistants such as Claude, ChatGPT or Cursor to your SAP data. Ask questions in plain language:
+
+- "What was our invoiced revenue per customer last quarter?"
+- "Which products have the highest discount rates?"
+- "Show open sales orders per plant, compared to last year"
+
+Because the data lives in the Peliqan data warehouse, the AI assistant can **combine SAP data with data from other applications**: match SAP customers with CRM accounts, compare SAP invoices with payments from your bank or accounting package, or enrich SAP product data with e-commerce data.
+
+See the [Peliqan MCP documentation](https://peliqan.io/mcp-docs) for setup instructions.
+
+## Consolidation with other data sources
+
+SAP data in Peliqan is regular warehouse data. Use SQL or Peliqan's data modelling features to consolidate it with any of the 250+ other connectors, for example:
+
+- SAP + Salesforce or HubSpot: revenue per CRM account
+- SAP + Exact Online or other entity ERPs: group-level financial consolidation
+- SAP + Shopify: ERP vs e-commerce reconciliation
+
+## Notes
+
+- API availability differs per S/4HANA release and deployment (Cloud Public, Cloud Private, on-premise). Peliqan verifies the exact list of available services against your system during setup.
+- SAP is migrating several APIs from OData V2 to V4; Peliqan supports both.
+- For high-volume tables (e.g. G/L line items), incremental sync strategies are configured per entity (change-date filters or delta-enabled services).

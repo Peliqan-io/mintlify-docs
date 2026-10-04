@@ -1,0 +1,251 @@
+---
+title: "Data Mapper"
+sidebarTitle: "Data Mapper"
+description: "This article explains how the Data Mapper (Data Mapping Manager) data app works and how to use it to enrich an existing data warehouse table with custom mapping columns."
+---
+
+This article explains how the **Data Mapper (Data Mapping Manager)** data app works and how to use it to enrich an existing data warehouse table with custom "mapping" columns.
+
+## Overview
+
+The Data Mapper helps you create a **mapping/enrichment table** on top of an existing source table.
+
+**Typical use cases**
+
+- Add a `category`, `region`, `owner`, `status`, or any other business label to existing rows.
+- Maintain a manual mapping table that can be joined back to the source table using a **primary key**.
+
+**Core idea**
+
+- Source columns are **read-only**.
+- Mapping columns are **editable**.
+- When you click **Save**, the app writes everything to a **destination table** (it does not modify the source table).
+
+## How it works (high level)
+
+1. **Select a source table** (warehouse → schema → table)
+2. **Choose source columns** to display
+3. **Pick a primary key** and define a **destination table**
+4. **Add mapping columns**
+5. **Fill values** (inline editor) or **upload a file**
+6. **Save to the data warehouse**
+7. (Optional) **Save a configuration** so you can reload everything later
+
+## Data flow
+
+```text
+Source table (read-only)
+   ↓ (selected columns)
+Working grid (source cols + mapping cols)
+   ↓ (Save)
+Destination mapping table (fully replaced on each save)
+```
+
+## UI structure
+
+The app has 2 main areas:
+
+- **Sidebar**: setup + saved configurations
+- **Main panel**: editing, upload, and data quality
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/49de0229-1a8e-42c8-90d0-408400e98139/screenshot_2026-05-14_at_3.26.27_pm/w=1920,quality=90,fit=scale-down)
+
+Main panel tabs:
+
+- **Preview and Edit Mappings**
+- **Upload from File**
+- **Data Quality**
+
+## Step-by-step usage
+
+### Step 1 — Choose your data source
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d442546d-3070-4730-aaed-92fe342c9f9c/screenshot_2026-05-14_at_3.28.43_pm/w=1920,quality=90,fit=scale-down)
+
+In the sidebar:
+
+1. Select **Data warehouse**
+2. Select **Schema**
+3. Select **Table**
+
+What the app does internally
+
+- Loads metadata (schemas/tables) via `pq.list_databases()`.
+- Fetches available columns from the selected table.
+
+### Step 2 — Choose columns to display
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e55f3ac6-287d-4e08-a6f8-d90baecce3a9/screenshot_2026-05-14_at_3.29.52_pm/w=1920,quality=90,fit=scale-down)
+
+Select the source columns you want visible in the editor.
+
+What the app does internally
+
+- Fetches rows for just the selected columns and stores them in session state.
+- Detects **duplicate rows** based on the selected columns (for a quick warning).
+
+### Primary key & destination table
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7f1d4365-215b-4c2a-9253-f2ac5ee75da0/screenshot_2026-05-14_at_3.31.06_pm/w=1920,quality=90,fit=scale-down)
+
+Still in the sidebar:
+
+- Choose a **Primary key column** (recommended: a true unique identifier).
+- Set:
+- **Destination schema**
+- **Destination table** (default is `<source_table>_mapping`)
+
+Why this matters
+
+- The **primary key** is used to join existing saved mappings back onto the source when you reload.
+
+## Mapping columns
+
+### Step 3 — Define mapping columns
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/409bba3c-43db-4470-bf73-b1b8b0003379/screenshot_2026-05-14_at_3.30.27_pm/w=1920,quality=90,fit=scale-down)
+
+Add one or more mapping columns (e.g. `category`, `segment`, `country_group`).
+
+Rules
+
+- Mapping column names must be unique.
+- Mapping columns cannot reuse a source column name.
+- `id` is reserved.
+
+## Editing mappings (Tab: Preview and Edit Mappings)
+
+When mapping columns exist, the grid becomes editable:
+
+- Grey / disabled columns: **source columns** (read-only)
+- White columns: **mapping columns** (editable)
+
+### Saving
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d6fbb3ad-42f1-4381-98eb-a7d302eadd88/screenshot_2026-05-14_at_3.39.49_pm/w=1920,quality=90,fit=scale-down)
+
+Click **Save to Data Warehouse** to persist your work.
+
+What happens on save
+
+- The destination table is **fully replaced**.
+- The app writes a table using a helper `write_table(...)` function.
+
+Primary key behavior
+
+- If you selected a primary key and it exists in the grid, that column is used as the **PRIMARY KEY** in the destination table.
+- Otherwise, the app generates a synthetic `id` from the selected columns.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/587c7efd-eca1-4e0e-8ae0-87eb54b9e56d/screenshot_2026-05-14_at_3.32.17_pm/w=1920,quality=90,fit=scale-down)
+
+## Uploading mappings (Tab: Upload from File)
+
+This tab is for bulk updates.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a0e0c339-318f-4d10-ac63-3ded70374bce/screenshot_2026-05-14_at_3.33.15_pm/w=1920,quality=90,fit=scale-down)
+
+### Template download
+
+You can download the current grid as:
+
+- CSV template
+- Excel template
+
+### Upload rules
+
+- Your file must contain the mapping column(s) you defined.
+- Extra columns in your file are ignored.
+
+### How rows are matched
+
+The app uses one of two strategies:
+
+1. **Match by source columns (recommended)**
+
+- If the upload contains one or more source columns, the app merges on those columns (string-normalized).
+
+3. **Apply by row position**
+
+- If the upload contains no source columns, mapping values are applied top-to-bottom.
+
+After upload, the app immediately saves to the destination table.
+
+## Saved configurations
+
+In the sidebar, you can **Save Configuration** with a human-friendly name.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d3c8228f-3c54-423f-9ff9-abe24e22a8ab/screenshot_2026-05-14_at_3.34.32_pm/w=1920,quality=90,fit=scale-down)
+
+A saved configuration stores:
+
+- `dw_id`, `schema_id`, `table_id`
+- `selected_cols`
+- mapping column names
+- `primary_key`
+- destination schema/table
+
+### Loading a configuration
+
+When you click **Load**, the app:
+
+1. Reloads the source metadata + data
+2. Restores mapping columns
+3. If a destination table exists, performs a **PK-based LEFT JOIN** to bring back previously saved mappings
+
+Join logic summary
+
+- The app deduplicates source and destination by primary key.
+- It keeps destination columns that are **not** in the source table as mapping columns.
+- It merges them back onto the source rows (LEFT JOIN).
+
+## Data Quality tab
+
+This tab runs quick checks to help ensure the mapping table will be reliable.
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d9cb071d-205d-45a0-a3fd-1001314e546c/screenshot_2026-05-14_at_3.37.09_pm/w=1920,quality=90,fit=scale-down)
+
+### 1) Primary key uniqueness
+
+- Counts nulls and duplicates for the selected PK in the source data.
+
+### 2) Join coverage (source vs destination)
+
+- When a configuration is loaded, the app reports:
+- source row count
+- destination row count
+- matched rows
+- unmatched rows
+
+### 3) Mapping completeness
+
+- For each mapping column, counts:
+- null values
+- empty strings
+- coverage %
+
+## Operational notes / gotchas
+
+- The destination table is replaced on each save, so treat it as an app-managed artifact.
+- If the primary key is not truly unique or contains nulls, join results will be unreliable.
+- If you change mapping column names after saving, the destination table structure may no longer match.
+- Large tables: editing in the UI is practical for small/medium sets. For large mappings, prefer file upload.
+
+## Troubleshooting
+
+### I can't see any schemas/tables
+
+- Verify the account has a data warehouse and you have access.
+
+### Save succeeds but mappings don't reappear when reloading
+
+- Confirm you selected the same destination schema/table.
+- Confirm the PK matches between source and destination.
+
+### Join shows many "unmatched" rows
+
+- The destination table doesn't contain those PKs yet (first time mapping) or PK values changed.
+
+### Upload didn't apply values
+
+- Ensure your file includes the mapping columns with the exact same names.
+- If matching by source columns, ensure the source columns in your file match the source rows (whitespace/casing differences can reduce matches).

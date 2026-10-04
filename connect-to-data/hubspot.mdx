@@ -1,0 +1,136 @@
+---
+title: "HubSpot - Getting started in Peliqan"
+sidebarTitle: "HubSpot"
+description: "Connect HubSpot to Peliqan via OAuth to sync Contacts, Companies, Deals, and Contact lists into your data warehouse for exploration and activation."
+---
+
+This article provides an overview to get started with the **HubSpot** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Contents
+
+- [Connect](#connect)
+- [Explore and Combine](#explore-and-combine)
+- [Activate](#activate)
+- [Metadata](#metadata)
+- [Manage and disconnect your connection to HubSpot](#manage-and-disconnect-your-connection-to-hubspot)
+- [Need further help](#need-further-help)
+
+## Connect
+
+In this guide, we will show you how to connect HubSpot to Peliqan to get you started.
+
+1. Log into Peliqan. If you do not have an account, you can [start a free trial now.](https://app.eu.peliqan.io/signup)
+2. Navigate to 'Add Connection' in the [Peliqan Dashboard](https://app.eu.peliqan.io/dashboard).
+
+![HubSpot add connection step 1](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f03864a5-5e4d-4326-940b-c67942ad3d18/Untitled/w=1920,quality=90,fit=scale-down)
+
+3. Choose 'Add New' in the [Connection page](https://app.eu.peliqan.io/admin/connections) and select 'HubSpot'.
+
+![HubSpot add connection step 2](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0f6d267c-ee20-428d-bb0c-10d699346323/Untitled/w=1920,quality=90,fit=scale-down)
+
+4. Select 'Connect HubSpot' to kick off the Oauth connection flow. You can provide a specific name and assign a group of choice for this connector.
+
+![HubSpot OAuth connection flow](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/50c9127e-b876-4419-8319-811d79ac6348/Untitled/w=1920,quality=90,fit=scale-down)
+
+5. Follow the OAuth flow to connect HubSpot.
+
+![HubSpot OAuth authorization](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3ba62532-73d9-432a-9d41-ad4f05cd0700/Untitled/w=1920,quality=90,fit=scale-down)
+
+6. Once connected you should see the 'HubSpot' connection in your Connection page.
+
+![HubSpot connection in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3574907e-9c4e-49ae-9623-16f0fbf23f55/Untitled/w=1920,quality=90,fit=scale-down)
+
+Peliqan will replicate your data into the built-in Peliqan data warehouse or a data warehouse of your choice (Snowflake, BigQuery etc.) on an hourly schedule. You can also manually refresh the data. More information can be found on the Peliqan documentation section ['connect to data'.](/connect-to-data)
+
+## Explore and Combine
+
+Once you've connected your HubSpot account, your data will be synced automatically to Peliqan. Peliqan will create one table per supported object type and they will appear as tables in the 'Explore' tab.
+
+Go to the ['Explore' tab](https://app.eu.peliqan.io/view/) and select the 'HubSpot' database to find your data.
+
+![HubSpot data in Peliqan Explore tab](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f6e692c3-b70d-4369-8d87-4a4b2fd970cc/Untitled/w=1920,quality=90,fit=scale-down)
+
+Currently supported objects:
+
+- Contacts
+- Companies
+- Deals
+- Contact_lists
+
+In the 'Explore' tab of the Peliqan platform you can:
+
+- Explore your HubSpot data easily in a grid view. See ["Working with data in the grid view"](/working-with-data-in-the-grid-view) of the Peliqan documentation section to understand all possibilities.
+- Enrich and join your HubSpot data through out-of-the-box formula's and SQL or Python powered scrips. See the ["Joining data"](/joining-data) section of the Peliqan documentation to understand all possibilities.
+
+Example use cases for HubSpot:
+
+- Clean your data e.g. standardise country code or telephone numbers.
+- Build a Customer360 view by combining HubSpot data with other CRM, Marketing, ERP or any other System.
+- Enrich your HubSpot contacts or companies with Machine Learning models for e.g. churn predication
+
+## Activate
+
+In the 'Build' tab of the Peliqan platform you can write your own Python Scripts to activate your data.
+
+Example use cases for HubSpot:
+
+- Export the enriched contact or company data back to HubSpot or any other platform.
+- Alert your Sales team if anomalies are found in your CRM data.
+- Feed your support team with combined Customer360 information when they work on a support case.
+
+## Metadata
+
+Run the below custom pipeline in Peliqan, to retieve all properties from Hubspot of type "Select" with their options (including standard and custom properties in Hubspot).
+
+<Accordion title="Click to expand script">
+  ```python
+  # This script gets all fields (properties) of a given object in Hubspot, that are of type "Select" (Drop down),
+  # And stores these fields in a table in the DWH, and the options in a second table.
+  
+  object_type = 'contacts'
+  schema = 'hubspot_v2'
+  
+  hubspotv2_api = pq.connect('HubSpot V2')
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  
+  response = hubspotv2_api.get('object_properties', object_type = object_type)
+  fields = response["results"]
+  select_fields = []
+  select_field_options = []
+  for field in fields:
+      if field['fieldType'] == 'select':
+          if not field['name'].startswith('hs_'): # exclude Hubspot standard fields (remove this line to include them)
+              if field['options']:
+                  options = field['options']
+                  for option in options:
+                      option['property_name'] = field['name']
+                      option['property_label'] = field['label']
+                      option['id'] = field['name'] + '_' + option['value']
+                  select_field_options.extend(options)
+              del field['options']
+              select_fields.append(field)
+  
+  st.header(f"Hubspot select fields for {object_type}")
+  st.subheader("Select fields (drop downs)")
+  st.write(select_fields)
+  
+  st.subheader("Select field options")
+  st.write(select_field_options)
+  
+  table = f"properties_select_{object_type}"
+  dbconn.write(schema, table, records = select_fields, pk = 'name')
+  
+  table = f"properties_select_options_{object_type}"
+  dbconn.write(schema, table, records = select_field_options, pk = 'id')
+  ```
+</Accordion>
+
+## Manage and disconnect your connection to HubSpot
+
+In the 'Connection' Tab you can manage and delete your connections. You full credentials and all linked HubSpot data will be removed from Peliqan.
+
+![HubSpot connection management in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/946bd32b-19ec-4a77-9b04-bd9aff6243cf/Untitled/w=1920,quality=90,fit=scale-down)
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](/).

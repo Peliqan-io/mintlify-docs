@@ -1,0 +1,280 @@
+---
+title: "Build AI agents with n8n and Peliqan"
+sidebarTitle: "n8n Agents"
+description: "Use Peliqan as the unified data gateway for n8n AI agents with Text-to-SQL, RAG, and writeback actions via the Peliqan community node."
+---
+
+AI Agents require data to gather knowledge and answer questions, and they need connectivity to business applications in order to take actions. Peliqan is the **data foundation for AI** that provides your AI Agents in [n8n](https://n8n.io/) with data from all your business applications through a single node, as well as "tool" nodes that allow your AI Agents to take actions in your applications such as adding & updating data, creating tasks, adding a draft invoice or anything else you can imagine. Peliqan is the unified gateway for n8n to all your internal company data.
+
+![n8n AI Agents using Peliqan as data gateway](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a630ca43-3496-4c8b-b6d0-209c89a70407/n8n_AI_Agents_-_Peliqan_data_gateway/w=1920,quality=90,fit=scale-down)
+
+## AI Agent capabilities
+
+With Peliqan, you can add following capabilities to your AI Agents in n8n:
+
+- **Text to SQL**: allow your AI Agent to convert any question in natural language to an SQL query, executed on the Peliqan data warehouse. Your AI Agent can combine data from all your sources (CRM, ERP etc.) and answer complex _analytical_ questions.
+- **RAG (Retrieval Augmented Generation)**: allow your AI Agent to search internal knowledge including structured and non-structured data (e.g. Google Drive, Notion etc.) in order to answer any _knowledge-related_ question.
+- **MCP style actions**: allow your AI Agent to take actions in your business applications such as scheduling a task, adding draft invoices based on worked hours etc. In Peliqan this is called "writeback".
+
+## Getting started
+
+### Step 1: signup for a free trial on Peliqan
+
+[Sign up for a free trial on Peliqan](https://app.eu.peliqan.io/signup) and add one or more connections, for example to your CRM, ERP, Accounting software, HRM/ATS, cloud storage (Google Drive, Sharepoint), files (Excel, CSV) etc. Peliqan will automatically build up an ELT pipeline and sync all data into the built-in data warehouse, which will act as an ultrafast cache for your AI Agents to access data using e.g. RAG or "Text to SQL".
+
+### Step 2: install the Peliqan community node
+
+In your self-hosted n8n environment, add the [Peliqan community node](https://www.npmjs.com/package/n8n-nodes-peliqan) under Settings > Community nodes > npm Package Name "n8n-nodes-peliqan".
+
+![n8n community node installation](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/311fdc3b-123e-4b90-91fe-73ab8560ef35/Screenshot_2025-07-30_at_13.42.10/w=1920,quality=90,fit=scale-down)
+
+If you want to use Peliqan as a "Tool" under your AI Agent (e.g. for "Text to SQL" queries), set the environment variable `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE` to True, by executing this command on the CLI:
+
+```bash
+export N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=True
+```
+
+### Step 3: download the n8n template
+
+Download this n8n template and import it into your n8n environment.
+
+[Peliqan AI Agent RAG and SQL V2.61.json](https://assets.super.so/35b4fd12-9269-4553-8b56-b54daf78bd41/files/bbeba1d1-9f69-4895-bc9a-c1e6cff84f10/Peliqan_AI_Agent_RAG_and_SQL_V2.61.json)
+
+![Peliqan n8n AI Agent template workflow](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/99465134-7cb5-46cd-a26c-c44c11a3317e/Peliqan_n8n_AI_Agent_template_with_RAG_and_Text_to_SQL/w=1920,quality=90,fit=scale-down)
+
+Or checkout the [Peliqan n8n template on the n8n website](https://n8n.io/workflows/6706-query-business-data-with-openai-chatbot-using-rag-and-text-to-sql-via-peliqan/).
+
+### Step 4: configure credentials in n8n
+
+Configure your credentials for OpenAI, Supabase and Peliqan.
+
+You can find your Peliqan API key in Peliqan under Settings.
+
+### Step 5: Configure "Text to SQL"
+
+Update the "System Message" of your AI Agent, with a list of tables and their columns.
+
+You can run the below script in Peliqan to generate a list of tables and columns from selected sources, and copy/paste the output.
+
+<Accordion title="Peliqan script to fetch your data model">
+  ```python
+  included_schemas = {"chargebee", "pipedrive", "odoo"} # Change this
+  
+  output_lines = []
+  for db in pq.list_databases():
+      for table in db["tables"]:
+          schema_name = next((s["name"] for s in db["schemas"] if s["id"] == table["schema_id"]), None)
+          if schema_name not in included_schemas:
+              continue
+              
+          table_meta = pq.get_table(table_id=table["id"])
+          columns = table_meta.get("all_fields", [])
+          column_names = [col["name"] for col in columns if not col["name"].startswith("_sdc")]
+  
+          if column_names:
+              output_lines.append(f"\n\nColumns in table {table['name_in_query']}:\n\n" + "\n".join(column_names))
+  
+  output = "".join(output_lines)
+  st.text(output)
+  ```
+</Accordion>
+
+**Add your datamodel dynamically (optional)**
+
+You can also retrieve your data model automatically from Peliqan by setting up an API endpoint in Peliqan, linked to this script, and adding this API endpoint as a Tool under your AI Agent in n8n.
+
+<Accordion title="Adding an API endpoint to dynamically fetch the data model">
+  Add an API handler script in Peliqan that sends the data model in the response:
+
+  ```python
+  from datetime import datetime, timedelta
+  
+  def handler(request):
+      cache = pq.get_state()
+      if cache and datetime.now() - datetime.strptime(cache["timestamp"], "%Y-%m-%d %H:%M:%S.%f") <= timedelta(hours=24):
+          return cache["datamodel"]
+          
+      included_dbs = [pq.DW_NAME]
+      included_schemas = ["chargebee", "pipedrive", "odoo"] # Change this
+      
+      output = ""
+      databases = pq.list_databases()
+      for db in databases:
+          if db["name"] in included_dbs:
+          
+              for table in db['tables']:
+                  
+                  for schema in db['schemas']:
+                      if schema['id'] == table['schema_id']:
+                          table['schema_name'] = schema['name']
+          
+                  if table['schema_name'] in included_schemas:
+                      table['database_name'] = db['name']
+                      table['server_name'] = db['server']['name']
+                      table['fully_qualified_name'] = f"{table['database_name']}.{table['name_in_query']}"
+                      
+                      output += f"\n\nColumns in table %s:\n\n" % table["name_in_query"]
+              
+                      table_meta_data = pq.get_table(table_id=table["id"])
+                      columns = table_meta_data['all_fields']
+                      column_names = []
+                      for column in columns:
+                          column_name = column["name"]
+                          column_names.append(column_name)
+                      
+                      column_names_str = "\n".join(column_names)
+                      output += column_names_str
+  
+      cache = {
+          "datamodel": output,
+          "timestamp": datetime.now() 
+      }
+      pq.set_state(cache)
+      
+      return output
+  ```
+
+  Add an API endpoint in Peliqan with path `/datamodel` and link it to the above handler script. In n8n, use the Peliqan Tool node with Resource "Endpoint" and Operation "Exec" and select the API endpoint you created in Peliqan:
+
+  ![n8n Peliqan Tool node selecting endpoint](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5ffbcaf4-4899-4884-8fc1-18ed2ab6169e/Screenshot_2025-07-30_at_13.54.12/w=1920,quality=90,fit=scale-down)
+
+  ![n8n endpoint operation configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/285c6f7e-3874-434b-b138-ac0d80bc8d26/Screenshot_2025-07-30_at_13.54.39/w=1920,quality=90,fit=scale-down)
+</Accordion>
+
+### Step 6: Configure RAG
+
+Make sure to add one or more data sources in Peliqan that you would like to use for RAG, for example Notion. [Click here for more info on how to connect Notion and sync all Notion page content to Peliqan](/notion-getting-started-in-peliqan).
+
+Use the lower blue section in the n8n template to feed data from the Peliqan data warehouse into your Supabase vector store for RAG.
+
+First, prepare your [Supabase to be used as a Vector Store](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.vectorstoresupabase/#use-the-vector-store-question-answer-tool-to-answer-questions).
+
+Next, in the n8n workflow, configure a table in the Peliqan node "Get table data" from the Peliqan data warehouse, for example the table that contains all your Notion pages content. Run this section of the workflow to feed all your data into the Supabase Vector Store.
+
+**Add multiple tables as data source**
+
+You can also add multiple tables from the Peliqan data warehouse as data source for feeding into the Supabase Vector Store.
+
+<Accordion title="Add multiple tables as source for RAG dynamically">
+  Use the Peliqan node with resource "Table" and Operation "List" to get a list of all your tables in Peliqan. Apply a filter if needed and use the filtered list to get the data of each table.
+
+  ![n8n Peliqan node list tables operation](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e143f343-b678-4650-97ac-987533c62cb0/Screenshot_2025-07-30_at_14.16.04/w=1920,quality=90,fit=scale-down)
+
+  ![n8n Peliqan node filtered table list](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b1ed1ea8-0e81-4e02-b67d-1a3c06bb73e6/Screenshot_2025-07-30_at_14.18.36/w=1920,quality=90,fit=scale-down)
+
+  ![n8n Peliqan node loop through tables](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4ccc4258-7865-4b7b-ae8b-22e648665e75/Screenshot_2025-07-30_at_14.18.44/w=1920,quality=90,fit=scale-down)
+
+  ![n8n workflow feeding multiple tables to vector store](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/692578eb-62b6-4019-bd28-debf4ad17a5e/Screenshot_2025-07-30_at_14.18.05/w=1920,quality=90,fit=scale-down)
+</Accordion>
+
+### Step 7: configure "writeback" actions
+
+You can perform actions in your n8n workflows via Peliqan, for example adding a contact in Hubspot, sending a message to Slack or creating a draft invoice in Xero. This is done as follows:
+
+- Add a script of type "API handler"
+- In the script, use Peliqan's writeback functions, for example "Slack send message" (see right pane next to script editor > Connected SaaS Applications).
+- Create a custom API endpoint and link it to the API handler script (Use JWT authorization and method POST)
+- In n8n, use the Peliqan node with following Parameters:
+- Resource: Endpoint
+- Operation: Execute
+- API endpoint: select the API endpoint you created in Peliqan
+
+## Use Peliqan DWH as a Vector Store
+
+The above example uses Supabase as the Vector Store and creating embeddings (vectorizing) is performed from the n8n workflow. However, it's also possible to use the Peliqan data warehouse as Vector Store, using a pipeline script in Peliqan to vectorize your source data.
+
+Add the tool **Postgres PGVector Store** under your AI Agent in n8n, and configure your Peliqan data warehouse DB in that node:
+
+![n8n Postgres PGVector Store configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ce9e5f32-6c25-4105-9bf3-4747cd1c6b69/Screenshot_2025-09-11_at_13.41.38/w=1920,quality=90,fit=scale-down)
+
+You can download the an example n8n workflow and import it into your n8n environment:
+
+![n8n AI Agent RAG with Peliqan DWH as vector store workflow](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/578dfa0b-01be-4b77-8a36-f67653715ba5/n8n_AI_Agent_RAG_with_Peliqan_DWH_as_vector_store/w=1920,quality=90,fit=scale-down)
+
+[RAG with Peliqan DWH as vector store.json](https://assets.super.so/35b4fd12-9269-4553-8b56-b54daf78bd41/files/352c4821-1f69-4d9d-b7f2-7fa4c1b0b2ce/RAG_with_Peliqan_DWH_as_vector_store.json)
+
+Use the below pipeline script in Peliqan to vectorize your source data.
+
+<Accordion title="Pipeline script to vectorize source data in Peliqan">
+  ```python
+  # This pipeline will vectorize source data (create embeddings) for RAG search in an AI Agent.
+  # You can build an AI Agent in a Streamit app in Peliqan (see templates) 
+  # Or e.g. in n8n: add "Postgres PGVector Store" as a tool to the AI Agent, and connect it to your Peliqan data warehouse DB, using table rag.documents
+  
+  import openai
+  import json
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  
+  openai.api_key = pq.get_secret("OpenAI API key") # Add a secret store under Connections with your OpenAI API key
+  EMBED_MODEL = "text-embedding-3-large"  # or text-embedding-3-small (dimension: 1536)
+  EMBED_MODEL_DIMENSION = 3072
+  
+  def get_embedding(text: str) -> list[float]:
+      resp = openai.embeddings.create(model=EMBED_MODEL, input=text)
+      return resp.data[0].embedding
+  
+  def create_table():
+      query_create_extension = "CREATE EXTENSION IF NOT EXISTS vector"
+      dbconn.execute(pq.DW_NAME, query = query_create_extension)
+      
+      query_create_table = f"""
+          CREATE TABLE IF NOT EXISTS rag.documents (
+              id SERIAL PRIMARY KEY,
+              text TEXT,
+              metadata JSONB, 
+              embedding vector({EMBED_MODEL_DIMENSION})
+          )
+      """
+      dbconn.execute(pq.DW_NAME, query = query_create_table)
+  
+  def vectorize():
+      create_table()
+      
+      # replace this, get records from source table in Peliqan DWH (e.g. Notion pages)
+      records = [
+          {"id": 1, "text": "Hello world"},
+          {"id": 2, "text": "OpenAI makes embeddings easy"},
+          {"id": 3, "text": "Postgres with pgvector is powerful"}
+      ]
+      
+      for record in records:
+          source_id = record["id"]
+          st.write(f"Vectorizing source id {source_id}")
+          embedding = get_embedding(record["text"])
+          metadata = { 
+              "source_id": source_id
+          }
+  
+          text_str = record["text"].replace('\'','\'\'')
+          metadata_str = json.dumps(metadata).replace("'", "''")   # escape single quotes
+          embedding_str = "[" + ",".join(f"{x:.6f}" for x in embedding) + "]"  # compact vector
+  
+          query_remove_existing_vector = f"DELETE FROM rag.documents WHERE metadata ->> 'source_id' = '{source_id}';"
+          result = dbconn.execute(pq.DW_NAME, query = query_remove_existing_vector)
+          if result.get("status") != "success":
+              st.write(result)
+          
+          query_insert = f"INSERT INTO rag.documents (text, metadata, embedding) VALUES ('%s', '%s', '%s');" % (text_str, metadata_str, embedding_str)
+          result = dbconn.execute(pq.DW_NAME, query = query_insert)
+          if result.get("status") != "success":
+              st.write(result)
+  
+  vectorize()
+  ```
+</Accordion>
+
+## FAQ
+
+<Accordion title="What if my data source (business application) is not listed on Peliqan ?">
+  Contact Peliqan Support ([support@peliqan.io](mailto:support@peliqan.io)), our connector team can add new connectors within a few business days.
+</Accordion>
+
+<Accordion title="Can my AI Agent show a link to the source data on e.g. Google Drive or Notion (using RAG) ?">
+  Yes, make sure to add Metadata when feeding your data into the Supabase Vector Store, e.g. the field \_source_url that links to the original source.
+
+  ![n8n Supabase Vector Store metadata configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/042a05a6-085a-40f9-801d-b127c44164a0/Screenshot_2025-07-30_at_14.10.04/w=1920,quality=90,fit=scale-down)
+</Accordion>
+
+<Accordion title="Can I get help building my AI Agent ?">
+  Yes, contact Peliqan Support ([support@peliqan.io](mailto:support@peliqan.io)) if you have generic questions. The Peliqan Customer Service team can also recommend partners that specialize in building custom AI Agents.
+</Accordion>

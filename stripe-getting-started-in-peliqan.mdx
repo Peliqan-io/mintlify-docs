@@ -1,0 +1,117 @@
+---
+title: "Stripe - Getting started in Peliqan"
+sidebarTitle: "Stripe"
+description: "Learn how to connect Stripe to Peliqan using an API key, sync payment data, and build a custom pipeline to ingest Stripe Sigma analytics from AWS S3."
+---
+
+This article provides an overview to get started with the **Stripe** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Add connection
+
+In Peliqan, go to Connections, click on Add Connection and find Stripe in the list.
+
+You will need to create an API key in Stripe first.
+
+![Stripe API key creation page](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/be8d0b35-a195-4180-80c5-1761f5cc2e83/screenshot_2026-02-21_at_09.33.53/w=1920,quality=90,fit=scale-down)
+
+## Stripe Sigma
+
+Stripe Sigma is Stripe's built-in analytics and reporting tool that lets you run SQL queries directly on your Stripe data. With Stripe Sigma Data Pipelines, you can export analytical data from Stripe to a target such as AWS S3.
+
+You can use your own target (S3 or other), or contact Peliqan Support to request a dedicated private bucket on AWS S3 to use as a target.
+
+Required steps:
+
+- Activate Stripe Sigma Data Pipelines in your Stripe account (cost: 57 EUR/month)
+- Choose AWS S3 as the target
+- Follow the wizard in Stripe to create an S3 bucket, a policy and a role
+- Get the verification file from the S3 bucket and upload in Stripe Sigma to finalize the setup
+- Wait up to 12 hours for data to be synced by Stripe to the S3 bucket
+- Use the below custom pipeline in Peliqan to sync the sata into your data warehouse
+
+Example in Stripe Sigma when target has bee configured
+
+![Stripe Sigma data pipeline configuration example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/29b68774-47fd-45fb-8408-a9707cf41676/61f2ae85-69fb-4b1c-aee0-c2c2367084a3/w=1920,quality=90,fit=scale-down)
+
+Use the below custom pipeline script in Peliqan, to set up an ELT pipeline from your Stripe Sigma data on S3 to the Peliqan data warehouse.
+
+<Accordion title="Click to expand script">
+  ```python
+  # This custom pipeline script will read data from Stripe Sigma
+  # Sigma is the analytical product from Stripe.
+  # Data is written to an S3 target using Stripe Sigma Data Pipelines (cost: 57 EUR/m)
+  # This script will read the Parquet files and store the data in tables in the data warehouse.
+  
+  # Setup in AWS:
+  # AWS IAM User: e.g. stripe-sigma-s3-bucket-user.
+  # Attach the policy created during the setup in Stripe Sigma to this user.
+  # S3 bucket: e.g. peliqan-stripe-sigma-data-pipeline.
+  # Create an access key for the above IAM user:
+  
+  access_key = "xxx"
+  secret_access_key = pq.get_secret("S3 bucket")
+  bucket_name = "peliqan-stripe-sigma-data-pipeline"
+  
+  testrun = False # Test run will only read files from S3, nothing is written to DWH
+  
+  import boto3
+  import pandas as pd
+  from io import BytesIO
+  
+  dw = pq.dbconnect(pq.DW_NAME)
+  
+  session = boto3.Session(
+      aws_access_key_id = access_key,
+      aws_secret_access_key = secret_access_key
+  )
+  
+  highest_timestamp_processed = 0
+  bookmark = pq.get_state()
+  if not bookmark:
+      bookmark = 2026010100
+  
+  st.write(f"Processing files after bookmark: {bookmark}")
+  
+  s3 = session.resource('s3')
+  bucket = s3.Bucket(bucket_name)
+  for obj in bucket.objects.all():
+      key = obj.key
+      #st.text(f"File or folder: {key}")
+      if key.endswith('.parquet') and not 'testmode' in key:
+  
+          path_parts = key.split("/")      # e.g. key = 2026022006/testmode/charges_metadata/part-xxxxx.zstd.parquet
+          timestamp = int(path_parts[0])   # e.g. "2026022006"
+          table_name = path_parts[2]       # e.g. "charges_metadata"
+          
+          if timestamp>bookmark: # Skip folders which are already processed
+              st.text(f"Processing file: {key}")
+              
+              if timestamp>highest_timestamp_processed:
+                  highest_timestamp_processed = timestamp
+              
+              file_contents = obj.get()['Body'].read()
+              df = pd.read_parquet(BytesIO(file_contents))
+              rows = df.to_dict(orient='records')
+      
+              if "id" in df.columns:
+                  pk = "id"
+              elif "key" in df.columns:
+                  pk = "key"
+              elif table_name == "payment_method_details":
+                  pk = "charge_id"
+              else:
+                  st.warning(f"No PK found in table {table_name}")
+                  st.dataframe(df)
+      
+              if not testrun:
+                  batch_size = 1000 #write in batches, for large files
+                  batches = [rows[i:i+batch_size] for i in range(0, len(rows), batch_size)]
+                  for batch in batches:
+                      st.write(f"Writing batch to DWH table: {table_name}")
+                      result = dw.write('stripe_sigma', table_name, batch, pk = pk)
+  
+  if highest_timestamp_processed>bookmark:
+      pq.set_state(highest_timestamp_processed)
+      st.write(f"New bookmark: {highest_timestamp_processed}")
+  ```
+</Accordion>

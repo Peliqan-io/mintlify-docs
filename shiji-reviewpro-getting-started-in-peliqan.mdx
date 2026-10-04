@@ -1,0 +1,176 @@
+---
+title: "Shiji ReviewPro - Getting started in Peliqan"
+sidebarTitle: "Shiji ReviewPro"
+description: "Learn how to connect Shiji ReviewPro to Peliqan, sync hospitality review data to your warehouse, and build custom pipelines for ratings and review analytics."
+---
+
+ReviewPro is a cloud-based platform that helps hospitality businesses manage their online reputation and improve guest experiences. It aggregates reviews from a wide range of online travel agents and review sites, including Google and TripAdvisor. It provides a dashboard to track, measure, and respond to reviews in real time.
+
+This article provides an overview to get started with the **Shiji ReviewPro** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## ReviewPro Data Pipeline
+
+### Fetching API key and API Secret
+
+Connecting to Shiji ReviewPro APIs requires API key and API Secret. API Keys are on Application level. Hence, it is required to create an Application and corresponding API key and API Secret.
+
+Login to [Developer Login](https://developer.reviewpro.com/login) and navigate to **My Account** to see all applications and keys.
+
+### Connect Shiji Reviewpro
+
+Connect Shiji ReviewPro through the Peliqan Connectivity module:
+
+![Shiji ReviewPro connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8ed27a73-4735-4722-8fa6-4771ccd23d50/image/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- API Key
+- API Secret
+- Start Date in YYYY-MM-DD format.
+- (Optional) table selection via 'Advanced'
+
+Click save to initiate the connection and allowing ReviewPro data to get synced to Peliqan DataWarehouse.
+
+API Key and API secret are combined to form a signature for Authentication purpose.
+
+## Shiji ReviewPro data sync to a data warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync ReviewPro data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+"Lodging" related data is retrieved in Peliqan for ReviewPro based on Date Intervals. Date intervals can be daily, weekly, monthly or yearly. For more details, refer **Shiji ReviewPro Data Activation** below.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![Data warehouse view showing Shiji ReviewPro tables](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/dea0eb23-f05f-4a92-918d-87029b7ee5b4/image/w=1920,quality=90,fit=scale-down)
+
+Data gets synced every 6 hours.
+
+![Sync schedule showing 6-hour intervals for Shiji ReviewPro](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/118f8d84-1eb3-4cec-9237-7e3e67637390/image/w=1920,quality=90,fit=scale-down)
+
+With the Peliqan federated query engine, queries on the Shiji ReviewPro data can be written and data can be transformed and combined with other sources.
+
+![SQL query editor showing Shiji ReviewPro data exploration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/12026594-43cd-4f13-9549-a136ebc55fcf/image/w=1920,quality=90,fit=scale-down)
+
+## Shiji ReviewPro Data Activation
+
+### Custom ETL Pipeline to sync Average Ratings and Review Ratings based on Date Intervals
+
+Peliqan offers Shiji ReviewPro data activation functions for generating review ratings or average index ratings based on date intervals. This is achieved through Custom Pipeline in Peliqan. Related data is generated, accumulated and stored in Peliqan DataWareHouse. Writing to DataWarehouse is done using **write()** method in Peliqan.
+
+Below is the custom Pipeline Script to get Weekly Average Indexed Ratings, Monthly Average Indexed Ratings, Monthly Average Rating Reviews.
+
+```python
+# Required Imports
+
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
+import time
+import calendar
+
+
+# Required helper functions
+def get_month_end_date(date):
+    month_end_date = calendar.monthrange(date.year, date.month)[1]
+    return f"{date.year}-{date.month}-{month_end_date}"
+
+def get_start_date(connection_name):
+    connections = pq.list_connections()
+    for connection in connections:
+        if connection['name'] == connection_name:
+            return connection['param1']
+
+
+
+# Required Inputs
+connection_name = 'Shiji ReviewPro' 
+source_schema_name = 'shiji reviewpro'
+source_tables = 'available_hotels'
+END_DATE = date.today()
+
+# setting start date
+START_DATE = get_start_date(connection_name)  # fetching from connect-form
+
+# required data objects
+monthly_avg_indexed_ratings, weekly_avg_indexed_ratings, monthly_avg_rating_reviews  = [], [], []
+
+
+# Required Connections
+source_conn = pq.connect(connection_name)
+dbconn = pq.dbconnect(pq.DW_NAME)
+
+# fetching all the available Hotels
+st.text('Fetching Hotels....')
+hotels_list = dbconn.fetch(pq.DW_NAME, source_schema_name, source_tables)
+
+
+# Fecthing monthly data: 
+st.text(f"Syncing Streams from {START_DATE} ....")
+
+for hotel in hotels_list:
+
+    # monthly_avg_indexed_ratings - monthly_avg_rating_reviews 
+    date_iter = datetime.strptime(START_DATE, '%Y-%m-%d').date()
+    while date_iter <= date.today():   # '=' considering same start_date and current_date | YYYY-MM-DD
+ 
+        body = {
+            'pid': hotel['id'],
+            'start_date': str(date_iter),
+            'end_date': get_month_end_date(date_iter)    
+        }
+        # Monthly average index rating : 
+        index_rating_result = source_conn.get('average_index_rating', body)
+        index_rating_result['year'] = date_iter.year
+        index_rating_result['month'] = date_iter.strftime("%B").lower()
+        index_rating_result[ 'external_id'] = str( index_rating_result['pid'] ) + "_" + str(date_iter.year) + "_" + date_iter.strftime("%B").lower() 
+        monthly_avg_indexed_ratings.append(index_rating_result)
+
+        time.sleep(0.5)    # to avoid rate limiting
+
+        # Monthly average review rating
+        review_rating_result = source_conn.get('average_review_rating_distribution', body)
+        review_rating_result['year'] = date_iter.year
+        review_rating_result['month'] = date_iter.strftime("%B").lower() 
+        review_rating_result[ 'external_id'] = str(review_rating_result['pid']) + "_" + str(date_iter.year) + "_" +  date_iter.strftime("%B").lower() 
+        monthly_avg_rating_reviews.append(review_rating_result)
+
+        date_iter += relativedelta(months=1)          # moving interation cursor
+        time.sleep(0.5)
+
+    # weekly_avg_indexed_ratings
+    date_iter = datetime.strptime(START_DATE, '%Y-%m-%d').date()
+    while date_iter <= date.today():  
+        
+        body = {
+            'pid': hotel['id'],
+            'start_date': str(date_iter),
+            'end_date': date_iter + relativedelta(weeks=1)   
+        }
+        weekly_index_result = source_conn.get('average_index_rating', body)
+        weekly_index_result['year'] = date_iter.year
+        weekly_index_result['week'] = date_iter.strftime("%U")
+        weekly_index_result[ 'external_id'] =  str(weekly_index_result['pid']) + "_" + str(date_iter.year) + "_" + date_iter.strftime("%U")
+        weekly_avg_indexed_ratings.append(weekly_index_result)
+
+        # moving interation cursor
+        date_iter += relativedelta(weeks=1)
+        time.sleep(0.5)
+
+
+# writing data to our datawarehouse
+
+for stream_name, data in {'monthly_avg_indexed_ratings': monthly_avg_indexed_ratings, 'weekly_avg_indexed_ratings': weekly_avg_indexed_ratings, 'monthly_avg_rating_reviews': monthly_avg_rating_reviews}.items():
+
+    write_result = dbconn.write(source_schema_name, stream_name, records = data , pk='external_id')
+    if write_result['status'] == 'success' :
+        st.text(f"Data Synced for stream {stream_name}! ")
+    else:
+        st.text(f"Error while syncing stream {stream_name}! ")
+        st.json(write_result)
+
+
+exit(0)
+```
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](mailto:support@peliqan.io).

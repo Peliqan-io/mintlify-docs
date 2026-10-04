@@ -1,0 +1,62 @@
+---
+title: "CareerPro - Getting started in Peliqan"
+sidebarTitle: "CareerPro FLA"
+description: "Learn how to connect the Belgian Federal Learning Account (FLA) from CareerPro to Peliqan via Chaman to sync employee training data."
+---
+
+The Federal Learning Account (FLA) is the online service from the social security services of the Belgian government, that allows employers to manage the individual and sectoral training rights of their employees. Employers register trainings and training rights and can keep track of which training the employees have followed and to which they are still entitled. It is part of Careerpro.be. More info: [https://careerpro.be/en/federallearningaccount.html](https://careerpro.be/en/federallearningaccount.html)
+
+This article provides an overview to get started with the **CareerPro FLA (Federal Learning Account)** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+<Tip>
+  CareerPro is a custom connector and requires a setup via our support team after retrieving the client_id (see below)
+</Tip>
+
+## Contents
+
+- [Connect](#connect)
+- [Need further help](#need-further-help)
+
+## Connect
+
+You need to enable access in Chaman (Channel Management from SocialSecurity.be).
+
+- Go to [https://chaman.socialsecurity.be](https://chaman.socialsecurity.be/)
+- Select "Enterprise", login using Itsme, select your company as employer.
+- Under "Webservice account", click on "Add Webservice account".
+- Select "REST" (not SOAP).
+- Enter an Account name (e.g. your company name).
+- Check the box for "CareerPro - Federal Learning Account - Aangifte".
+- Upload the **certificate file** from Peliqan:
+  - [certificate.crt](https://assets.super.so/35b4fd12-9269-4553-8b56-b54daf78bd41/files/1603ca75-174f-4243-9ece-1f537595ec61/certificate.crt)
+- Enter a name for the certificate, e.g. Peliqan.
+
+![Chaman Webservice account setup](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/bb6d2a49-461c-4f3c-ad67-d404e9b4432e/Chaman_RSZ/w=1920,quality=90,fit=scale-down)
+
+Click Confirm.
+
+You will now see the details of the newly added "Channel":
+
+![Chaman Channel details](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c9288f28-01c7-4802-84a3-2c07261373ba/Chaman_RSZ_2/w=1920,quality=90,fit=scale-down)
+
+Copy the **Client ID**.
+
+Save the ClientID as Peliqan Secret (add new connection > secret store) and notify our support team so they can activate the connection for you.
+
+<Tip>
+  Save the ClientID as Peliqan Secret (add new connection > secret store) and notify our **support team so they can activate the connection for you.**
+</Tip>
+
+Once the connection is added in Peliqan, the data from CareerPro FLA can be synced to tables in the data warehouse. You will need the company ID (KBO = VAT number), and a list of employee IDs (rijksregister numbers).
+
+For each employee following data is available:
+
+- Trainings
+- Training Rights
+- Training Credits
+
+![CareerPro FLA employee data](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/25803144-cb08-41b3-9a23-10a79cdfb5fc/Screenshot_2024-06-12_at_12.05.47/w=1920,quality=90,fit=scale-down)
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](/).

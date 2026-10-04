@@ -1,0 +1,77 @@
+---
+title: "Generating UNION queries"
+description: "Combine multiple tables with matching columns into one dataset using UNION queries in Peliqan, either with a fixed list or generated dynamically across databases."
+sidebarTitle: "UNION Queries"
+---
+
+UNION queries are useful to combine multiple table with the same columns into one table. They are often used in Peliqan to consolidate data from multiple similar source (Connections) into one set of tables.
+
+## Consolidating data from multiple connections into one dataset
+
+For example let's say you are using accounting software Exact Online in multiple countries. You could add separate connections in Peliqan to connect to each Exact Online instance. The result is a separate set of tables, each under their own schema. With the below approach, you can automatically generate queries (views) that combine all these datasets into one consolidated data set.
+
+**Example:**
+
+**Connection "Exact Online - Belgium"**
+
+Table customers:
+
+| id | name |
+| --- | --- |
+| 1 | ACME |
+| 2 | Wood Construct |
+
+**Connection "Exact Online - Netherlands"**
+
+Table customers:
+
+| id | name |
+| --- | --- |
+| 1 | Metals |
+| 2 | ABC Ltd. |
+
+**Unified dataset**
+
+Table customers (UNION query):
+
+| id | name | source |
+| --- | --- | --- |
+| 1 | ACME | BE |
+| 2 | Wood Construct | BE |
+| 1 | Metals | NL |
+| 2 | ABC Ltd. | NL |
+
+Note: the primary key (PK) of this unified table is `id` + `source`.
+
+## Generate a UNION query
+
+Example to generate a UNION SQL query for a set of tables. Parameter `sources` is optional, it adds an extra column in the UNION to indicate the source of the records per table.
+
+```python
+table_ids = [1, 2, 7]
+source_names = { 1: "Paris", 2: "London", 7: "Gent" }
+union_query = pq.generate_sql_union(table_ids = table_ids, sources = source_names)
+st.write(union_query)
+pq.update_table(id = 123, query = union_query)
+```
+
+## Generate a UNION query dynamically
+
+The below example allows you to dynamically generate e.g. a UNION query that includes a list of tables from your account. The app can be scheduled to run daily, in order to keep the UNION query up to date as new tables are added.
+
+Here's an example that loops over all tables in all databases, filters on table name and builds up a UNION query that includes all the matching tables:
+
+```python
+databases = pq.list_databases()
+
+table_ids = []
+source_names = {}
+for db in databases:
+  for table in db["tables"]:
+    if "<some word>" in table["name"]:
+      table_ids.append(table["id"])
+      source_names[table["id"]] = table["name"].replace("<some word>", "")
+
+union = pq.generate_sql_union(table_ids = table_ids, sources = source_names)
+pq.update_table(id = 123, query = union)
+```

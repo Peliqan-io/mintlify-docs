@@ -1,0 +1,62 @@
+---
+title: "Yuki - Getting started in Peliqan"
+sidebarTitle: "Yuki"
+description: "Connect Yuki accounting data to Peliqan using an API key. Find your administration ID and API key in Yuki, enter them in Peliqan, and start syncing financial data."
+---
+
+_Yuki is a cloud-based accounting platform designed to simplify and automate financial administration for small and medium-sized businesses (SMBs) and accounting firms. Founded in 2007 in the Netherlands, Yuki has expanded its presence to Belgium and Spain, and since 2020, it has been part of the Visma Group ._
+
+This article provides an overview to get started with the **Yuki** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Contents
+
+- [Contents](#contents)
+- [Add connection](#add-connection)
+  - [How to get your API key in Yuki](#how-to-get-your-api-key-in-yuki)
+- [Using Yuki in scripts in Peliqan](#using-yuki-in-scripts-in-peliqan)
+
+## Add connection
+
+In Peliqan, go to Connections and click on New Connection.
+
+Select Yuki from the list. Enter following information from your Yuki account:
+
+- Administration id
+- API key
+- Start date (to sync data)
+
+### How to get your API key in Yuki
+
+Only "Portal administrator" or user with the role "Director" can generate an API-Key in Yuki Domain.
+
+1.After Logging In, On left-upper corner of the homepage, go to settings > "Web Service"
+
+2. On bar above, click "+" icon to add a new API-key.
+
+3. Choose Company (or create) under the domain and create a key.
+
+## Using Yuki in scripts in Peliqan
+
+Example script to view the PDF of an invoice:
+
+```python
+import base64
+
+yuki_api = pq.connect('Yuki')
+downloadfile = {
+    'document_id': "a9497df7-71af-4c05-b656-2ca3d4a16436",
+}
+result = yuki_api.get('file_base64', downloadfile)
+file_base64 = result["FileData"]
+
+base64_decoded = base64.b64decode(file_base64) #.decode('utf-8')
+
+#st.write(base64_decoded)
+
+html = f"""
+<embed src="data:application/pdf;base64,{file_base64}" type="application/pdf" width="100%" height="600px" />
+"""
+
+st.write("PDF from Yuki:")
+st.markdown(html, unsafe_allow_html=True)
+```

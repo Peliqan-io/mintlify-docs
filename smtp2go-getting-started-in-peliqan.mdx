@@ -1,0 +1,63 @@
+---
+title: "SMTP2Go - Getting started in Peliqan"
+sidebarTitle: "SMTP2Go"
+description: "Learn how to connect SMTP2Go to Peliqan using an API token and send emails or templated messages directly from your Python scripts."
+---
+
+SMTP2Go is one of the connectors offered in Peliqan to send emails and receive emails.
+
+SMTP2Go offers a free license that does not expire, for up to 1000 emails per month.
+
+More info: [https://www.smtp2go.com/pricing/](https://www.smtp2go.com/pricing/)
+
+## Connect SMTP2Go
+
+Sign up for an account on SMTP2Go first. Verify your domain in Sending > Verified Senders.
+
+Generate your API token in Sending > API Keys.
+
+In Peliqan, go to Connections > Add connection.
+
+Find SMTP2Go in the list of available connectors and select it. Paste the API token and save.
+
+## Send out emails
+
+Here are example scripts in Peliqan to send out emails.
+
+### Send an email
+
+```python
+smtp2go_api = pq.connect('SMTP2Go')
+email_send = {
+    'cc': ['martina@acme.com'],
+    'to': ['anna@acme.com'],
+    'sender': "marco@acme.com",
+    'subject': "Confirm your email address",
+    'html_body': "Test"
+}
+result = smtp2go_api.add('email_send', email_send)
+st.json(result)
+```
+
+### Send an email with Template
+
+You can link the template with "template_id" and send the variables with "template_data"
+
+```python
+smtp2go_api = pq.connect('SMTP2Go')
+email_send = {
+    'cc': ['martina@acme.com'],
+    'to': ['anna@acme.com'],
+    'sender': "marco@acme.com",
+    'subject': "Confirm your email address",
+    'version': 1,
+    'html_body': "Test",
+    'template_id': "1234567",
+    'template_data': {
+        'var1_url': "https://peliqan.io/",
+        'var2_name': "cars",
+    },
+}
+result = smtp2go_api.add('email_send', email_send)
+st.json(result)
+```

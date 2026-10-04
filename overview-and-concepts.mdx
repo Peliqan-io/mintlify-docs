@@ -1,0 +1,90 @@
+---
+title: "Overview and concepts"
+sidebarTitle: "Overview"
+description: "Learn the core concepts of Peliqan, including data virtualization, the grid view, SQL on anything, data apps, and the built-in data warehouse."
+---
+
+Peliqan is an **all-in-one data platform and iPaaS** that provides direct data access to a wide range of data sources including databases, data warehouses and SaaS business applications. Peliqan provides one-click ETL pipelines from 100+ sources. Peliqan has a built-in data warehouse or you can use your own data warehouse (Snowflake, BigQuery, Redshift, SQL Server etc.). Peliqan combines magical SQL with low-code Python to get work done fast, including setting up BI, data activation, data syncs (reverse ETL), publishing data apps and data APIs, embedding and more.
+
+## Peliqan use cases
+
+Peliqan helps in a wide range of data-centric use cases:
+
+- Connecting to data: DBs, DWs, SaaS business applications
+- Set up ETL pipelines to the built-in data warehouse or your own data warehouse
+- Ad hoc analysis: asking ad-hoc data questions and finding an answer fast
+- Data visualization / BI
+- Data preparation & transformation, making data ready for e.g. analysis or machine learning
+- Combining data from multiple sources
+- Data checks: e.g. find anomalies
+- Working with data: e.g. keeping track of things, manual verifications etc.
+- Building interactive data apps
+- Custom reporting & report distribution
+- Setting up business alerts
+- Publishing data APIs
+- Set up data syncs (reverse ETL)
+- Data imports
+
+In each of these use cases, Peliqan avoids the need of a data team or data engineers. Peliqan also avoids the need to setup data pipelines or perform complex tasks. Peliqan allows to start working on the data instantly, without waiting on IT or other specialists to take action.
+
+## Direct data access, data virtualization
+
+In Peliqan you add connections to data sources such as databases and SaaS business applications. Peliqan will fetch the data in real-time from the source where possible, each time you access data to view it or work with it. This concept is also known as "data virtualization". In some cases, e.g. with SaaS sources, Peliqan will make a copy of the data in its built-in data warehouse.
+
+## Grid view interface to explore data
+
+Data can be viewed and edited in a grid view, similar to a spreadsheet. Peliqan eliminates the need to make exports of your data that you dump into e.g. Excel, because data exports are not a repeatable process to work with data.
+
+## SQL on anything
+
+You can apply "SQL on anything" and write SQL queries that can be shared as new virtual tables (views) to business users. When the business user opens the table to view the data, the query will be executed in real-time. For the business user, it's just another table with all the capabilities of Peliqan such as editing, filtering, using the table in their favorite BI tool etc.
+
+## Data structure
+
+Peliqan follows the structure of relational databases to organize data:
+
+- Connection
+- Database
+- Schema
+- Table
+- Columns
+- Cells
+
+For example you can add a connection to a MySQL server. The connection uses certain credentials that have access to multiple databases on the server. Each database can have schemas (e.g. "public") and each schema can have tables. Each table has one or more columns.
+
+For SaaS Sources, Peliqan creates a schema for each source in the built-in data warehouse or the externally connected data warehouse. Peliqan will create one table for each object type, for example for a CRM such as Hubspot you will see tables such as Companies, Contacts, Deals etc.
+
+## Tables
+
+Every table in Peliqan can be accessed via the Grid view interface, each table can be used in SQL queries and each table can be referenced and used in Data apps (see below).
+
+For example you could write an SQL query to join 2 tables. The result can be used by business users in the Grid view interface or a BI tool, it can be referenced in another SQL query and it can be consumed in a data app.
+
+Following table types exist in Peliqan:
+
+- **Internal tables**: created by the user in Peliqan
+- **External tables**: tables from DB and DW connections (MySQL, Postgres, Snowflake, SQL Server etc.)
+- **Target tables**: tables created by Peliqan in the data warehouse from an ETL pipeline (e.g. from a SaaS Source)
+- **Queries**: SQL SELECT queries written in the Peliqan SQL editor
+
+## Data transformations
+
+Data can easily be [transformed](/data-transformations) in Peliqan. This is required to prepare data for usage by other people or teams, or to combine data from different sources.
+
+## Data apps with low-code Python
+
+Peliqan allows the [creation of interactive data apps](/low-code-python-data-apps/basics-of-data-apps) such as custom data interfaces for internal teams. Peliqan offers a low-code Python scripting environment that has direct access to all tables in Peliqan. These scripts are used for a wide range of use cases including reporting, alerting, writebacks (reverse ETL), machine learning, data quality etc.
+
+## Built-in data warehouse or bring your own
+
+Peliqan comes with a built-in data warehouse (Postgres) or you can connect your own data warehouse such as Snowflake, SQL Server, Redshift, BigQuery.
+
+When you add a SaaS connection to Peliqan, the data will be synced into the data warehouse. Peliqan automatically sets up a one-click ETL data pipeline.
+
+## Data lineage
+
+Peliqan provides out-of-the-box data lineage showing provenance, dependencies and impact analysis of data flows.
+
+## White-label, embedding & multi-customer management
+
+Peliqan is tailored for SaaS companies and consultancy companies that manage data projects for their end-customers. Peliqan offers white-labeling and embedding into an existing portal or SaaS application, plus central management of end-customer accounts (tenants). End-customer accounts can automatically be created and hydrated.

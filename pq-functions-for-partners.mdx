@@ -1,0 +1,50 @@
+---
+title: "pq Functions for partners"
+sidebarTitle: "pq Functions"
+description: "This section describes how you can build automations in Peliqan to manage sub accounts from your end-customers using pq functions in low-code Python scripts."
+---
+
+This section describes how you can build automations in Peliqan to manage sub accounts from your end-customers. This applies to Peliqan Partner accounts only. You can also use the [Peliqan Partner REST API](/whitelabel/partner-api-embed-api).
+
+`pq` is the Peliqan Python module, available in low-code Python scripts, that you run on Peliqan or even outside of Peliqan (by using `pip install peliqan`, [more info here](/low-code-python-data-apps/peliqan-python-client)).
+
+Below `pq` functions are available to partners that want to automate the creation, hydration and management of sub-accounts using low-code Python scripts, running the Partner account.
+
+Examples:
+
+```python
+# List sub accounts
+result = pq.list_subaccounts()
+sub_accounts = result["data"] # use result["next"] for paging
+st.json(sub_accounts)
+
+sub_account_external_id = 'wood_123'
+sub_account_id = 2179
+
+# Get sub account details using external id
+sub_account = pq.get_subaccount(external_id = sub_account_external_id)
+st.json(sub_account)
+
+# Get sub account details using account id
+sub_account_info = pq.get_subaccount_info(account_id = sub_account_id)
+st.json(sub_account_info)
+
+# Get pq instance to access the sub account
+sub_pq = pq.get_subaccount_instance(account_id = sub_account_id)
+
+# Get databases in sub account
+dbs = sub_pq.list_databases()
+st.json(dbs)
+
+# Get scripts in sub account
+scripts = sub_pq.list_scripts()
+st.json(scripts)
+
+
+# Add a script in a sub account (hydration of sub account)
+raw_script = """
+    st.write('Hello')
+"""
+sub_pq.add_script(group_name = "General", raw_script = raw_script, name = 'my_new_script')
+# Note: 'General' is the name of the default group in each newly created account
+```

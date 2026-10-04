@@ -1,0 +1,95 @@
+---
+title: "Nmbrs - Getting started in Peliqan"
+sidebarTitle: "Nmbrs"
+description: "Learn how to connect Nmbrs payroll and HR data to Peliqan using a Client login, authorize access, select tables, and troubleshoot common issues."
+---
+
+Nmbrs (a Visma product) is payroll & HR software used by accountants and businesses in the Netherlands. Connect your Nmbrs debtor to Peliqan to sync payroll and HR data (debtors, companies, employees, contracts, salaries, leave, payroll runs and more). Website: [nmbrs.com](https://www.nmbrs.com)
+
+This article helps you get started with the Nmbrs connector in Peliqan. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Prerequisites
+
+- An Nmbrs account.
+- A dedicated **Client login** scoped to the debtor you want to sync (see Step 1). A regular accountant login is not enough.
+
+## Step 1: Create a Client login under the target debtor
+
+In Nmbrs, create a Client login scoped to the debtor you want to connect. See Nmbrs's guide: [Creating a client login (Accountants)](https://support.nmbrs.com/hc/en-us/articles/360018607499-Creating-a-client-login-Accountants). Note that viewing this guide requires an Nmbrs support account.
+
+<Tip>
+  Use a plain email address without a "+" alias (e.g. not `name+client1@domain.com`). We've observed that a "+" can trigger an "Error" popup on Nmbrs's authorize screen. This isn't documented by Nmbrs; it's based on our own testing when setting up the connector.
+</Tip>
+
+## Step 2: Add the Nmbrs connector in Peliqan
+
+In Peliqan, go to Connections, click **Add new**, find **NMBRS** in the list and click **Connect**. Pick the **NMBRS** card, not **NMBRS (Private App)**, which is a separate connector for customers who register their own Nmbrs app. Fill in the form:
+
+- **Connection Name**: a name for this connection.
+- **Start Year / End Year**: optional. The form helptext mentions wage components, but these fields scope every year based table: company payroll runs, payroll run employees, fixed and variable wage components, employee cost centers, employee departments, fixed hours, cost per hour, company wage models, labour agreements and parental leave. Left blank, only the current year is synced, so set Start Year if you need history.
+- **Scopes**: prefilled with all available scopes. Remove only what you don't need, and keep `debtor.info.read`: it is what makes the debtor picker on the authorize screen work.
+- **Target data warehouse / Group / Description**: standard Peliqan fields.
+
+![The Nmbrs connect form in Peliqan.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5f4fe8b1-f21b-4bbd-992d-2a484b546898/screenshot_2026-09-16_145220/w=1920,quality=90,fit=scale-down)
+
+The Nmbrs connect form in Peliqan.
+
+## Step 3: Select tables and connection capabilities
+
+Click **Advanced** to open the table selection screen. All tables are selected by default; use the search box or **Select all** / **Clear** to choose what you need. The same screen has two connection capability toggles:
+
+- **Enable ETL**: syncs this connection's data into the data warehouse on a schedule.
+- **Enable writeback**: allows API calls back to the source, including write actions.
+
+<Warning>
+  Enable ETL and Enable writeback cannot be changed after the connection is created, so set them now.
+</Warning>
+
+Click **Next** to return to the form, then click **Add Connection**.
+
+![Table selection and connection capabilities.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/33e02b22-f9a7-4e70-b9dc-fff583cdff08/screenshot_2026-09-16_151131/w=1920,quality=90,fit=scale-down)
+
+Table selection and connection capabilities.
+
+## Step 4: Authorize
+
+You are redirected to Nmbrs to sign in, and then to Nmbrs's consent screen on `apiconsent.nmbrsapp.com`, titled "Peliqan needs to access your data". Sign in with the **Client login** from Step 1, not your regular accountant login. Nmbrs shows the Peliqan app with an orange **Unverified** badge; this is expected and safe to approve. Under "The app will access" Nmbrs lists the data groups Peliqan requested: Employee, Company, Debtor, User and Document Information. Debtor Information only appears when the `debtor.info.read` scope is included.
+
+Lower on the same screen, under "Select which profile will grant the data", tick the checkbox next to the debtor you want to connect _and_ select its profile in the **Profile** column. The dropdown groups profiles by type and only lists logins that are tied to that debtor, for example "Client Login (1)". The **Allow** button stays greyed out until both the debtor and a profile are set. Accountants with many debtors can use the debtor search box, the selected/deselected filter and the pager (20 rows per page). Click Allow; you are returned to Peliqan and the connection is created, after which the first sync runs.
+
+![Nmbrs's consent screen: Peliqan is shown as Unverified, with the data groups it will access.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a9451955-78fd-44f0-8333-459e847ddea5/1789556348093_two/w=1920,quality=90,fit=scale-down)
+
+Nmbrs's consent screen: Peliqan is shown as Unverified, with the data groups it will access.
+
+![Tick the debtor, then pick its Client Login profile. Allow stays greyed out until both are set.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/fa05e20c-6353-406c-9533-1b3c17ef1688/1789556348093_thre/w=1920,quality=90,fit=scale-down)
+
+Tick the debtor, then pick its Client Login profile. Allow stays greyed out until both are set.
+
+## Good to know
+
+- The connector offers 35 tables: debtors, companies and company addresses, cost centers, cost units, hour codes, payroll runs, schedules, wage models, contracts, departments, managers, employees, employments, employee details, personal info, addresses, salaries, absences, parental leave, labour agreements, functions, extra fields, fixed and variable hours, fixed and variable wage components, cost centers, cost per hour, departments, schedules, leave requests, leave balances, leave groups and payroll run employees.
+- A connection syncs all debtors the authorized login can access. Since a Client login is scoped to one debtor, connect once per debtor you want to sync. `debtorId` and `company_id` are included as columns so you can tell records apart.
+- The default sync interval is every 24 hours.
+- Six tables sync incrementally: `employments`, `schedules`, `employee_salaries`, `employee_absences`, `employee_labouragreements` and `employee_parentalleave`. All other tables are fully reloaded on every sync.
+
+## Troubleshooting
+
+### The debtor is missing on the consent screen, or Allow stays greyed out
+
+Nmbrs only lists logins that are tied to a specific debtor on the "Select which profile will grant the data" screen, so the failure shows up in one of two ways: the debtor row is not listed at all, or the row is there but its **Profile** dropdown has no Client Login to choose, which leaves **Allow** disabled. A regular accountant login hits this even when it has full rights to all debtors inside Nmbrs. Create a Client login under the target debtor (Step 1) and authorize with that login instead.
+
+### An "Error" popup appears on the authorize screen
+
+Check the email address of the Client login. We have seen this happen when the address contains a "+" alias. Use a plain email address without a "+".
+
+### Wage components or payroll runs only contain the current year
+
+Start Year and End Year were left blank, which limits all year based tables to the current year. Set Start Year to the first year you need and re-sync.
+
+### The connection stops syncing with an authorization error
+
+Reconnect the connection in Peliqan and authorize again with the same Client login used originally.
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](mailto:support@peliqan.io).

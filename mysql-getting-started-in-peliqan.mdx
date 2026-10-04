@@ -1,0 +1,65 @@
+---
+title: "MySQL - Getting started in Peliqan"
+sidebarTitle: "MySQL"
+description: "Learn how to connect a MySQL 8.x database to Peliqan as an external DB connection, configure users, permissions, and IP whitelisting."
+---
+
+This article describes how to connect a MySQL database to Peliqan. This is referred to as an "external DB connection" in Peliqan, a direct DB connection is made to query data, without duplicating the data to the Peliqan data warehouse.
+
+<Note>
+  The minimum supported version for MySQL is 8.x. Older versions cannot be connected to Peliqan ! Run "SELECT VERSION();" in your DB to check your version.
+</Note>
+
+## Connect MySQL
+
+In Peliqan, go to Connections > Add Connection > Select **MySQL** in the list > Enter the details of your MySQL instance:
+
+![MySQL connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b234ae1e-fd3c-43da-aa4b-aa613c9c9164/Connect_MySQL/w=1920,quality=90,fit=scale-down)
+
+## Permissions in MySQL
+
+Make sure to configure following permissions in MySQL, so that Peliqan can connect remotely:
+
+### Create user
+
+Use wildcard `%` for the hostname in the user, so that the user can connect remotely (from Peliqan) to your MySQL database:
+
+```sql
+CREATE USER 'newuser'@'%' IDENTIFIED BY 'StrongPassword123!';
+```
+
+If the user is created using e.g. `CREATE USER 'newuser'@'localhost'`, Peliqan will not be able to connect.
+
+### Grant permissions
+
+Use the wildcard `%` for the hostname, also when granting permissions:
+
+```sql
+GRANT ALL PRIVILEGES ON mydatabase.* TO 'newuser'@'%';
+```
+
+## IP whitelisting
+
+Make sure to add Peliqan's IP addresses, as well as the AWS hostnames for each IP, in case that IP whitelisting is active on your database. More info:
+
+[IP whitelisting](/ip-whitelisting)
+
+Example to add **IP whitelisting** for the Peliqan EU instance, when creating a user:
+
+```sql
+CREATE USER 'newuser'@'3.74.207.151' IDENTIFIED BY 'StrongPassword123!';
+CREATE USER 'newuser'@'52.28.10.115' IDENTIFIED BY 'StrongPassword123!';
+CREATE USER 'newuser'@'52.28.176.5' IDENTIFIED BY 'StrongPassword123!';
+
+CREATE USER 'newuser'@'ec2-3-74-207-151.eu-central-1.compute.amazonaws.com' IDENTIFIED BY 'StrongPassword123!';
+CREATE USER 'newuser'@'ec2-52-28-10-115.eu-central-1.compute.amazonaws.com' IDENTIFIED BY 'StrongPassword123!';
+CREATE USER 'newuser'@'ec2-52-28-176-5.eu-central-1.compute.amazonaws.com' IDENTIFIED BY 'StrongPassword123!';
+
+GRANT ALL PRIVILEGES ON mydatabase.* TO 'newuser'@'3.74.207.151';
+GRANT ALL PRIVILEGES ON mydatabase.* TO 'newuser'@'52.28.10.115';
+GRANT ALL PRIVILEGES ON mydatabase.* TO 'newuser'@'52.28.176.5';
+
+GRANT ALL PRIVILEGES ON mydatabase.* TO 'newuser'@'ec2-3-74-207-151.eu-central-1.compute.amazonaws.com';
+GRANT ALL PRIVILEGES ON mydatabase.* TO 'newuser'@'ec2-52-28-10-115.eu-central-1.compute.amazonaws.com';
+GRANT ALL PRIVILEGES ON mydatabase.* TO 'newuser'@'ec2-52-28-176-5.eu-central-1.compute.amazonaws.com';
+```

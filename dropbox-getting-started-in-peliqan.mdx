@@ -1,0 +1,168 @@
+---
+title: "Dropbox - Getting started in Peliqan"
+sidebarTitle: "Dropbox"
+description: "Learn how to connect Dropbox to Peliqan to list, download, and upload files using Python scripts and data apps."
+---
+
+The Dropbox connector can be used to read Dropbox files from within your scripts in Peliqan. For example, you can implement a file sync from Dropbox to a target API (e.g. an ERP or CRM or Project management tool).
+
+## Connect Dropbox
+
+In Peliqan, go to Connections, click "Add connection", and select Dropbox from the list.
+
+Complete the authorization flow by granting the Peliqan app access to your Dropbox account.
+
+## List items in a Dropbox folder
+
+Here's an example on how to get a list of items (folders, files) from a given path:
+
+```python
+dropbox_api = pq.connect("Dropbox")
+path = "" # Root folder
+items = dropbox_api.get("files", {"path": path})
+
+for item in items:
+    if item[".tag"] == "file":
+       st.text(item["name"] + " is a file"
+    elif item[".tag"] == "folder":
+        st.text(item["name"] + " is a folder"
+```
+
+## Download a file from Dropbox
+
+Here's an example on how to download a file from Dropbox as a base64 encoded string:
+
+```python
+dropbox_api = pq.connect("Dropbox")
+content = dropbox_api.get("downloadfile", {"path": "/myfile.pdf"})
+st.write(content["base64"])
+```
+
+## Upload a file to Dropbox
+
+Here's an example on how to upload a file to Dropbox:
+
+```python
+dropbox_api = pq.connect("Dropbox")
+  
+# Example downmload a file from a URL
+url = "https://mydomain.com/somefile.pdf"
+response = requests.get(url)
+response.raise_for_status()  # raise an error if the download failed
+file_bytes = response.content
+
+file_content_base64 = base64.b64encode(file_bytes).decode("ascii")
+uploadfile_params = {
+    "path": "/myfile.pdf",
+    "content_type": "application/octet-stream",
+    "file_content_base64": file_content_base64
+}
+result = dropbox_api.add('uploadfile', uploadfile_params)
+st.write(result)
+```
+
+## Script templates
+
+### File explorer with file sync to a target API
+
+This example script allows the user to select a folder in Dropbox. The script can be scheduled and will sync all files in the folder to a target API (e.g. an ERP or CRM or Project management tool). The script keeps track if which files are already synced and will sync each file only once.
+
+```python
+# File explorer to select a folder in Dropbox,
+# And sync all files from that folder to target API.
+#
+# Limitations:
+# No paging is done when fetching contents of a folder.
+# Only folders under root folder are shown.
+# File updates are not synced.
+
+import base64
+
+dropbox_api = pq.connect("Dropbox")
+target_api = pq.connect('Some Connection')
+dw = pq.dbconnect(pq.DW_NAME)
+
+
+def show_file_explorer():
+    folders = dropbox_get_items("", "folder")
+    selected_folder = pq.get_state()
+    index = None
+    if selected_folder:
+        for i, folder in enumerate(folders):
+            if folder["name"] == selected_folder["name"]:
+                index = i
+
+    st.title("File sync from Dropbox to API")
+    st.selectbox("Select a folder from your Dropbox to sync", 
+                 folders, 
+                 key = "selectbox_folder", 
+                 on_change = on_change, 
+                 format_func = lambda f: f["name"],
+                 index = index)
+
+    if st.button("Sync now"):
+        do_sync()
+    st.info("Or set a schedule to this app after selecting a folder.")
+
+
+def do_sync():
+    selected_folder = pq.get_state()
+    if not selected_folder:
+        st.text("No folder set to sync")
+    else:
+        st.text("Doing file sync from Dropbox to API")
+        files = dropbox_get_items(selected_folder["path_lower"], "file")
+        synced_files = dw.fetch(pq.DW_NAME, 'logs', 'dropbox_sync')
+        
+        for file in files:
+            already_synced = False
+            for synced_file in synced_files:
+                if file["name"] == synced_file["file"]:
+                    already_synced = True
+                    st.text(f"File %s already synced" % file["name"])
+            if not already_synced:
+                sync_file(file)
+                st.text(f"File %s synced" % file["name"])
+
+
+def sync_file(file):
+    content = dropbox_api.get("downloadfile", {"path": file["path_lower"]})
+    
+    file_type = file["name"].split(".",1)[1].lower()
+    if file_type == "pdf":
+        mime_type = "application/" + file_type
+    else:
+        mime_type = "image/" + file_type
+    
+    payload = {
+          'file_contents': content["base64"],
+          'file_mime_type': mime_type,
+          'file_name': file["name"]
+    }
+
+    result = target_api.add('document', payload)
+    st.text(f"Uploaded file: %s, status: %s" % (file["path_lower"], result["status"]))
+    if result["status"] == "error":
+        st.json(result)
+    dw.upsert(pq.DW_NAME, 'logs', 'dropbox_sync', file, { 'file': file["name"], 'status': result['status'] })
+
+
+def dropbox_get_items(path, type):
+    items = dropbox_api.get("files", {"path": path})
+    folders = []
+    for item in items:
+        if item[".tag"] == type:
+            folders.append(item)
+    return folders
+
+
+def on_change():
+    st.text(f"Selected folder saved: %s" % st.session_state.selectbox_folder["name"])
+    pq.set_state(st.session_state.selectbox_folder)
+
+
+if RUN_CONTEXT == 'interactive':
+    show_file_explorer()
+else: # Scheduled run
+    do_sync()
+```

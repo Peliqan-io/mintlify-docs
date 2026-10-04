@@ -1,0 +1,24 @@
+---
+title: "Platform status"
+sidebarTitle: "Platform Status"
+description: "Monitor Peliqan's platform health, service availability and scheduled maintenance windows for EU and US instances."
+---
+
+Please visit Peliqan' status page for up to date information on the status of Peliqan's different services:
+
+[https://status.peliqan.io](https://status.peliqan.io)
+
+## Maintenance windows
+
+Peliqan deploys platform updates within fixed time windows. While we aim to keep downtime to a minimum, certain updates and upgrades require e.g. restarts and can cause minimal downtime.
+
+- **EU instance: 5:30 PM - 7:30 PM CET** (Brussels) on Wednesday or Thursday
+- **US instance: 5:30 AM - 7:30 AM ET** (New York) on Wednesday or Thursday
+
+Note that not every maintenance window is used.
+
+During the maintenance window:
+
+- At the start of the deploy time window, schedulers (for pipelines and Data Apps) are stopped, for a duration of minimum 1 hour after which the actual deploy starts.
+- Downtime during deploy is aimed to be minimal (15 - 30 minutes or less).
+- Pipelines and scheduled Data Apps that are still running during deploy will be killed, their bookmarks will not be increased and they will pick up where they left off on the next scheduled run.

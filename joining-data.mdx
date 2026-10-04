@@ -1,0 +1,38 @@
+---
+title: "Joining data"
+description: "Write JOIN queries in Peliqan to combine tables from the same or different sources using the built-in Trino federated query engine for cross-database joins."
+sidebarTitle: "Joining data"
+---
+
+In the SQL query editor, you can write any type of SELECT query, including a query with a JOIN statement.
+
+You can join tables from the same source, or from different sources, assuming the data from both sources is in the same database or data warehouse. For example when you connect your CRM (e.g. Hubspot) and your accounting software (e.g. Xero) you can write a JOIN query between both sources, by using the target tables in the data warehouse. Example:
+
+```sql
+SELECT * FROM hubspot.companies
+INNER JOIN xero.customers
+ON hubspot.companies.vat = xero.customers.vat_number
+```
+
+When you want to JOIN data from two different databases (e.g. between a table in MySQL and a table in Postgres), you need to run your query using Peliqan's built-in federated query engine Trino. Can you enable this under the Settings icon of the query in the SQL query editor:
+
+![Enable Trino setting](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/310f80c8-af5d-4cf6-afce-10c76e8ec7d7/enable_Trino/w=1920,quality=90,fit=scale-down)
+
+## Different types of joins
+
+The different types of joins are described below:
+
+- **Left join**: take all rows from the left table and match with the right table; right table columns could be NULL in join.
+- **Right join**: take all rows from the right table and match with the left table; left table columns could be NULL in join.
+- **Inner join**: take only rows that match on both sides; not all rows if left table and not all rows from right table will be included.
+- **Outer join**: combine every row from the left table with every row from the right table; if there are 5 rows left and 3 rows right, there will be 5 x 3 = 15 rows in the result
+
+## Preparing data for joins
+
+In order to join tables from different sources, you need a common key between both tables. In order to prepare data for a join, you might need to transform the data first. For example the common key could be a VAT number, but in one table the VAT number contains a country code or dots, and in the other table the VAT number does not.
+
+In this case you can apply a transformation on the VAT number in the left table first, and then use the transformed column to do the join.
+
+See the following section for more information on applying transformations:
+
+[Data transformations](/data-transformations)

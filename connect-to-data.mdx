@@ -1,0 +1,145 @@
+---
+title: "ELT: Connect to data"
+sidebarTitle: "Connect to data"
+description: "Learn how to add connections, sync data from databases and SaaS apps, understand connection statuses, and request new connectors in Peliqan."
+---
+
+Peliqan provides direct data access to a wide range of data sources: SaaS business applications, databases, data warehouses, APIs, files etc.
+
+## Add a new connection
+
+In Peliqan, go to Connections and add a new connection. Select the connection type and enter the required credentials or complete the oAuth flow.
+
+![Peliqan add connection dialog](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/05d28caa-705a-4e0b-9e17-fbb45d02e306/connection_add_2/w=1920,quality=90,fit=scale-down)
+
+## Data sync and schema discovery
+
+After adding a connection, Peliqan will automatically set up a data pipeline and start syncing data (for SaaS sources) and/or do schema discovery (for databases). This process can take anywhere between a few seconds and a few minutes. You will automatically see the database and its tables appear in the left pane under "Explore" in Peliqan. Click on a table to open it and view the data.
+
+### For databases:
+
+Once the connection is added, Peliqan will automatically start doing schema discovery on the connection. This means it will make a list of all the databases, per database all the schemas, per schema all the tables, and per table all the columns. Peliqan will also capture sample data etc.
+
+Note that Peliqan **does not replicate your DB data**. Instead Peliqan uses a DB connection when you access data from the DB source or when you execute SQL queries in Peliqan.
+
+Note: you can use the built-in distributed query engine Trino to combine data across sources.
+
+### For SaaS applications:
+
+For SaaS connections, Peliqan will set up an ELT pipeline and replicate your data into the built-in Peliqan data warehouse or a data warehouse of your choice (Snowflake, BigQuery etc.).
+
+Peliqan will create one table per object type. For example for a CRM such as Hubspot, you will see tables appearing such as Contacts, Companies, Deals etc. as well as "child tables" for e.g. the Phone numbers of Contacts.
+
+## Available connectors
+
+<Note>
+  For an up to date list of all available connectors, visit [https://peliqan.io/connectors](https://peliqan.io/connectors)
+</Note>
+
+### Databases, Data warehouses and data lakes
+
+- MySQL
+- Microsoft SQL server (Azure)
+- Postgres
+- MongoDB
+- Snowflake
+- Amazon Redshift
+- Google BigQuery
+- Amazon S3 (coming soon)
+- Databricks (coming soon)
+
+Other DB's, DW's and DL's are available on request, see below.
+
+For databases, data warehouses and data lakes, Peliqan will fetch the data in real-time when a table is opened or used in e.g. a data app. Peliqan does not store a copy of the data, except when you [materialize](/data-warehouse-materialize-tables) a table in Peliqan.
+
+### SaaS business applications
+
+- Salesforce
+- Hubspot
+- Jira
+- Zendesk
+- Pipedrive
+- Odoo
+- Freshdesk
+- Intercom
+- Unleashed ERP
+- And [100+ other SaaS business applications](https://peliqan.io/connectors) !
+- Other SaaS connectors are available on request, see below.
+
+For SaaS business applications, Peliqan will set up a data pipeline automatically when you add a connection, and it will start syncing the data from the SaaS application into the built-in data warehouse. The sync is incremental where possible, the interval can be viewed under Connections.
+
+### On-prem data sources
+
+Peliqan offers a secure peer-to-peer VPN agent, that can be installed on-prem to sync data to a data warehouse in the cloud. [Contact us](https://peliqan.io/contact) for more information on the on-prem agent.
+
+### Files and API data sources
+
+Working with files and APIs is done through [Peliqan's low-code Python scripts](/low-code-python-data-apps).
+
+More info on working with files:
+
+[Working with files](/low-code-python-data-apps/working-with-files)
+
+See Data Enrichment for an example working with APIs directly:
+
+[Data enrichment](/low-code-python-data-apps/data-enrichment)
+
+Note that you can also request a new connector (see below), in which case you don't have to handle the API of a SaaS application to extract data.
+
+## Requesting a new connector
+
+The Peliqan connector team will add new connectors in 2 business days at a fixed low one-time setup price. [Contact support](/contact-support) for more details.
+
+- **For databases**: please provide the name of the database system you want to connect, optionally including a test account.
+- **For SaaS sources**: Peliqan can work with any type of API (REST, SOAP Web services, GraphQL etc.). Please provide following details if possible in your connector request:
+  - Name of the SaaS business application
+  - Brief description of the use case, e.g. which data do you need
+  - Do you want to read data only or also perform write-back?
+  - Link to API documentation
+  - If possible, test credentials to the API
+
+## Connection status
+
+You can verify the status of your connections under "Connections" in Peliqan.
+
+![Peliqan connection statuses](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b522df01-36a5-4958-b6c1-9e6f72aa0334/connections/w=1920,quality=90,fit=scale-down)
+
+### Connection status for SaaS connections
+
+**Source status**
+
+- **Green icon**: Scheduled syncs are running normally.
+- **Red icon**: Last sync had an error. Scheduled syncs will no longer run. Start a manual run (menu item "Sync") to try again. If this sync runs normally, the source will show a green icon again and scheduled runs will be resumed.
+- **Spinner icon**:
+  - When adding a new connection: data pipeline is being created and executed.
+  - For an existing connection: data pipeline is being executed.
+
+**Target status**
+
+- **Green icon**: Syncing data into the data warehouse is running normally.
+- **Red icon**: When using an external data warehouse: check connection and permissions on this DW.
+- **Spinner icon**: Peliqan is discovering the tables & columns on the DW target tables, getting sample values etc.
+
+**Menu action "Sync"**
+
+Use this when you don't want to wait for the next scheduled sync to pull in new SaaS data.
+
+**Menu action "Full resync"**
+
+Use this when you want to update to the latest version of a connector (which supports e.g. more tables) or you want to resync all data. A full resync will also make sure that records that were deleted in the source are no longer present in the target data warehouse.
+
+### Connection status for DB connections
+
+**Source status**
+
+- **Green icon**: Peliqan was able to connect and discover the schema.
+- **Red icon**: Double check connection details and run "Sync" so that Peliqan will try to discover schemas again. If this is successful, the source icon will be green again.
+- **Spinner icon**: Peliqan is discovering tables & columns, getting sample values etc.
+
+**Target status**
+
+There is no target for DB connections, because Peliqan will access external DBs directly without the need to replicate the data. Use Peliqan's built-in Trino query engine to combine data from multiple sources.
+
+**Menu action "Sync"**
+
+Use this when the schema changed in the connected DB, e.g. new tables or columns were added. By doing a "Sync", you will see the new tables or columns appear in Peliqan.

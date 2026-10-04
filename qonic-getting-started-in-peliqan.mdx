@@ -1,0 +1,292 @@
+---
+title: "Qonic - Getting started in Peliqan"
+sidebarTitle: "Qonic"
+description: "Qonic is a cloud-based BIM modelling platform for the AEC industry (Architecture, Engineering, Construction)."
+---
+
+[Qonic](https://www.qonic.com) is a cloud-based BIM modelling platform for the AEC industry (Architecture, Engineering, Construction). It exposes BIM project, model, library, and product data.
+
+This article explains how to get started with the Qonic connector in Peliqan, what gets synced to your data warehouse, and how to write back to Qonic from Python scripts.
+
+## How to connect Qonic
+
+To connect Qonic to Peliqan, you need a Qonic OAuth2 application (`client_id` + `client_secret`) registered against your Qonic tenant.
+
+1. In your Qonic developer portal, register an OAuth2 application and whitelist the redirect URI **exactly** as `https://oauth.peliqan.io`. Note the `client_id` and `client_secret`.
+2. In Peliqan, go to **Connections** and click **Add Connection**.
+3. Search for **Qonic** and select it.
+4. Fill in the fields:
+
+- **Client ID** — OAuth2 `client_id` from your Qonic app
+- **Client secret** — OAuth2 `client_secret` from your Qonic app
+- **Scopes** — space-separated list. Default value covers reads + writes:
+
+`projects:read models:read libraries:read models:write libraries:write issues:read projects:write`
+
+6. Click **Save**, then complete the OAuth2 consent screen Qonic redirects you to. Peliqan stores the access token and refresh token automatically.
+
+The connection refreshes its access token on every sync (default `run_interval` is 6 hours).
+
+## Qonic data sync to data warehouse
+
+Once connected, Peliqan syncs the following streams from Qonic into your data warehouse.
+
+All streams are scoped per project. Child streams (models, libraries, locations, types, custom properties) are fetched once per project, and library-item streams are fetched once per `(project, library)` pair.
+
+| Stream | Replication | Description |
+| --- | --- | --- |
+| `projects` | Full | All projects you have access to |
+| `models` | Full | Models per project (one row per model) |
+| `codifications` | Full | Codification (classification) libraries per project |
+| `codification_library_items` | Full | Exploded codification entries inside each library |
+| `material_libraries` | Full | Material libraries per project (one row per library) |
+| `material_library_items` | Full | Exploded materials inside each library |
+| `locations` | Full | Spatial location hierarchy per project (flattened with `parentGuid` · `depth` · `path`) |
+| `types` | Full | Type items per project (flattened across all type libraries) |
+| `custom_properties` | Full | Custom property sets per project |
+| `products_available_data` | Full | Available product property fields per `(project, model)` |
+| `products_dynamic_properties_available_data` | Full | Available dynamic property fields per `(project, model)` |
+| `products` | Full (disabled by default) | Full product properties per `(project, model)` — enable only after confirming your tenant supports it |
+
+Peliqan provides a built-in data warehouse. You can alternatively sync Qonic data to an external data warehouse (Snowflake, Google BigQuery, MS SQL, etc.). You can explore the synced data in the Peliqan UI.
+
+### Synthetic primary keys
+
+Several Qonic responses do not expose a stable primary key per emitted row, so the connector adds a `_peliqan_pk` column built from the natural identifiers it does have.
+
+| Stream | `_peliqan_pk` formula |
+| --- | --- |
+| `codifications` | `{projectId}\|{libraryGuid}` |
+| `material_libraries` | `{projectId}\|{libraryGuid}` |
+| `codification_library_items` | `{projectId}\|{libraryGuid}\|{guid}` |
+| `material_library_items` | `{projectId}\|{libraryGuid}\|{materialGuid}` |
+| `custom_properties` | `{projectId}\|{guid}` |
+
+Use `_peliqan_pk` as the join key in SQL. It survives library reorganisations better than positional indexes.
+
+## Writeback from Python scripts
+
+The Qonic connector exposes 35 write operations covering codifications, materials, models, spatial locations, custom properties, and types.
+
+Path parameters (`projectId`, `libraryGuid`, etc.) are passed alongside the body fields. The connector substitutes them into the URL automatically and strips them from the request body.
+
+### Basic writeback example
+
+```python
+qonic_api = pq.connect('Qonic')
+
+# Add a material to an existing material library
+result = qonic_api.add('material', {
+	'projectId':   '<project-guid>',
+	'libraryGuid': '<material-library-guid>',
+	'name':        'Concrete C30/37',
+	'color':       '#888888',
+	'description': 'Standard structural concrete',
+	'category':    'Structural',
+})
+
+st.json(result)
+```
+
+Empty-string values for optional fields are stripped automatically before sending. Qonic rejects `""` on enum-like fields with `400 InvalidArgument`, so you do not need to filter your dict manually.
+
+### Available writeback endpoints
+
+**Codifications** (classification systems like Uniclass, NL/SfB, OmniClass)
+
+- `codification_library_add`, `codification_library_delete`
+- `codification_code_add`, `codification_code_update`, `codification_code_delete`
+
+**Materials**
+
+- `material_library_add`, `material_library_delete`
+- `material_add`, `material_update`, `material_delete`
+
+**Custom properties** (user-defined fields on entities)
+
+- `custom_property_set_add`, `custom_property_set_update`, `custom_property_set_delete`
+- `custom_property_definition_add`, `custom_property_definition_update`, `custom_property_definition_delete`
+
+**Spatial locations** (Site / Building / Floor / Space hierarchy)
+
+- `location_add`, `location_update`, `location_delete`
+
+**Type items** (e.g. wall types, door types)
+
+- `type_add`, `type_update`, `type_delete`
+
+**Models** (see _Editing models_ below)
+
+- `model_add`, `model_start_session`, `model_end_session`
+- `model_products_modify`, `model_product_delete`
+- `model_publish`, `model_discard`, `model_export_ifc`
+- `model_products_properties_query`, `model_products_quantities_query`, `model_products_dynamic_properties_query`
+
+**Helpers**
+
+- `upload_url_get` — presigned URL to upload an IFC file before `model_add`
+- `operation_get` — poll the status of asynchronous operations
+
+### Editing models: the session/publish/discard pattern
+
+Model edits in Qonic are transactional. You open an editing session, make changes, and then either **publish** (commit) or **discard** (rollback). Skipping the session step will fail.
+
+```python
+qonic_api = pq.connect('Qonic')
+
+project_id = '<project-guid>'
+model_id   = '<model-guid>'
+
+# 1. Start an editing session
+qonic_api.add('model_start_session', {
+	'projectId': project_id,
+	'modelId':   model_id,
+})
+
+# 2. Mutate products (add/update/delete in one call)
+qonic_api.update('model_products_modify', {
+	'projectId': project_id,
+	'modelId':   model_id,
+	'addOrUpdate': {
+		'<product-guid>': { 'name': 'Updated wall', 'IsExternal': True },
+	},
+})
+
+# 3. Commit and end the session
+qonic_api.add('model_publish', {
+	'projectId':   project_id,
+	'modelId':     model_id,
+	'title':       'Bulk update from Peliqan',
+	'description': 'Imported from external source',
+})
+
+qonic_api.add('model_end_session', {
+	'projectId': project_id,
+	'modelId':   model_id,
+})
+```
+
+If anything goes wrong in the middle, call `model_discard` instead of `model_publish` to roll back, then `model_end_session`.
+
+### Creating a new model (IFC upload)
+
+`model_add` is a three-step flow: get a presigned URL, upload the IFC file with HTTP `PUT`, then register the model.
+
+```python
+import requests
+
+qonic_api = pq.connect('Qonic')
+
+# 1. Ask Qonic for a presigned upload URL
+upload = qonic_api.get('upload_url')
+
+upload_url      = upload['uploadUrl']   # adjust to actual response shape
+upload_filename = upload['fileName']
+
+# 2. PUT the IFC file directly to that URL (not via Peliqan)
+with open('/path/to/model.ifc', 'rb') as f:
+	requests.put(upload_url, data=f.read()).raise_for_status()
+
+# 3. Register the new model
+result = qonic_api.add('model', {
+	'projectId':      '<project-guid>',
+	'modelName':      'My new model',
+	'uploadUrl':      upload_url,
+	'uploadFileName': upload_filename,
+	'discipline':     'Architectural',  # see "Important" section below
+	'defaultRole':    'Modeler',
+})
+
+st.json(result)
+```
+
+### Async operations (export, quantities, dynamic properties)
+
+A few endpoints return an `operationId` instead of an immediate result. Poll `operation_get` until the status is `Ready`.
+
+```python
+qonic_api = pq.connect('Qonic')
+
+# Trigger an IFC export
+op = qonic_api.add('model_export_ifc', {
+	'projectId': '<project-guid>',
+	'modelId':   '<model-guid>',
+})
+
+operation_id = op['operationId']
+
+# Poll until ready (Queued -> InProgress -> Ready / Failed)
+import time
+
+while True:
+	status = qonic_api.get('operation', {'operationId': operation_id})
+	if status['status'] in ('Ready', 'Failed'):
+		break
+	time.sleep(5)
+
+st.json(status)
+```
+
+The same pattern applies to `model_products_quantities_query` and `model_products_dynamic_properties_query`.
+
+## Important: Qonic API limitations and quirks
+
+### `discipline` is required, but the OpenAPI spec marks it optional
+
+When calling `model_add`, Qonic rejects requests without a `discipline` value (`400 InvalidArgument: "Discipline is required for model creation"`).
+
+The OpenAPI spec lists it as a nullable string and does not enumerate valid values, and Qonic's public docs do not either. To find what your tenant accepts, read the existing `models` stream and inspect the `discipline` column.
+
+```sql
+SELECT DISTINCT discipline FROM qonic.models
+```
+
+Use one of the existing values. Common BIM disciplines (`Architectural`, `Structural`, `MEP`) are reasonable first guesses but may not match your tenant exactly.
+
+### Empty strings are rejected
+
+Optional string fields like `discipline`, `defaultRole`, and `category` cannot be sent as `""`.
+
+The connector's writeback prerequest strips empty strings before sending, so as long as you use the connector helpers you are fine. If you call the API directly, omit these keys rather than passing empty strings.
+
+### `defaultRole` valid values
+
+Per [Qonic docs — Model Access Rights](https://help.qonic.com/documentation/qonic-dashboard/models/model-access-rights), the five roles are:
+
+- `No Access`
+- `Viewer`
+- `Data editor`
+- `Modeler`
+- `Owner`
+
+### Async operation status values
+
+Returned by `operation_get`: `Queued`, `InProgress`, `Ready`, `Failed`.
+
+### Common error codes
+
+| Code | Meaning |
+| --- | --- |
+| `400 InvalidArgument` | Missing or invalid body field — check the response `errorDetails` |
+| `404 ProjectNotFound` / `ModelNotFound` / `LibraryNotFound` | Path identifier does not exist or you lack access |
+| `409` (on publish or end-session) | No active session — call `model_start_session` first |
+| `429` | Rate limited — slow down between calls |
+
+### How Peliqan addresses these
+
+- **Empty-string stripping** in `quonic_writeback_prerequest` prevents the most common 400 on enum-like fields.
+- **Path-key stripping** removes `projectId`, `modelId`, `libraryGuid`, etc. from the JSON body after they have been substituted into the URL, which keeps Qonic from rejecting duplicates.
+- **Bookmarks persisted between runs** — incremental categories (project / model / library) are tracked so a partial sync resumes cleanly.
+- **Synthetic** `_peliqan_pk` on streams without a stable natural PK guarantees deterministic deduplication in the warehouse.
+
+### What to expect on the first sync
+
+The first sync of a tenant with many projects and large IFC models can take several minutes to over an hour, mostly because of the per-project and per-(project, model) fan-out for library items, types, custom properties, and available-data streams.
+
+Subsequent runs only re-fetch top-level lists. The heavy library and type detail streams use cached parent IDs and run much faster.
+
+If a specific project repeatedly errors during sync, narrow the run with the optional **Project ID** filter in the connection settings to isolate the problem, and contact [support@peliqan.io](mailto:support@peliqan.io).
+
+## Need further help?
+
+For assistance, contact [support@peliqan.io](mailto:support@peliqan.io).

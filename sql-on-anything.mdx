@@ -1,0 +1,78 @@
+---
+title: "SQL on anything"
+description: "Use Peliqan’s SQL query editor to write SELECT queries on any data source, including JOINs and UNIONs, with support for Trino as a federated query engine."
+sidebarTitle: "SQL on anything"
+---
+
+Use the Peliqan SQL query editor to write SELECT queries on any data source, including JOIN queries that join data from different sources, UNION etc.
+
+On save, the SQL query will automatically be beautified. The query will be executed two times, the first time with a "LIMIT 1" added to discover the schema (columns) of the result, the second time to fetch a page of data (default 3000 rows). The Grid view in Peliqan will automatically apply paging when you scroll.
+
+You can insert table names from the right pane. You can hover over a table in the SQL editor to see the structure (columns, example value etc.) of the referenced table.
+
+![SQL editor table hover info](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8055b149-e862-4b3f-a03d-1840b1036f5a/SQL_editor_table_hover_info/w=1920,quality=90,fit=scale-down)
+
+## Referencing tables and views in queries
+
+### Referencing a table
+
+Examples:
+
+```sql
+SELECT * FROM databasename.schema.tablename;
+SELECT * FROM schema.tablename;
+SELECT * FROM tablename;
+```
+
+## Referencing another query
+
+When you write a SELECT query and save it, it becomes a "table" in Peliqan. The query is ephemeral, which means it will be executed each time the table is opened. You can reference another SQL query inside a new SQL query.
+
+Example where an SQL query references another SQL query with name **my_query_name**:
+
+```sql
+SELECT * FROM my_query_name WHERE id>10;
+```
+
+Peliqan will convert this into a CTE (common table expression). For example let's say that the SQL query with name **my_query_name** was `SELECT id, LOWER(name) FROM my_table`. The above final query that will be executed will be:
+
+```sql
+WITH my_query_name AS (
+  SELECT id, LOWER(name) FROM my_table
+) 
+SELECT * FROM my_query_name WHERE id>10;
+```
+
+### Referencing a Grid view
+
+It is possible to reference a grid view that is defined on a table in the Grid view interface:
+
+![Grid view interface](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/18337754-1b99-440d-8fd5-a73a2df056cb/grid_view/w=1920,quality=90,fit=scale-down)
+
+Grid views are useful to e.g. filter the data. A Grid view is appended to the table name using an underscore. Example:
+
+```sql
+SELECT * FROM databasename.schema.tablename_gridviewname;
+```
+
+## Run SQL queries on Peliqan's federated query engine (Trino)
+
+Optionally you can run your SQL queries on Peliqan's built-in federated query engine Trino, in order to join data between separate databases and data warehouses. Enable Trino under the Settings icon of your query in the SQL query editor:
+
+![Enable Trino setting](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e4011f6a-66da-44a3-906b-931a8e5e48b6/enable_Trino/w=1920,quality=90,fit=scale-down)
+
+[Click here for all Trino SQL functions](https://trino.io/docs/current/functions.html)
+
+## Common examples
+
+Filter records after a specified date:
+
+```sql
+SELECT * FROM some_table where some_date_column > date '2021-12-25'
+```
+
+Cast a column to a different format:
+
+```sql
+SELECT CAST(some_column AS float) FROM some_table
+```

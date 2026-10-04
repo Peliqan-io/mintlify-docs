@@ -1,0 +1,150 @@
+---
+title: Generate and distribute PDF reports
+sidebarTitle: PDF Reports
+description: Generate PDF reports in Peliqan using HTML, download them via Streamlit, or distribute them by email using Postmark.
+---
+
+You can generate a PDF report in Peliqan in different ways. In this example, we are using HTML to have full control over the layout of the report. The HTML is converted into a PDF document.
+
+## Generate PDF report for download
+
+The Streamlit module in Peliqan `st` is only used in this example to render the HTML on screen to verify it. We use the Peliqan function `pq.download_pdf_button()` to show a download button. The download button converts the HTML to PDF and allows the user to download the PDF report.
+
+Example low-code Python script in Peliqan:
+
+```python
+import html
+
+dbconn = pq.dbconnect(pq.DW_NAME)
+data = dbconn.fetch(pq.DW_NAME, 'schema_name', 'INVOICES')
+data = data[["DISPLAY_NAME", "ACCOUNT_ID", "COMPANY_ID", "QUANTITY", "PRODUCT_ID", "PRICE_TOTAL"]]
+
+report  = "<body style='margin: 20; padding: 20'>\n"
+report += "<style>td { padding: 15px; background-color: #D6EAF8; }</style>"
+
+report += "<h1>Invoicing report</h1>\n"
+report += "<img src='https://.../logo.svg' width=100><br><br>\n"
+report += "<h3>Invoice lines</h3>\n"
+report += "<table>\n"
+for i, row in data.iterrows():
+    report += "<tr>\n  "
+    for col in row:
+      report += "<td>%s</td>" % html.escape(str(col))
+    report += "\n</tr>\n"
+report += "</table>\n"
+report += "</body>\n"
+
+data = dbconn.fetch('db_name', 'schema_name', 'Invoice_summary') # Query in Peliqan (Group by)
+
+report += "<br><br><h3>Summary by product</h3>\n"
+report += "<table>\n"
+for i, row in data.iterrows():
+    report += "<tr>\n  "
+    for col in row:
+      report += "<td>%s</td>" % html.escape(str(col))
+    report += "\n</tr>\n"
+report += "</table><br><br>\n"
+
+st.markdown(report, unsafe_allow_html=True)
+
+pq.download_pdf_button(report, file_name = "report.pdf", label = "Download PDF")
+```
+
+## Include charts in a PDF report
+
+Here's an example that includes a chart in a PDF report.
+
+We use `PyPlot` to create the charts and we render the charts on screen using Streamlit `st`. This is a great way to build interactive apps with charts, where the same charts can be used on screen and in the PDF report.
+
+```python
+import matplotlib.pyplot as plt
+import base64
+import io
+
+# Example data
+fruits = ['apple', 'blueberry', 'cherry', 'orange']
+counts = [40, 100, 30, 55]
+bar_labels = ['green', 'blue', 'red', 'orange']
+bar_colors = ['tab:green', 'tab:blue', 'tab:red', 'tab:orange']
+
+# Create chart
+fig, ax = plt.subplots()
+ax.bar(fruits, counts, label=bar_labels, color=bar_colors)
+ax.set_ylabel('fruit supply')
+ax.set_title('Fruit supply by kind and color')
+ax.legend(title='Fruit color')
+
+# Show the chart on screen using Streamlit (optional)
+st.pyplot(fig)
+
+# Convert chart to JPG image (base64 encoded)
+stringIObytes = io.BytesIO()
+plt.savefig(stringIObytes, format='jpg')
+stringIObytes.seek(0)
+base64_jpg = base64.b64encode(stringIObytes.read()).decode()
+
+# Create HTML report including the image of the chart
+img_html = '<img src="data:image/png;base64, ' + base64_jpg + '" width=100%>'      
+html = "<h1>Fruit supply report</h1>" + img_html
+
+# Allow user to download PDF (this will convert the HTML to PDF)
+pq.download_pdf_button(html, file_name='report.pdf', label='Download PDF report')
+```
+
+## Distribute PDF reports by email
+
+Below is an example that generates a PDF report (including a chart) and sends the report by email, using Postmark. This scenario can be used to generate personalized reports at scale and distribute them by email. You can use the below code directly in Peliqan and configure a schedule, for example daily or weekly distribution of the reports.
+
+```python
+import matplotlib.pyplot as plt
+import base64
+import io
+import pdfkit
+import os
+
+# Example data
+fruits = ['apple', 'blueberry', 'cherry', 'orange']
+counts = [40, 100, 30, 55]
+bar_labels = ['green', 'blue', 'red', 'orange']
+bar_colors = ['tab:green', 'tab:blue', 'tab:red', 'tab:orange']
+
+# Create chart
+fig, ax = plt.subplots()
+ax.bar(fruits, counts, label=bar_labels, color=bar_colors)
+ax.set_ylabel('fruit supply')
+ax.set_title('Fruit supply by kind and color')
+ax.legend(title='Fruit color')
+
+# Convert chart to JPG image (base64 encoded)
+stringIObytes = io.BytesIO()
+plt.savefig(stringIObytes, format='jpg')
+stringIObytes.seek(0)
+base64_jpg = base64.b64encode(stringIObytes.read()).decode()
+
+# Create HTML report including the image of the chart
+img_html = '<img src="data:image/png;base64, ' + base64_jpg + '" width=100%>'      
+html = "<h1>Fruit supply report</h1>" + img_html
+
+# Convert HTML to PDF, write to temporary file and read file as base64
+file_name = 'report.pdf'
+pdfkit.from_string(html, file_name)
+with open(file_name, "rb") as f:
+    pdf_base64 = base64.b64encode(f.read())
+
+# Send PDF as email attachment
+email_server = pq.connect('Postmark')
+email = {
+    "from":                      "no-reply@acme.com",
+    "to":                        "john@acme.com",
+    "subject":                   "Test email with PDF attachment",
+    "text":                      "See PDF file attached.",
+    "html":                      "See PDF file attached.",
+    "attachment_name":           "report.pdf",
+    "attachment_content_base64": pdf_base64.decode("ascii"),
+    "attachment_contenttype":    "application/octet-stream"
+}
+result = email_server.add('email_with_attachment', email)
+# st.json(result) # Optional, show result of sending email on screen for testing
+
+os.remove(file_name)
+```

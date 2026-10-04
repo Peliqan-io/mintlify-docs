@@ -1,0 +1,47 @@
+---
+title: "Trello - Getting started in Peliqan"
+sidebarTitle: "Trello"
+description: "Connect Trello to Peliqan to sync your boards, lists, and cards into your data warehouse. Generate an API key and token in Trello and add them to Peliqan."
+---
+
+_Trello is a visual project management tool from Atlassian that uses boards, lists, and cards to organize tasks and workflows. It's popular for its simple drag-and-drop interface, where teams (or individuals) can track projects, assign tasks, set due dates, and collaborate in real time. It's flexible, you can use it for anything from software development and marketing campaigns to personal to-do lists._
+
+This article provides an overview to get started with the **Trello** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect Trello in Peliqan
+
+Create an **API key** and **Token** in Trello:
+
+- Go the Trello Power Up Admin panel: [https://trello.com/power-ups/admin](https://trello.com/power-ups/admin)
+
+![Trello Power Up Admin page](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a757d226-da62-443b-a00b-26300b8fdda2/Trello_Power_Up_Admin/w=1920,quality=90,fit=scale-down)
+
+- Click on the "New" button
+- Fill in the details:
+  - Name: e.g. "Peliqan"
+  - Workspace: choose a Trello workspace
+  - Email and Support contact: fill in e.g. your own email
+  - Author: fill in e.g. your own name
+  - iFrame connector URL: leave blank
+- After creating the Power Up, click on the button "Generate new API key"
+
+![Trello app showing Generate new API key button](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e78873d2-acb6-476d-a6eb-7dbea448b123/Trello_app_API_key/w=1920,quality=90,fit=scale-down)
+
+- Copy the API key
+- Allowed origins: fill in [https://oauth.peliqan.io](https://oauth.peliqan.io) and click on the "Add" button
+- Click on the link "Token" on the right hand side, next to the API key
+- On the next screen, click on the "Allow" button at the bottom
+
+![Trello access authorization screen](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ec7fae65-3133-405a-896b-04d4bfde9100/Authorize_access/w=1920,quality=90,fit=scale-down)
+
+- Copy the Token
+
+![Trello token display page](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f1d6cf93-61eb-43c9-8443-b135757bafe2/Token/w=1920,quality=90,fit=scale-down)
+
+<Note>
+  The app Secret is NOT used.
+</Note>
+
+Add a Connection of type "Trello" in Peliqan and paste the **API key** and **Token**.
+
+![Trello connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b613639c-19a4-497a-9459-69bea3101d5b/Screenshot_2025-10-20_at_10.41.20/w=1920,quality=90,fit=scale-down)

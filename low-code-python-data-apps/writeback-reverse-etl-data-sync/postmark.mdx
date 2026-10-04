@@ -1,0 +1,135 @@
+---
+title: "Postmark - Getting started in Peliqan"
+sidebarTitle: "Postmark"
+description: "Learn how to connect Postmark to Peliqan, send emails with attachments, and receive incoming emails using webhooks stored in your data warehouse."
+---
+
+Postmark is one of the connectors offered in Peliqan to send emails and receive emails.
+
+Postmark offers a free license that does not expire, for up to 100 emails per month.
+
+More info: [https://postmarkapp.com/pricing](https://postmarkapp.com/pricing)
+
+## Connect Postmark
+
+Sign up for an account on Postmark first. Create a "Server" in Postmark.
+
+Copy the API token of the Server. In Peliqan, go to Connections > Add connection.
+
+Find Postmark in the list of available connectors and select it. Paste the API token and save.
+
+## Send out emails
+
+Here are example scripts in Peliqan to send out emails.
+
+### Send an email
+
+```python
+email = {
+    "from": "no-reply@acme.com",
+    "to": "john@acme.com",
+    "subject": "Hi there",
+    "text": "We are happy to provide you with this report !",
+    "html": "We are <b>happy</b> to provide you with this report !"
+}
+
+conn = pq.connect('Postmark')
+result = conn.add('email', email)
+st.json(result) # for debugging only, see result of sending email to Postmark
+```
+
+### Send email with text file as attachment
+
+```python
+import base64
+
+text_file_content = "This will be in the attached text file."
+
+email = {
+    "from": "no-reply@acme.com",
+    "to": "john@acme.com",
+    "subject": "Test email with attachment",
+    "text": "See Text file attached.",
+    "html": "See Text file attached.",
+    "attachment_name": "my_file.txt",
+    "attachment_content_base64": base64.b64encode(text_file_content.encode("ascii")).decode("ascii"),
+    "attachment_contenttype": "text/plain"
+}
+
+conn = pq.connect('Postmark')
+result = conn.add('email_with_attachment', email)
+st.json(result) # for debugging only, see result of sending email to Postmark
+```
+
+## Send email with CSV or PDF as attachment
+
+See the Alerting & Messaging section for examples on how to send out CSV files with data from a Peliqan table:
+
+[Alerting & messaging](/low-code-python-data-apps/alerting-messaging)
+
+See the Reporting section for a detailed example on how to generate a PDF file and send that PDF file as an attachment in an email:
+
+[Generate and distribute PDF reports](/low-code-python-data-apps/reporting/generate-a-pdf-using-html)
+
+## Receive emails (incoming emails)
+
+In Peliqan, go to Admin > Settings and copy your **Account Webhook** URL.
+
+This is your Peliqan URL to receive incoming webhook events. Every incoming webhook event will be stored in your Peliqan data warehouse, in a table `webhook.incoming_webhooks`. This table will automatically be created on the first incoming webhook.
+
+In Postmark, go to your Server > Message Streams > **Default inbound Stream**.
+
+Paste your Peliqan **Account Webhook** URL in Postmark in the field **inbound webhook URL**.
+
+Note down your Postmark email address to receive emails. It will look like this:
+
+`41b12...569d@inbound.postmarkapp.com`
+
+Send an email to this address. Check if it is processed by Postmark and forwarded to the Peliqan webhook URL. Next, check if you can find a new row in the table `webhook.incoming_webhooks` in your Peliqan DWH.
+
+Finally, you can process these incoming emails with a script in Peliqan:
+
+```python
+dw = pq.dbconnect(pq.DW_NAME)
+incoming_webhooks = dw.fetch(pq.DW_NAME, 'webhook', 'incoming_webhooks')
+
+for incoming_webhook in incoming_webhooks:
+    email = incoming_webhook["payload"]
+    sender = email["From"]
+    to = email["To"]
+    subject = email["Subject"]
+    body = email["TextBody"]
+    st.write(subject) # add logic here to process incoming emails
+```
+
+### Set webhooks as processed
+
+To avoid reprocessing webhook records, add a column "status" to the table and update this field after processing a webhook:
+
+```python
+dw.update(dw_name, 'webhook', 'incoming_webhooks', incoming_webhook["id"], {"status": "processed"})
+```
+
+In the above script, exclude processed webhooks using a query:
+
+```python
+incoming_webhooks = dw.fetch(pq.DW_NAME, query = "SELECT * FROM webhook.incoming_webhooks WHERE status != 'processed'; ")
+```
+
+### Receive emails with attachments
+
+Here's an example to process incoming emails with attachments (example with Excel files):
+
+```python
+dw = pq.dbconnect(pq.DW_NAME)
+incoming_webhooks = dw.fetch(dw_name, 'webhook', 'incoming_webhooks')
+
+for incoming_webhook in incoming_webhooks:
+  email = incoming_webhook["payload"]
+  for attachment in email["Attachments"]:
+    if attachment["ContentType"] in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/octet-stream"]:
+      decoded_bytes = base64.b64decode(attachment["Content"])
+      file_bytes = io.BytesIO(decoded_bytes)
+      excel_df = pd.read_excel(file_bytes)
+      # Process Excel data here
+```

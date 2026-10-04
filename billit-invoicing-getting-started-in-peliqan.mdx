@@ -1,0 +1,46 @@
+---
+title: "Billit Invoicing - Getting started in Peliqan"
+sidebarTitle: "Billit Invoicing"
+description: "Learn how to connect Billit Invoicing to Peliqan using an API key to sync invoicing data to your data warehouse."
+---
+
+Billit is **a platform that helps businesses create, send, and receive digital invoices**. It also helps businesses automate their invoicing and accounting processes, simultaneously offering a seamless way to manage your financial processes with powerful features designed for efficiency. It eases to send invoices, offers, receipts, uploading purchase costs and invoices directly through the app, link your bank for quick payments, and sharing essential documents effortlessly with your accountant online with just a few clicks. Website: [https://www.billit.bg/en-bg/home/](https://www.billit.bg/en-bg/home/)
+
+This article provides an overview to get started with the **Billit Invoicing** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+- [Billit Invoicing Sync Pipeline](#billit-invoicing-sync-pipeline)
+- [Connect to Billit Invoicing](#connect-to-billit-invoicing)
+- [Billit Invoicing data sync to a data warehouse](#billit-invoicing-data-sync-to-a-data-warehouse)
+- [Need further help](#need-further-help)
+
+## Billit Invoicing Sync Pipeline
+
+### Connect to Billit Invoicing
+
+Connect Billit Invoicing through the Peliqan connectivity module:
+
+![Billit Invoicing connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9899b35c-dd4e-4ab7-86d5-bf1978f9c041/image/w=1920,quality=90,fit=scale-down)
+
+Configuration options:
+
+- API Key (required)
+- Start Date (required)
+- (Optional) table selection via 'Advanced'
+
+Once filled, click on "Save" to initiate data sync.
+
+### Billit Invoicing data sync to a data warehouse
+
+Peliqan offers an out of the box data warehouse. Optionally the user can choose to sync Billit Invoicing data to their own data warehouse such as Snowflake, Google BigQuery, MS SQL etc.
+
+Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
+
+![Billit Invoicing Data Warehouse sync](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f1368752-efd0-4da6-8ccc-2d6fa7978011/image/w=1920,quality=90,fit=scale-down)
+
+<Warning>
+  For the **InvoiceLines** table, a complete re-sync of the Billit connection is necessary if any invoice line has been deleted at the source. If invoice line deletions occur frequently, please reach out to Peliqan Support to arrange a custom script tailored to your specific use case.
+</Warning>
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](/).

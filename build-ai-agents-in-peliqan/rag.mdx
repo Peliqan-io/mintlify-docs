@@ -1,0 +1,212 @@
+---
+title: "Implement RAG"
+sidebarTitle: "RAG"
+description: "Use Peliqan's RAG Manager to create embeddings from company data and perform similarity searches for AI chatbots and MCP servers."
+---
+
+## What is RAG
+
+**Retrieval-Augmented Generation (RAG)** is a technique that improves AI answers by doing a "similarity search" on company data. In order to perform a similarity search, the source data needs to be converted into embeddings (vectors) first. Peliqan provides a RAG Manager app to create embeddings from source data (e.g. Google Drive files, Notion pages, Github files etc.) and to perform RAG searches. These RAG searches are then used in e.g. an AI Chatbot or an MCP Server.
+
+## RAG Manager - create embeddings
+
+The RAG Manager app in Peliqan allows you to configure the automatic scheduled creation of embeddings (vectors) for RAG. The Peliqan data warehouse is used as vector store (using pgvector).
+
+Install the app from the "Rag Manager" tile:
+
+![RAG Manager app tile in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9c0931fc-17c2-4cf9-8766-7204c6e4d1c2/screenshot_2026-01-06_at_09.01.20/w=1920,quality=90,fit=scale-down)
+
+In the app, add one or more source tables under Settings:
+
+![RAG Manager settings showing source tables](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5959d313-1600-4789-9d4c-84c8feaa7046/rag_manager/w=1920,quality=90,fit=scale-down)
+
+Go to Processing and use the Process button to create embeddings.
+
+Add a schedule to the app with e.g. a daily interval, to automatically create embeddings for new and updated rows in the source tables.
+
+## RAG data sources
+
+RAG can be used on text sources. Here are examples of Peliqan connectors that are typically used as a source for RAG embeddings:
+
+- [Notion](/notion-getting-started-in-peliqan)
+- [Google Drive](/google-drive-getting-started-in-peliqan)
+- [Github](/low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/github)
+- Etc.
+
+<Note>
+  For some connectors, you need to enable a **custom pipeline script** to fetch the actual content for each file or item. E.g. for Notion you need a custom pipeline to fetch the contents of each page. For Google Drive and Github you need a custom pipeline to fetch the text content of files. Click on the above connector links for more information.
+</Note>
+
+## Performing RAG Search
+
+### Example script
+
+Here's an example Python script to perform a RAG Search in Peliqan:
+
+<Accordion title="Click to expand script">
+  ```python
+  import os
+  import json
+  
+  search_text = "What is the capital of France?"
+  model = "text-embedding-3-large"
+  schema = "your_schema"  # Change to your source schema name
+  table = "your_table_name"  # Change to your source table name (without 'rag_' prefix)
+  
+  # Model dimensions
+  EMBED_MODELS = {
+      "text-embedding-3-large": 3072,
+      "text-embedding-3-small": 1536
+  }
+  
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  openai_api = pq.connect('OpenAI')
+  dimension = EMBED_MODELS[model]
+  
+  def create_embedding(text, model, dimension):
+      """Create embedding using OpenAI API"""
+      embedding_request = {
+          "input": text,
+          "model": model,
+          "dimensions": dimension
+      }
+      response = openai_api.get('embeddings', embedding_request)
+      embedding = response.get("data", [{}])[0].get("embedding")
+      return embedding
+  
+  def search_rag(search_text, schema, table, model, dimension, top_k=5):
+      """Search for similar embeddings"""
+      # Create embedding for search text
+      search_embedding = create_embedding(search_text, model, dimension)
+  
+      if search_embedding:
+          embedding_str = "[" + ",".join(map(str, search_embedding)) + "]"
+          search_query = f"""
+          SELECT id, text, metadata,
+              1 - (embedding <#> '{embedding_str}'::vector) AS similarity
+          FROM "{schema}"."rag_{table}"
+          ORDER BY similarity DESC
+          LIMIT {top_k}
+          """
+          search_result = dbconn.execute(pq.DW_NAME, query=search_query)
+          records = search_result["detail"]
+  
+          # Convert from list format with headers to list of dicts
+          dict_records = []
+          if records and len(records) > 0:
+              headers = records[0]  # First row contains column names
+              for row in records[1:]:  # Skip header row
+                  record_dict = {}
+                  for i, header in enumerate(headers):
+                      record_dict[header] = row[i]
+                  dict_records.append(record_dict)
+          return dict_records
+      else:
+          return []
+  
+  st.write(f"Searching for: '{search_text}' using model {model}, embeddings from source table {schema}.{table} (using rag_{table})")
+  results = search_rag(search_text, schema, table, model, dimension, top_k=5)
+  st.write(results)
+  ```
+</Accordion>
+
+### RAG API handler
+
+Here's an API handler script that performs RAG search:
+
+<Accordion title="Click to expand script">
+  ```python
+  # Example RAG Search via API calls.
+  # 
+  # Add this script as an API handler in Peliqan.
+  # Add an API endpoint of type GET with path "/rag" and link it this script.
+  # Example usage: GET https://api.eu.peliqan.io/1234/rag?search=What is the capital of France     (1234 = your Peliqan account id)
+  
+  import json
+  from urllib.parse import parse_qs
+  
+  model = "text-embedding-3-large"
+  schema = "schema_name"  # Change to your source schema name
+  table = "table_name"  # Change to your source table name (without 'rag_' prefix)
+  
+  # Model dimensions
+  EMBED_MODELS = {
+      "text-embedding-3-large": 3072,
+      "text-embedding-3-small": 1536
+  }
+  
+  dbconn = pq.dbconnect(pq.DW_NAME)
+  openai_api = pq.connect('OpenAI')
+  dimension = EMBED_MODELS[model]
+  
+  def create_embedding(text, model, dimension):
+      """Create embedding using OpenAI API"""
+      embedding_request = {
+          "input": text,
+          "model": model,
+          "dimensions": dimension
+      }
+      response = openai_api.get('embeddings', embedding_request)
+      embedding = response.get("data", [{}])[0].get("embedding")
+      return embedding
+  
+  def search_rag(search_text, schema, table, model, dimension, top_k=5):
+      """Search for similar embeddings"""
+      # Create embedding for search text
+      search_embedding = create_embedding(search_text, model, dimension)
+  
+      if search_embedding:
+          embedding_str = "[" + ",".join(map(str, search_embedding)) + "]"
+          search_query = f"""
+          SELECT id, text, metadata,
+              1 - (embedding <#> '{embedding_str}'::vector) AS similarity
+          FROM "{schema}"."rag_{table}"
+          ORDER BY similarity DESC
+          LIMIT {top_k}
+          """
+          search_result = dbconn.execute(pq.DW_NAME, query=search_query)
+          records = search_result["detail"]
+  
+          # Convert from list format with headers to list of dicts
+          dict_records = []
+          if records and len(records) > 0:
+              headers = records[0]  # First row contains column names
+              for row in records[1:]:  # Skip header row
+                  record_dict = {}
+                  for i, header in enumerate(headers):
+                      record_dict[header] = row[i]
+                  dict_records.append(record_dict)
+          return dict_records
+      else:
+          return []
+  
+  def handler(request):
+      
+      # Read querystring
+      query_string = request['query_string']
+      query_string_parsed = parse_qs(query_string)
+      search_text = query_string_parsed["search"][0] if "search" in query_string_parsed else None
+  
+      results = search_rag(search_text, schema, table, model, dimension, top_k=5)
+  
+      # Logging
+      print(f"Search: '{search_text}' using model {model}, embeddings from source table {schema}.{table} (using rag_{table})")
+      print(results)
+  
+      return results
+  ```
+</Accordion>
+
+### MCP Server with RAG
+
+The Peliqan's MCP Server template can perform RAG Searches, next to Text-To-SQL.
+
+[Build a custom MCP Server on Peliqan](/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan)
+
+### RAG in Peliqan's AI Chatbot
+
+The Peliqan's AI Chatbot app can perform RAG Searches in combination with Text-To-SQL.
+
+More info:
+
+[Build a custom AI client (harness) in Peliqan](/build-ai-agents-in-peliqan)

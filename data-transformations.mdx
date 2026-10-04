@@ -1,0 +1,118 @@
+---
+title: "Data transformations"
+description: "Transform data in Peliqan using SQL queries or low-code Python to change formats, convert currencies, unify data, and prepare tables for joins and aggregations."
+sidebarTitle: "Data transformations"
+---
+
+Data can be transformed for many different reasons. Here are a few examples:
+
+- Changing a date format
+- Converting from one currency to another
+- Unifying the data before doing aggregations (e.g. Sum)
+- Ability to join data from different tables
+- Etc.
+
+Data can be transformed in Peliqan in different ways:
+
+1. Using **SQL queries** in the Peliqan Query Editor
+2. Using **Low-code Python code** in the Peliqan Data App editor
+
+## Transforming data in Peliqan
+
+### Using SQL queries
+
+Add a new table of type "SQL query", and write an SQL query that transforms the data.
+
+### Using low-code Python
+
+See [Building Data Apps](/low-code-python-data-apps) for more information. You can for example process the rows of a table in a Python script, and write the result to the same table (in other columns), or write to a separate output table.
+
+## Various Data Transformation scenarios
+
+Here are examples of common data transformations for various use cases:
+
+<CardGroup cols={2}>
+  <Card title="Convert numeric status fields to readable text" href="/data-transformations/convert-numeric-status-fields-to-readable-text">
+  </Card>
+
+  <Card title="Merge data from multiple similar sources" href="/data-transformations/merge-data-from-multiple-similar-sources-eg-saas">
+  </Card>
+
+  <Card title="Currency conversions" href="/data-transformations/currency-conversions">
+  </Card>
+
+  <Card title="Mapping charts of accounts from different countries" href="/data-transformations/mapping-charts-of-accounts-from-different-countries-accounting">
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card title="Convert numeric status fields to readable text" href="/data-transformations/convert-numeric-status-fields-to-readable-text">
+  </Card>
+
+  <Card title="Merge data from multiple similar sources" href="/data-transformations/merge-data-from-multiple-similar-sources-eg-saas">
+  </Card>
+
+  <Card title="Currency conversions" href="/data-transformations/currency-conversions">
+  </Card>
+
+  <Card title="Mapping charts of accounts from different countries" href="/data-transformations/mapping-charts-of-accounts-from-different-countries-accounting">
+  </Card>
+</CardGroup>
+
+## Overview of available transformations in Peliqan
+
+**ROW TRANSFORMATIONS**
+
+| Transformation | Description |
+| --- | --- |
+| Filters | Apply filters to include/exclude rows based on various criteria in the Grid view interface |
+| Advanced filters | Write SQL queries to filter your data |
+| Remove duplicates | Using a Python script |
+| Edit rows | Edit data in a spreadsheet-like Grid view interface |
+
+| Transformation | Description |
+| --- | --- |
+| Filters | Apply filters to include/exclude rows based on various criteria in the Grid view interface |
+| Advanced filters | Write SQL queries to filter your data |
+| Remove duplicates | Using a Python script |
+| Edit rows | Edit data in a spreadsheet-like Grid view interface |
+
+**COLUMN TRANSFORMATIONSCOLUMN TRANSFORMATIONS**
+
+| Transformation | Description |
+| --- | --- |
+| Arithmetic | Apply calculations & aggregations in SQL |
+| Case / if | Apply "if" logic in SQL |
+| Comparison | Compare numbers, dates, text in SQL |
+| Text manipulation | Apply text manipulations in SQL |
+| Date manipulation | Apply date manipulations in SQL |
+| SQL queries | Write SQL queries to apply any type of column transformation. |
+| Obfuscate data | Obfuscate data, e.g. for GDPR reasons, using a Python script |
+
+| Transformation | Description |
+| --- | --- |
+| Arithmetic | Apply calculations & aggregations in SQL |
+| Case / if | Apply "if" logic in SQL |
+| Comparison | Compare numbers, dates, text in SQL |
+| Text manipulation | Apply text manipulations in SQL |
+| Date manipulation | Apply date manipulations in SQL |
+| SQL queries | Write SQL queries to apply any type of column transformation. |
+| Obfuscate data | Obfuscate data, e.g. for GDPR reasons, using a Python script |
+
+**TABLE TRANSFORMATIONSTABLE TRANSFORMATIONS**
+
+| Transformation | Description |
+| --- | --- |
+| Join | Join tables |
+| Aggregations | Aggregate data using sum, avg, mean etc. |
+| Union | Union two or more tables into a new table. |
+| SQL | Write SQL queries to apply any type of table transformation, using JOIN, UNION, GROUP BY statements etc. |
+| Low-code Python | Use low-code Python scripts to process data and to create new tables and to perform writeback (Reverse ETL) to SaaS applications. |
+
+| Transformation | Description |
+| --- | --- |
+| Join | Join tables |
+| Aggregations | Aggregate data using sum, avg, mean etc. |
+| Union | Union two or more tables into a new table. |
+| SQL | Write SQL queries to apply any type of table transformation, using JOIN, UNION, GROUP BY statements etc. |
+| Low-code Python | Use low-code Python scripts to process data and to create new tables and to perform writeback (Reverse ETL) to SaaS applications. |

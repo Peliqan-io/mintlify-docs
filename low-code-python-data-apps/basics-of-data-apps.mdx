@@ -1,0 +1,81 @@
+---
+title: "Basics of data apps"
+description: "Learn how to create, write, and run your first data app in Peliqan using the built-in IDE, the pq module, and Streamlit for UI output."
+sidebarTitle: "Basics"
+---
+
+You can build data apps using Peliqan's low-code Python scripts. You can **write, test and run** your scripts inside Peliqan, or you can use your own IDE such as Visual Studio.
+
+In Peliqan, go to "Build" and click on Create app. You can now start writing your Python script. Use the right pane to insert code examples and snippets. Click on "Save & Run" to run your Python script:
+
+![Create and run a data app in Peliqan IDE](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/fd84bb18-9112-45f4-bb61-ce34e07531de/writeback_script/w=1920,quality=90,fit=scale-down)
+
+More info on running scripts:
+
+[Running apps (manual, schedule etc.)](/low-code-python-data-apps/running-apps-manual-schedule-etc)
+
+## Using the `pq` and `st` modules
+
+Following two main modules are automatically imported in every Python script in Peliqan:
+
+- `pq` module: to access built-in Peliqan functions
+- `st` module (Streamlit): to show output, visualise data and to add UI elements such as buttons, input fields etc.
+
+## Building a UI
+
+Peliqan uses [Streamlit](https://docs.streamlit.io/library/api-reference) as the front-end for your Python scripts, available as the `st` module (no import needed). Do not use `print()` in your scripts, instead use `st.write()`. Example:
+
+```python
+st.write("Hello there")
+```
+
+More examples using Streamlit:
+
+```python
+st.title("My title")
+st.text("My text")
+st.line_chart(data)
+
+dbconn = pq.dbconnect(pq.DW_NAME) 
+rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
+
+st.table(rows)
+st.json(rows)
+st.dataframe(rows)
+```
+
+More info:
+
+[Interactive apps (Streamlit)](/low-code-python-data-apps/interactive-apps)
+
+## Reading data from a table
+
+You can load data from any table into your Python code:
+
+```python
+# Open a connection to the Peliqan data warehouse
+dbconn = pq.dbconnect(pq.DW_NAME) # See your DW name under My Connections
+
+# Read the rows from the table
+rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
+```
+
+More info:
+
+[Reading data from tables](/low-code-python-data-apps/reading-data-from-tables)
+
+## Writing to tables
+
+Here are basic examples of updating data in tables:
+
+```python
+# Open a connection to the Peliqan data warehouse
+dbconn = pq.dbconnect(pq.DW_NAME)
+
+# Insert a row in a table
+dbconn.insert('db_name', 'schema_name', 'table_name', record_dict)
+```
+
+More info:
+
+[Writing data to tables](/low-code-python-data-apps/writing-data-to-tables)

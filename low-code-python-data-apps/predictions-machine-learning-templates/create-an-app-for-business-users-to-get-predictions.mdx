@@ -1,0 +1,151 @@
+---
+title: "Create an app for business users to get predictions"
+sidebarTitle: "Prediction App for Business Users"
+description: "Create an interactive app for business users to consume an ML model in a simple and intuitive way, for example requesting a Churn prediction for one given customer."
+---
+
+Create an interactive app for business users to consume an ML model in a simple and intuitive way, for example requesting a Churn prediction for one given customer.
+
+This template is for **developing a UI to easily consume ML models.** By following this template, you can **create ML-powered interactive applications** that can be easily used by a wide range of business users, and that can **deliver real value** and **insights to end-users**.
+
+This tutorial is tailored for the [**Churn Prediction model**](/low-code-python-data-apps/predictions-machine-learning-templates/churn-prediction), but can be modified to work with other models as well.
+
+### Import required modules & load models
+
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+from joblib import load
+import pandas as pd
+
+# Loading models to make predictions
+model = load('/data_app/model_churn_prediction')
+encoder = load('/data_app/encoder_churn_prediction')
+```
+
+### Building a UI
+
+The app is designed to **allow users to Search records by customer name** and obtain churn predictions for a customer. The UI includes a **Submit button to get the records and initiate the analysis process**.
+
+```python
+st.title('Churn Prediction')
+st.write("Welcome to Peliqan's Churn Prediction app!")
+
+form = st.form(key='churn-form')
+user_input = form.text_input('Search by customer name')
+submit = form.form_submit_button('Submit')
+```
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7e589bf7-5adf-4eff-9f27-93cd2eb5f13b/Untitled/w=1920,quality=90,fit=scale-down)
+
+Learn more about Streamlit functionality [here](https://docs.streamlit.io/library/api-reference).
+
+### Create a function to get records on search
+
+We are applying the user search to find records in an SQL query:
+
+```python
+def getRecords(searchTerm):
+    my_query = f"select * from customers where lower(CustomerName) like lower('{searchTerm}%') limit 5"
+
+    dbconn = pq.dbconnect(pq.DW_NAME)
+    data = dbconn.fetch(pq.DW_NAME, query = my_query)
+
+    st.dataframe(data) # show searched results
+    return data
+```
+
+### Write a function to make predictions
+
+Now we will define the function **makePrediction** that takes a user_input parameter as input. It uses a **previously trained encoder and model** object to **predict the Churn probability of customer**:
+
+```python
+def makePrediction(user_input):
+    df = getRecords(user_input)
+    if df.empty:
+        return st.error(f"Customer with name {user_input} does not exist.")
+    X = df.drop(['Prediction', 'Churn', 'CustomerName'], axis=1)
+    # converting categorical columns to numeric
+    cat_cols = X.select_dtypes('object').columns
+    X[cat_cols] = X[cat_cols].apply(lambda x: encoder[x.name].transform(x))
+
+	# Making prediction
+    prediction = model.predict(X)
+    proba = model.predict_proba(X)[0][prediction]
+    result = pd.DataFrame({'CustomerID':X['CustomerID'], 'Customer Name':df['CustomerName'], 'Prediction': prediction, 'Probability': proba})
+    return result
+```
+
+### Logic for Submit button
+
+When the **submit button is pressed**, the `makePrediction()` function is called with the user input as the argument. The **predicted churn score for each found record** is extracted from the **function's returned result**. Depending on the predicted score, the **UI displays a message.** We also **plot a bar chart** for Prediction vs Customer name.
+
+```python
+if submit:
+    result = makePrediction(user_input)
+    if type(result) == pd.DataFrame:
+        st.header('Predictions')
+        st.dataframe(result)
+        st.header('Prediction of churn vs Customers')
+        st.bar_chart(result, y='Prediction', x='Customer Name')
+```
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/cda5896c-9cdc-4842-86aa-72aeeb2a8733/Untitled/w=1920,quality=90,fit=scale-down)
+
+![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/df5aad90-6aa4-4e77-b868-064775cbb90d/Untitled/w=1920,quality=90,fit=scale-down)
+
+<details>
+  <summary>Expand this to see the full code</summary>
+
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+from joblib import load
+import pandas as pd
+
+# Loading models to make predictions
+model = load('/data_app/model_churn_prediction')
+encoder = load('/data_app/encoder_churn_prediction')
+
+st.title('Churn Prediction')
+st.write("Welcome to Peliqan's Churn Prediction app!")
+
+form = st.form(key='churn-form')
+user_input = form.text_input('Search by customer name')
+submit = form.form_submit_button('Submit')
+
+def getRecords(searchTerm):
+    my_query = f"select * from public.customer_churn where lower(CustomerName) like lower('{searchTerm}%') limit 5"
+		dbconn = pq.dbconnect('dw_123')
+		data = dbconn.fetch('dw_123', query = my_query)
+
+    st.dataframe(data) # show searched results
+    return data
+
+def makePrediction(user_input):
+    df = getRecords(user_input)
+    if df.empty:
+        return st.error(f"Customer with name {user_input} does not exist.")
+    X = df.drop(['Prediction', 'Churn', 'CustomerName'], axis=1)
+    # Converting categorical columns to numeric
+    cat_cols = X.select_dtypes('object').columns
+    X[cat_cols] = X[cat_cols].apply(lambda x: encoder[x.name].transform(x))
+
+	  # Making prediction
+    prediction = model.predict(X)
+    proba = model.predict_proba(X)[0][prediction]
+    result = pd.DataFrame({'CustomerID':X['CustomerID'], 'Customer Name':df['CustomerName'],'Prediction': prediction, })#'Probability': proba})
+    return result
+
+if submit:
+    result = makePrediction(user_input)
+    if type(result) == pd.DataFrame:
+        st.header('Predictions')
+        st.dataframe(result)
+        st.header('Prediction of churn vs Customers')
+        st.bar_chart(result, y='Prediction', x='Customer Name')
+```
+</details>
+
+## What's Next
+
+1. You can make real-time predictions on new incoming data and send [**alerts to Slack**](/low-code-python-data-apps/predictions-machine-learning-templates/send-alerts-to-slack) if the model makes a prediction **above a certain threshold**.
+2. You can make **predictions on real-time incoming data** using the saved model. Learn more about [making real-time predictions on new incoming data.](/low-code-python-data-apps/predictions-machine-learning-templates/write-predictions-to-a-table)

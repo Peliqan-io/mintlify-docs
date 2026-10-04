@@ -1,0 +1,80 @@
+---
+title: "Visual Planning - Getting started in Peliqan"
+sidebarTitle: "Visual Planning"
+description: "Sync your Visual Planning dimensions and project data to Peliqan with automatic schema discovery. Configure incremental sync and explore your planner data in the data warehouse."
+---
+
+_Visual Planning is a resource scheduling and planning platform, used by companies to plan projects, teams, vehicles, equipment and more. Every planner is fully customizable: each company defines its own dimensions and fields. Website:_ [_https://www.visual-planning.com/_](https://www.visual-planning.com/)
+
+This article provides an overview to get started with the **Visual Planning** connector in **Peliqan**. Please contact support if you have any additional questions or remarks.
+
+## Visual Planning Data Pipeline
+
+### Connect Visual Planning
+
+Connect Visual Planning through the Peliqan Connectivity module. You need:
+
+- **Base URL**: the URL of your Visual Planning server, including the port number and the application path, e.g. `https://<your-vp-server>:<port>/vplanning`
+- **API key**: the REST API key of the planner you want to sync. The Visual Planning REST API module must be enabled on your server; your Visual Planning administrator or partner can provide the key.
+
+Optional settings:
+
+- **Resource models**: leave empty to sync all dimensions automatically, or provide a comma-separated list to sync only specific dimensions.
+- **Force full refresh**: reload all data on every sync instead of syncing incrementally.
+
+<Tip>
+  One connection syncs one planner. To sync multiple planners, add one connection per planner, each with its own API key.
+</Tip>
+
+## Visual Planning data sync to a data warehouse
+
+The connector automatically discovers the dimensions configured in your planner (e.g. Projects, Tasks, Crew, Vehicles, Equipment) and creates **one warehouse table per dimension** — no mapping or configuration needed:
+
+- Every heading configured in Visual Planning becomes a column, including custom fields.
+- Links between dimensions become foreign keys, so tables can be joined directly (e.g. site reports to projects, tasks to crew members).
+- Dates and numbers are synced in raw, locale-independent format, ready for SQL and BI tools.
+- Password-type fields are never synced.
+
+<Tip>
+  Because every Visual Planning planner has its own configuration, the tables and columns reflect exactly how your planner is set up. When you add new dimensions or headings in Visual Planning, run a full resync on the connection to pick up the new schema.
+</Tip>
+
+Peliqan offers an out of the box data warehouse. Optionally you can sync Visual Planning data to your own data warehouse such as Snowflake, Google BigQuery, MS SQL or PostgreSQL.
+
+## Incremental sync
+
+On every run the connector checks the Visual Planning history API per dimension and only reloads dimensions that changed since the previous sync. Unchanged dimensions are skipped, keeping syncs fast and light on your Visual Planning server.
+
+<Tip>
+  Incremental sync requires **Visual Planning 9 or higher**. On older versions the connector still works and falls back to full loads on every sync.
+</Tip>
+
+## Troubleshooting
+
+### Connection fails with "API key rejected"
+
+The API key is invalid for this planner or the REST API module is not enabled on your Visual Planning server. Verify the key with your Visual Planning administrator and check that the Base URL points to the correct planner instance.
+
+### A dimension is missing as a table
+
+Tables are discovered from the data: a dimension without any records will not appear as a table. Add at least one record in Visual Planning and run a full resync.
+
+### New headings/columns do not appear
+
+Run a **full resync** on the connection. A full resync rebuilds all tables with the current planner configuration.
+
+## Visual Planning Data Activation
+
+## Report Visual Planning data to BI tools
+
+Connectivity to a BI tool such as Microsoft Power BI can be set up using the Postgres datasource credentials in the connection module. All planner dimensions are available as regular tables, joinable on the foreign keys — for dashboards on project portfolios, crew utilization, equipment allocation or site report follow-up. Visual Planning data can be combined with your other sources (ERP, accounting, HR) using SQL, explored in the Peliqan spreadsheet UI, or fed to AI agents through Peliqan's MCP support.
+
+## Advanced options
+
+- **Planning events**: in addition to the dimension tables, the actual planning events (who is scheduled on what, when, for how long) can be synced as a fact table. Please contact support to enable this for your planner.
+- **Data activation / writeback**: creating and updating records in Visual Planning from Peliqan (reverse ETL) is supported. Please contact support to set this up.
+- **Deletion handling**: Visual Planning deletes records permanently; Peliqan offers patterns to keep the warehouse in sync. Please contact support for the setup that fits your data volumes.
+
+## Need further help?
+
+Please contact our support for any further assistance via [support@peliqan.io](mailto:support@peliqan.io).

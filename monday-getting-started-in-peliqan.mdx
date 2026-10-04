@@ -1,0 +1,22 @@
+---
+title: "Monday - Getting started in peliqan"
+sidebarTitle: "Monday"
+description: "Learn how to connect Monday.com to Peliqan using a personal API token, sync boards to your data warehouse, and filter which boards to include."
+---
+
+**_Monday.com_** _is a cloud-based work management platform that helps teams plan, organize, and track their projects and tasks. It provides customizable workflows, collaboration tools, and automation features to streamline work across departments like marketing, operations, sales, and software development. Users can create boards to visualize tasks, deadlines, and progress in formats like Kanban, Gantt charts, or calendars._
+
+This article provides an overview to get started with the Monday connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect Monday
+
+In Peliqan, go to Connections > Add Connection > Select Monday in the list > Enter the details of your Monday instance.
+
+![Monday connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7883b9d5-4ba7-4c67-9cde-5e58a054b69f/Screenshot_2025-04-28_at_15.57.38/w=1920,quality=90,fit=scale-down)
+
+- **API key**: In Monday go to Administration > Connections > API > generate a Personal API token and paste it in Peliqan.
+- **Include boards containing**: enter a comma-separated list of keywords, for boards to include. Peliqan will create a separate table in the data warehouse for each board in Monday. That is because every board can have different columns. In the example above we entered: _marketing, sales tasks_. This means that e.g. boards named "_Marketing overview_" and "_Our Sales Tasks_" will be included.
+
+<Note>
+  Note: if you have thousands of boards, and you only want to sync a few but you don't know the names yet, enter a non-existing keywords such as "xxxxx". In that case no boards will be synced but a table called Boards will appear. You can now find the keywords you need, enter them and do a Full Resync.
+</Note>

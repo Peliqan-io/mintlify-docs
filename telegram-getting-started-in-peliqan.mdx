@@ -1,0 +1,123 @@
+---
+title: "Telegram - Getting started in Peliqan"
+sidebarTitle: "Telegram"
+description: "Send Telegram messages and build chatbots in Peliqan using low-code Python scripts. Connect with BotFather and configure webhooks to receive incoming messages."
+---
+
+This articles describes how to send messages to **Telegram** from Peliqan, for example alerts or updates, and how to implement a chatbot in Peliqan.
+
+Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect Telegram in Peliqan
+
+In Telegram, start a chat with **BotFather**, and ask it to create a bot, name if for example "Peliqan Bot". Copy the API token, add a connection in Peliqan and paste the token.
+
+## Send a message
+
+Example code:
+
+```python
+telegram_api = pq.connect('Telegram')
+
+# Send a message in Telegram to your bot first
+# Then get the updates (incoming messages)
+updates = telegram_api.get('updates')
+chat_id = updates["result"][0]["message"]["chat"]["id"]
+  
+send_message = {
+    'text': "Hi there from Peliqan",
+    'chat_id': chat_id
+}
+result = telegram_api.add('send_message', send_message)
+st.json(result)
+```
+
+## Receive messages
+
+Set up an API endpoint in Peliqan (POST), and configure it as webhook in Telegram to receive incoming messages:
+
+```python
+telegram_api = pq.connect('Telegram')
+
+def main():
+    get_webhook()
+    #add_webhook()
+    #delete_webhook()
+    
+def get_webhook():
+    result = telegram_api.get('webhook')
+    st.json(result)
+    
+def delete_webhook():
+    result = telegram_api.delete('webhook')
+    st.json(result)
+
+def add_webhook():
+		# URL of your API endpoint configured in Peliqan
+    webhook_uri = "https://api.eu.peliqan.io/123/telegram"
+    result = telegram_api.add('webhook', webhook_uri = webhook_uri)
+    st.json(result)
+
+main()
+```
+
+Add an API handler script to receive incoming messages and send a reply:
+
+```python
+import json
+
+telegram_api = pq.connect('Telegram')
+
+def handler(request):
+    data = json.loads(request["data"])
+    message = data["message"]["text"]
+    chat_id = data["message"]["chat"]["id"]
+    print(f"Message from user: {message}") # logging
+    
+    response_message = f"You said: {message}"
+    
+    send_message = {
+        'text': response_message,
+        'chat_id': chat_id
+    }
+    result = telegram_api.add('send_message', send_message)
+    
+```
+
+## Implement a chatbot
+
+Very basic example that invokes OpenAI to create a response:
+
+```python
+import json
+
+telegram_api = pq.connect('Telegram')
+
+def askAI(message):
+    openai_api = pq.connect('OpenAI')
+    messages_to_ai = []
+    messages_to_ai.append({"role": "user", "content": message})
+    request = {
+        "model": "gpt-3.5-turbo",
+        "messages": messages_to_ai,
+        "temperature": 0.7
+    }    
+    llm_answer = openai_api.get('completion_raw', request)
+    message = llm_answer["choices"][0]["message"]
+    answer_content = message["content"]
+    return answer_content
+
+def handler(request):
+    data = json.loads(request["data"])
+    message = data["message"]["text"]
+    chat_id = data["message"]["chat"]["id"]
+    print(f"Message from user: {message}") # logging
+    
+    response_message = askAI(message)
+    
+    send_message = {
+        'text': response_message,
+        'chat_id': chat_id
+    }
+    result = telegram_api.add('send_message', send_message)
+```

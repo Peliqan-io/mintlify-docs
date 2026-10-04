@@ -1,0 +1,104 @@
+---
+title: "Send alerts to Slack"
+sidebarTitle: "Slack Alerts"
+description: "Send Slack alerts when machine learning predictions exceed thresholds using Peliqan data apps. Configure real-time fraud and anomaly notifications."
+---
+
+Alert users on Slack if a prediction is made which is above a certain threshold, e.g. a fraudulent sales transaction is detected.
+
+This feature provides users with **real-time notifications** of **critical events** and allows them to take **immediate action**. By setting the threshold for the alert, users can customize their notifications based on their **specific needs and risk tolerance**. With this feature, our users can **stay informed** and **make decisions in a timely manner**.
+
+This tutorial is tailored for the [**Anomaly/Fraud Detection model**](/low-code-python-data-apps/predictions-machine-learning-templates/detect-anomalies-fraud-detection), but you can modify it to work with other models as well.
+
+### Import required modules
+
+```python
+from joblib import load # to load the existing saved model
+import pandas as pd
+```
+
+### Load new records
+
+We will read new records, where the prediction is null. Make sure you add a "Prediction" column first in the spreadsheet view of the table.
+
+```python
+my_query = 'select * from transactions where prediction is null limit 5'
+dbconn = pq.dbconnect(pq.DW_NAME)
+df = dbconn.fetch(pq.DW_NAME, query = my_query, df = True)
+```
+
+### Data Preprocessing
+
+For predicting, we have to **prepare the data** in the same format as it was trained on.
+
+```python
+# Drop unwanted features
+X = df.drop(['Class', 'Prediction'], axis=1)
+```
+
+Note: It's recommended to add a "Try/Except" statement, in case there are no records to update other wise it will throw errors in the future.
+
+### Load the model & predict
+
+```python
+model = load('/data_app/model_credit_card') # loading the model
+
+# Making prediction
+pred = model.predict(X)
+
+#Reshape the prediction values to 0 for Valid transactions, 1 for Fraud transactions
+pred[pred == 1] = 0
+pred[pred == -1] = 1
+
+# Saving the prediction to the dataframe df
+df['Prediction'] = pred
+```
+
+### Sending Slack notifications
+
+After making the predictions we will iterate over them and if a prediction is **1 (which means fraud)** we will send **an alert notification to slack**.
+
+```python
+for _, record in df.iterrows():
+    if record['Prediction'] == 1:
+      st.text('Fraud at index: ' + str(int(record['index'])))
+      slack = pq.connect("Slack") # use the name of your connection
+      slack.add("message", channel = "general", text = f"User with index id: {int(record['index'])} has been detected as fraud. Take a look and confirm.", username = "Peliqan Credit Card Fraud Detection bot")
+```
+
+<Accordion title="Expand this to see the full code">
+  ```python
+  from joblib import load # to load the existing saved model
+  import pandas as pd
+  
+  my_query = 'select * from credit_card_56k where prediction is null limit 5'
+  dbconn = pq.dbconnect('dw_123')
+  df = dbconn.fetch('dw_123', query = my_query, df = True)
+  
+  # Drop unwanted features
+  X = df.drop(['Class', 'Prediction'], axis=1)
+  
+  model = load('/data_app/model_credit_card') # loading the model
+  
+  # Making prediction
+  pred = model.predict(X)
+  
+  #Reshape the prediction values to 0 for Valid transactions, 1 for Fraud transactions
+  pred[pred == 1] = 0
+  pred[pred == -1] = 1
+  
+  # Saving the prediction to df
+  df['Prediction'] = pred
+  
+  for _, record in df.iterrows():
+      if record['Prediction'] == 1:
+        st.text('Fraud at index: ' + str(int(record['index'])))
+        slack = pq.connect("Slack") # use the name of your connection
+        slack.add("message", channel = "general", text = f"User with index id: {int(record['index'])} has been detected as fraud. Take a look and confirm.", username = "Peliqan Credit Card Fraud Detection bot")
+  ```
+</Accordion>
+
+## What's Next
+
+1. You can make **predictions on real-time incoming data** using the saved model. Learn more about [making real-time predictions on new incoming data.](/low-code-python-data-apps/predictions-machine-learning-templates/write-predictions-to-a-table)
+2. Using **Peliqan** you can **create an app for business users to consume** the model you have made in a **simple and intuitive UI**. Learn more about [creating apps for users to consume your model](/low-code-python-data-apps/predictions-machine-learning-templates/create-an-app-for-business-users-to-get-predictions)**.**

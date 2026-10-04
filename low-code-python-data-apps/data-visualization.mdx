@@ -1,0 +1,45 @@
+---
+title: "Data Visualization (Streamlit)"
+sidebarTitle: "Data Visualization"
+description: "Build visualizations in Peliqan using Streamlit charts, tables, and interactive components. Explore built-in line, bar, and Altair chart examples."
+---
+
+Build apps to visualize your data in Peliqan using charts, tables and interactive components thanks to Peliqan's built-in Streamlit module.
+
+Note that there are other options in Peliqan for data visualizations:
+
+- [Connect your own BI tool](/connect-your-bi-or-db-tool) to Peliqan
+- Deploy Metabase or Superset from the Peliqan Market place
+
+## Simple charting templates
+
+`st` is the Streamlit module, a powerful library to build data visualizations and interactive data apps. Click here for the [Streamlit](https://docs.streamlit.io/library/api-reference) documentation.
+
+Line chart & bar chart:
+
+```python
+dbconn = pq.dbconnect(pq.DW_NAME) 
+data = dbconn.fetch('db_name', 'schema_name', 'table_name')
+
+st.line_chart(data)
+
+st.bar_chart(data, x = "country", y = "revenue")
+```
+
+Bar chart with a row count:
+
+```python
+import altair as alt
+
+dbconn = pq.dbconnect(pq.DW_NAME) 
+data = dbconn.fetch('db_name', 'schema_name', 'table_name')
+
+chart_definition = alt.Chart(customers).mark_bar().encode(
+    x = "country",
+    y = {"aggregate": "count"}
+)
+
+st.altair_chart(chart_definition)
+```
+
+Streamlit allows you to add Altair charts. View the [Altair documentation](https://altair-viz.github.io/) for more information.

@@ -1,0 +1,60 @@
+---
+title: "Google Cloud Document AI - Getting started in Peliqan"
+sidebarTitle: "Google Cloud Document AI"
+description: "Set up the Google Cloud Document AI connector in Peliqan to process documents with OCR and extract structured data using custom pipeline scripts and GCP processors."
+---
+
+Google Cloud (GCP) Document AI allows you to create document processors that help automate tedious tasks, improve data extraction, and gain deeper insights from unstructured or structured document information. Document AI helps developers create high-accuracy processors to extract, classify, and split documents.
+
+This guide provides an overview of setting up the **Google Cloud Document AI** Connector in Peliqan. For technical assistance or custom integration requirements, please [contact our support team](https://peliqan.io/contact).
+
+## Setup
+
+Perform these steps:
+
+- Create a Project on [Google Cloud (GCP)](https://console.cloud.google.com/)
+- Copy your Project ID
+
+![Google Cloud Project ID](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8a2709e1-f2fc-441a-b9bc-5a0effc77df0/Project_ID/w=1920,quality=90,fit=scale-down)
+
+- [Enable the Document AI API](https://console.cloud.google.com/apis/library/documentai.googleapis.com)
+- Set up billing in your Google Cloud account
+- Enable a processor (e.g. "OCR") in Document AI:
+  - Go to [https://console.cloud.google.com/ai/document-ai](https://console.cloud.google.com/ai/document-ai)
+  - Click on Explore Processors
+
+![Google Cloud Document AI explore processors](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/61a069fd-f268-4935-bd60-d6ad24212211/Google_GCP_Document_AI/w=1920,quality=90,fit=scale-down)
+
+- Select a processor, give it a name and click on "Create"
+
+![Google Cloud Document AI add processor](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a789d597-b7d2-4430-b3d9-8a2a648a9a04/Add_processor/w=1920,quality=90,fit=scale-down)
+
+- Copy the Processor ID
+
+![Google Cloud Document AI processor ID](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/32814f7e-ed07-41cd-add5-d7fbe4480bc9/Processor_ID/w=1920,quality=90,fit=scale-down)
+
+- Add a connection in Peliqan for "Google Document AI" and authorize Peliqan to access the Google GCP project
+
+## Example script
+
+```python
+google_document_ai_api = pq.connect('Google Document AI')
+
+import base64
+import requests
+
+allowed_upload_file_type = 'pdf'
+uploaded_file = st.file_uploader(f"Upload {allowed_upload_file_type} file", accept_multiple_files=False, type=[allowed_upload_file_type])
+
+if uploaded_file is not None:
+    file_contents = uploaded_file.read()
+    file_base64 = base64.b64encode(file_contents).decode('utf-8')
+
+    params = {
+        'base64_content': file_base64,
+        'mimetype': "application/pdf"
+    }
+    
+    result = google_document_ai_api.get('process_document', params)
+    st.json(result)
+```

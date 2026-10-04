@@ -1,0 +1,114 @@
+---
+title: "ENK – Getting started in Peliqan"
+sidebarTitle: "ENK"
+description: "Learn how to connect the ENK Online RQS gateway to Peliqan, what tables are synced, and how to handle ENK gateway size limits and timeouts during data sync."
+---
+
+[ENK](https://www.enksoftware.nl) is a Dutch ERP system for technical service companies (installation, maintenance, field service). It exposes its data via the **ENK Online RQS gateway**, which proxies SQL queries to a customer-specific NexusDB backend.
+
+This article explains how to get started with the ENK connector in Peliqan, what gets synced, and what to keep in mind given how the ENK gateway works.
+
+## How to connect ENK
+
+To connect ENK to Peliqan, you need an active **ENK Online subscription**, gateway credentials, and the customer's domain ID.
+
+1. Get the following from your ENK administrator:
+   - **Base URL**, e.g. `https://gateway.enkonline.nl/relay-to/dom2590[username]`
+   - **Username** and **password**
+   - **API version** (typically `v200`)
+2. In Peliqan, go to **Connections** and click **Add Connection**.
+3. Search for **ENK** and select it.
+4. Fill in the fields:
+   - **Base URL** — the gateway URL provided by ENK
+   - **Username** / **Password** — your ENK credentials
+   - **API version** — e.g. `v200`
+   - **Start Date** — the earliest creation date to fetch (default `2020-01-01`). Records created before this date are skipped.
+   - **Batch size** — rows per request (default `1000`, recommended)
+   - **Extra Tables** _(optional)_ — comma-separated list of additional tables, format `TableName|pk1+pk2`
+5. Click **Save**.
+
+## ENK data sync to data warehouse
+
+Once connected, Peliqan syncs the following 28 tables from ENK into your data warehouse:
+
+| Table | Replication | Description |
+| --- | --- | --- |
+| `Bestellingen` | Incremental | Purchase orders |
+| `CalcOnderdelen` | Full | Calculation parts |
+| `Facturen` | Incremental | Sales invoices |
+| `Inkfacturen` | Incremental | Purchase invoices |
+| `Opdrachtbonnen` | Incremental | Work orders |
+| `Termijnstaten` | Incremental | Term/instalment statements |
+| `Werken` | Full | Projects/jobs |
+| `InkFactRegels` | Incremental | Purchase invoice lines |
+| `OpdrachtbonRegels` | Incremental | Work-order lines |
+| `CalcRegels` | Incremental | Calculation lines |
+| `CalculatieHoofdstukken` | Full | Calculation chapters |
+| `Dagboeken` | Full | Journals |
+| `Grootboekrekeningen` | Full | General ledger accounts |
+| `Kostenplaatsen` | Full | Cost centres |
+| `Montagegangen` | Full | Assembly routes |
+| `Uursoorten` | Full | Hour types |
+| `Uurtariefcodes` | Full | Hourly rate codes |
+| `Werkbonregels` | Full | Service-ticket lines |
+| `Calculaties` | Incremental | Calculations (estimates) |
+| `Werkbon` | Incremental | Service tickets |
+| `Faktuurregels` | Full | Invoice lines |
+| `Personeel` | Full | Employees |
+| `ENKData_Relaties` | Full | Customer/supplier relations |
+| `Offertes` | Incremental | Quotes |
+| `Bewakingscodes` | Full | Monitoring codes |
+| `Werksoorten` | Full | Work types |
+| `SYNC_DELETEDRECS` | Full | Deletion log |
+| `TermijnstaatRegels` | Full | Term-statement lines |
+
+Peliqan provides a built-in data warehouse. You can alternatively sync ENK data to an external data warehouse (Snowflake, Google BigQuery, MS SQL, etc.). You can explore the synced data in the Peliqan UI.
+
+## Excluded blob fields
+
+Some ENK tables contain **RTF document blobs and binary data** that are not useful in a data warehouse and significantly slow down the sync. Peliqan excludes these fields **at the SQL level** so they are never transferred over the network:
+
+| Table | Excluded field | Reason |
+| --- | --- | --- |
+| `Calculaties` | `CalculatieData` | Binary calculation document (~50 KB+ per record) |
+| `ENKData_Relaties` | `Opmerkingen` | RTF notes blob |
+| `Offertes` | `OfferteData` | RTF quote document (~50 KB+ per record) |
+| `Werken` | `Opmerkingen` | RTF project notes blob |
+| `Facturen` | `Faktuurdata`, `Faktuurspecificatie` | RTF invoice document and specification (~14 KB + ~3.6 KB per record) |
+
+If you specifically need any of these fields in your warehouse, contact [support@peliqan.io](mailto:support@peliqan.io).
+
+## Important: ENK gateway limitations
+
+The ENK Online gateway has practical limits on response size and total query duration. ENK's own guidance recommends:
+
+- **Response size:** 1–5 MB per request is ideal. Above 10 MB, you risk timeouts and memory issues.
+- **Records per request:** 100–1000 is the typical safe range, with **1000 as the absolute maximum**.
+
+When these limits are exceeded, you may see HTTP errors:
+
+| Code | Meaning |
+| --- | --- |
+| **408** | Request Timeout — the request took too long |
+| **500** | Internal Server Error — typically `"No server connected to domain"`, meaning the RQS backend dropped its connection from the gateway |
+| **502** | Bad Gateway — the nginx front-end could not reach the ENK backend |
+
+### How Peliqan addresses these limitations
+
+- **Tuned batch size (1000)** — chosen to keep responses comfortably within ENK's 1–5 MB sweet spot for all synced tables.
+- **Blob fields excluded at SQL level** — keeps responses small and predictable, avoiding 5–50 MB responses that would trigger timeouts.
+- **Incremental replication** wherever date columns are available — only modified records are fetched after the initial run, keeping subsequent syncs short and light.
+- **`500 ms`** **delay between requests** — prevents overloading ENK's gateway during heavy syncs.
+- **Bookmarks persisted between runs** — if the gateway disconnects mid-sync, the next run resumes from where it left off rather than restarting from scratch.
+
+### What to expect on the first sync
+
+The very first sync of a customer with a large database (millions of records in `CalcRegels`, for example) **can take several hours**. During this initial run, the ENK gateway may occasionally disconnect for tables that have not yet been synced. These will complete on the next scheduled run.
+
+Subsequent **incremental** runs typically complete in minutes.
+
+If the first sync repeatedly fails on a specific table, lower the **Batch size** parameter (try 500 or 250) and contact [support@peliqan.io](mailto:support@peliqan.io).
+
+## Need further help?
+
+For assistance, contact [support@peliqan.io](mailto:support@peliqan.io).

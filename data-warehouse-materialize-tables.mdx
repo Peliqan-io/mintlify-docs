@@ -1,0 +1,57 @@
+---
+title: "Data warehouse"
+sidebarTitle: "Data Warehouse"
+description: "Learn how Peliqan's built-in Postgres data warehouse works, how to connect your own data warehouse, and how to materialize SQL queries to tables."
+---
+
+Peliqan has a built-in data warehouse, based on Postgres. By default the built-in data warehouse will be used, for example when you add a connection to a SaaS application.
+
+When you add a SaaS connection, Peliqan will set up an ETL pipeline and it will start syncing data from your SaaS application into the data warehouse. Peliqan will create a schema per SaaS connection, for example a schema "hubspot" when you connect Hubspot (CRM). A schema is a logical grouping of tables, it's like a folder under a database.
+
+You can also add a connection to your existing data warehouse. Peliqan supports following data warehouses as target for ETL pipelines:
+
+- Postgres
+- Snowflake
+- AWS Redshift
+- Google GCP BigQuery
+- Microsoft SQL Server (Azure)
+
+## Connect to your Peliqan data warehouse from a BI tool or DB tool or from code
+
+If you want to connect to Peliqan's built-in data warehouse, go to Connections in Peliqan, find the Data Warehouse card and copy paste all connection details.
+
+![Peliqan data warehouse connection details](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9e971c63-fdc0-46d9-9c5f-4cecaff63f45/Data_warehouse_details/w=1920,quality=90,fit=scale-down)
+
+More info:
+
+[Connect your BI, DB tool or iPaaS](/connect-your-bi-or-db-tool)
+
+## Use your own data warehouse
+
+In order to connect an external data warehouse: in Peliqan, go to Connections and click on Add Connection. Find your data warehouse in the list, for example SQL Server. Add connection details, and make sure to fill in the **Target Database** name. This will turn the connection into a target data warehouse.
+
+![Adding SQL Server as external data warehouse](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/177b2cfe-4dae-48a6-bb44-893d5a6f3a07/add_sql_server_connection/w=1920,quality=90,fit=scale-down)
+
+Now when you add a SaaS connection (CRM, ERP, accounting etc.) you will be able to choose between the Peliqan built-in DW and your DW as the target. Example with 3 target data warehouses configured (Postgres internal, Postgres external and SQL Server):
+
+![Choosing a target data warehouse](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2665915a-e5fa-4a7f-ab18-64632d2cb9bd/choose_target/w=1920,quality=90,fit=scale-down)
+
+### IP whitelisting
+
+You can restrict access to your data warehouse by whitelisting IP addresses from Peliqan. More info:
+
+[IP whitelisting](/ip-whitelisting)
+
+## Materialize SQL queries in the data warehouse and replicate tables
+
+You can materialize any SQL query into a new table in the built-in data warehouse or your connected data warehouse. The materialized table will be updated on a schedule. This can be done with any SQL query:
+
+- SQL query on a connected DB
+- SQL query executed via Peliqan's federated query engine Trino (SQL queries across sources)
+- SQL query on the data warehouse itself
+
+Similarly, you can replicate any table from an external DB or DWH into the built-in data warehouse or your connected data warehouse.
+
+More info:
+
+[Materialize & Replicate](/materialize)

@@ -1,0 +1,673 @@
+---
+title: "Reverse ETL"
+description: "Sync data from the Peliqan data warehouse back into business applications using the Reverse ETL app with field mapping, relations, scheduling, and custom code."
+sidebarTitle: "Reverse ETL"
+---
+
+## Introduction
+
+Reverse ETL is the concept of writing data back into business applications, using the data warehouse as a source. This approach allows to use curated clean data from the data warehouse to keep data in business applications in sync. For example you could sync customers and invoices from your ERP to your accounting software (using the data warehouse as in-between).
+
+[Click here to watch a 7 minute how-to video on Reverse ETL in Peliqan](https://youtu.be/I6z5f-zbuc4)
+
+## Data flow overview
+
+The entire data flow consists of 2 phases:
+
+1. **ELT pipeline**: Data is synced from the source into the Peliqan data warehouse
+2. **Reverse ETL**: Data from the data warehouse is written to a business application
+
+![Reverse ETL overview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/50590170-19b8-4855-913d-277508667e9d/reverse_etl_overview/w=1920,quality=90,fit=scale-down)
+
+**Phase 1** is done by adding a connection in Peliqan to the source system. This will automatically set up an ELT pipeline and sync the data into the data warehouse.
+
+**Phase 2** is done by adding a connection in Peliqan to the target system and using the Peliqan Reverse ETL app. Install the app in your Peliqan account, configure the Reverse ETL flow and set a schedule on the app for ongoing syncs. All the steps of phase 2 are described below.
+
+![Reverse ETL app flow](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e8e9fe59-0a65-4632-8ba3-bf625a21d9f6/reverse_etl_app_flow/w=1920,quality=90,fit=scale-down)
+
+<Note>
+  You can also implement Custom Data Syncs (Custom Reverse ETL flows) in Peliqan using low-code Python scripts, based on one of the provided templates. For more information visit: [Custom data syncs](/low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports)
+</Note>
+
+## Prerequisites
+
+Before usign the Peliqan Reverse ETL app, make sure you have a good understanding of following basic concepts in the Peliqan data platform:
+
+- [ELT pipelines: sync data into the data warehouse](/connect-to-data)
+- [Data explorer: explore source data](/working-with-data-in-the-grid-view)
+- [Data apps: low-code Python scripts in Peliqan](/low-code-python-data-apps)
+
+Before installing the Reverse ETL app, complete following steps:
+
+1. Add a connection to the **source**: this will sync data into the data warehouse, which will be the source data for the Reverse ETL app.
+2. Add a connection to the **target**: this connection will be mainly used for making API calls to the target (inserts & updates) as well as optionally doing QA checks on the target data.
+
+## Install the Reverse ETL app
+
+In Peliqan, go to the Build section (rocket icon in left).
+
+Find the Reverse ETL app and click on Install Template.
+
+![Install Reverse ETL template](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/da769048-47f4-484c-8e7b-3e9f83fb3032/Screenshot_2025-09-13_at_10.07.16/w=1920,quality=90,fit=scale-down)
+
+Pin the app to your Peliqan homepage, see menu item "Pin to home":
+
+![Pin to home menu](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ca5b465d-e63b-42d2-bfb7-31d801b9dbe8/screenshot_2026-01-23_at_10.52.21/w=1920,quality=90,fit=scale-down)
+
+Open the app from your Peliqan homepage.
+
+## Add syncs
+
+In the app, in the left pane, add a sync for each object type, for example a sync for "Companies" and a sync for "Contacts".
+
+![Add syncs in Reverse ETL app](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/eeb93762-ccc0-4681-91d5-5a46cfb58845/Screenshot_2025-09-13_at_10.09.45/w=1920,quality=90,fit=scale-down)
+
+You can change the ordering of Syncs under "Manage sync". Make sure to sync parent records first, before syncing child records. For example Contacts are linked to a parent Company, so Companies need to sync first.
+
+## General tab
+
+### Sync mode
+
+For each sync, choose the sync mode, e.g. "Insert & Update records".
+
+### Incremental sync
+
+Enable incremental sync, if the source data has a "timestamp last update" field. Incremental sync means that on each [scheduled run](#schedule), only new & updated records from the source are processed, as opposed to processing all records from the source on each run.
+
+Peliqan pipelines always add a timestamp `_sdc_batched_at` so this is the default timestamp source column to use.
+
+If you use a source query (scope query), make sure to include this column in your query so that it is available for the Reverse ETL app to read.
+
+![Incremental sync configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8f9d7637-5479-47e4-a225-0c8b6a31427b/Screenshot_2025-09-13_at_10.12.35/w=1920,quality=90,fit=scale-down)
+
+### Run pipeline first
+
+Use this to make sure the source data (data warehouse tables) is up to date before running the Reverse ETL logic.
+
+### Write back of id
+
+Use this feature to write the new id (after insert in the target) back into a field in the source. Usually a custom field is used for this. Example: sync Contacts from Hubspot to Odoo. After insert of a new Contact in Odoo, the Odoo id is written to a custom field **odoo_id** in Hubspot.
+
+Note that this is optional, the id's of source and target are also stored in Link tables, see below.
+
+![Write back id to source](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a12e7050-0cbc-4395-b583-043bc90ebe4b/writeback_id_to_source/w=1920,quality=90,fit=scale-down)
+
+### Error handling
+
+Choose whether or not the Reverse ETL run should stop if an error is encountered while writing to the target.
+
+Enable "Alert emails" on the Reverse ETL script (under Build) to receive emails when an error occurs in a scheduled run. Note that this option is only available once a schedule is active.
+
+### 2-way sync
+
+Use this when syncing in 2 directions. In this case one sync is configured for each direction and each sync is linked to its "equivalent" sync in the other direction. This is to avoid unnessary updates and eternal loops. Note that the "hash" feature (see below) also avoids eternal loops.
+
+Example syncing Companies and Contacts between Hubspot and Odoo in both directions. Syncs to configure:
+
+1. Companies - Hubspot to Odoo
+2. Contacts - Hubspot to Odoo
+3. Companies - Odoo to Hubspot
+4. Contacts - Odoo to Hubspot
+
+In the above example sync 1 and 3 are linked under the 2-ways sync configuration, as well as sync 2 and 4.
+
+## Source tab
+
+Select a source table. See below on how to write a "source query" in order to transform data and map it to the target model. When you have created a source query, make sure to select this as the source table.
+
+![Source tab](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4ade02cb-5193-4340-a41b-cd912d946cf3/source/w=1920,quality=90,fit=scale-down)
+
+## Target tab
+
+Select a target. You have to configure a Target API Object, this will be used to perform writeback to the target (using [Peliqan's writeback functions](/low-code-python-data-apps/writeback-reverse-etl-data-sync) in the selected Connector).
+
+![Target tab](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8c01ee41-b694-4b2a-ad07-506b6cd839b9/reverse_etl_target/w=1920,quality=90,fit=scale-down)
+
+### Generic Target Object
+
+If you cannot find the Target Object that you need, you can select "Object", if it is available in the target connector that you selected. Example:
+
+![Generic target object](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3b8064dc-3eb5-46d6-bbf4-619f458ad0df/reverse_etl_generic_target_object/w=1920,quality=90,fit=scale-down)
+
+This is a generic writeback, that can be used for multiple object types. When doing so, you will have to set the object name in the Field Mapping tab. To do so, click on the Pencil icon on the left, and enter the name of the object manually, for example "organizations" in the screenshot below (in order to insert/update organizations in the target Pipedrive):
+
+![Set object name in field mapping](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d26082a4-3deb-46d6-b139-ba4089acd92a/screenshot_2025-12-18_at_07.17.02/w=1920,quality=90,fit=scale-down)
+
+## Field mapping tab
+
+Map fields from the source to the target.
+
+Do not use "id" fields in the target (column on the right). Those fields are often FK relations in the target, use the "Relations (FK)" tab instead.
+
+![Field mapping tab](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a0cfd0d3-f7f8-47a5-a450-6adef1180144/fieldmapping/w=1920,quality=90,fit=scale-down)
+
+### Static source values
+
+Click on the edit icon (pencil) in the left column to enter a static value.
+
+For example enter a static value `555` that needs to be used for all records, and whic is mapped to a target field `division_id` (assuming all synced records in the target need to have division_id=555).
+
+### Custom fields
+
+Click on the edit icon (pencil) in the right column to enter a target column name. Use this e.g. to write into a custom field in the target.
+
+## Relations tab (FKs, foreign keys, parent relations)
+
+If you have an FK (foreign key) in the source, which is a relation to a parent object, you probably need to map that to another FK field in the target. You cannot map FK fields directly because the parent object will have another id in the source and in the target.
+
+Here is an example where first sync Companies, then we sync Contacts. Each Contact (child) is linked to a Company (Parent):
+
+![Parent relations example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/917d27d8-bca3-415b-9d62-f44692d14427/reverse_etl_parent_relations/w=1920,quality=90,fit=scale-down)
+
+In the above example, you can see that:
+
+- Source Company id=100 is synced to target Partner id=789.
+- Source Contact id=500 is synced to target Contact id=321.
+- You cannot map source **company_id** directly to target **partner_id**.
+
+Instead the source FK (500) must be translated to the target FK (789) when the Contact is synced. This is depicted as "Step 3" in the drawing above, in green.
+
+The Reverse ETL app will perform this type of lookup when you configure the FK's for source and target under "Relations":
+
+![FK relation configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1df86476-c315-4161-bc2d-eca16343042d/FK_relation/w=1920,quality=90,fit=scale-down)
+
+The lookup to find the FK for the tarfget, is done in the link table of the parent object (green line in the above drawing). See below for more info on link tables.
+
+## Data tab
+
+### Test the Reverse ETL sync
+
+You can test the sync under "Data" by selecting one source record and performing a manual sync. If there are errors, adjust the field mapping and test again.
+
+![Data tab test sync](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7ead42f9-86ac-4f5a-9173-10517d080864/data/w=1920,quality=90,fit=scale-down)
+
+### View the status of a sync
+
+View the status of each sync under "Status". This shows the link table which contains all source ids that have been synced, the timetamps and errors if any.
+
+![Sync status view](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/948410d5-61b1-4970-a557-371a601d0e7a/status/w=1920,quality=90,fit=scale-down)
+
+## Custom code tab
+
+Examples to use custom code:
+
+- Write nested JSON to the target API
+- Conditional updates
+- Etc.
+
+### Write nested JSON to target API
+
+The Reverse ETL app performs API calls to the target for inserts and updates. The JSON payload is a flat objects with keys and values, as defined in the field mapping. Example insert:
+
+```text
+POST https://mycrm.com/api/contacts
+{
+  "name": "John Doe",
+  "email": "john@doe.com",
+  "phone": "+1 555 6666"
+}
+```
+
+Custom Python code can be used to write a nested JSON structure. Example custom code:
+
+```python
+def transform(source_record, target_record, pq, target_id=None):
+    
+    # Add nested data
+    target_record["address"] = {
+        "street": source_record["address_street"]
+        "city":   source_record["address_city"]
+    }
+
+    # For updates
+    if target_id:
+        final_payload['id'] = target_id
+
+    return target_record
+```
+
+Example of final insert:
+
+```text
+POST https://mycrm.com/api/contacts
+{
+  "name": "John Doe",
+  "email": "john@doe.com",
+  "phone": "+1 555 6666",
+  "address": {
+     "street": "1 Somestreet",
+     "city": "NY"
+  }
+}
+```
+
+<Note>
+  Note: sending nested JSON can also be done with a [JSON column in a source query](#nested-data-in-a-source-query) (without using custom code).
+</Note>
+
+### Conditional updates
+
+Example custom code for conditional updates:
+
+```python
+def transform(source_record, target_record, pq, target_id=None):
+    final_payload = target_record
+    
+    if target_id: # meaning an update (not an insert)
+        if source_record["status"] == "deleted":
+            return None # returning None makes sure the record is skipped
+        else:
+            final_payload["id"] = target_id
+    return final_payload
+```
+
+## Link tables
+
+The Reverse ETL app creates a link table under schema **link_tables** for each sync. The link table keeps track of source ids and target ids. Example of a link table:
+
+| source_id | target_id | status | First sync | Last sync |
+| --- | --- | --- | --- | --- |
+| 100 | 567 | Success | … | … |
+| 200 | 890 | Success | … | … |
+
+Possible values for "status":
+
+- Success
+- Error
+- Skipped - "Same hash": a hash is calculated before every update in the target, based on the input fields. If the hash is identical to the previous update, the update is skipped. This is to avoid unnecessary updates, especially when the source timestamp "last update" is increased but not because of fields that are in scope for the sync.
+
+## Handling existing records in target
+
+The Reverse ETL app assumes that the target is empty, or at least that the records that will be created from the source do not exist yet in the target. The Reverse ETL will only check the link table to decide if the target record already exists (and do an update instead of an insert), it will not check the target in real-time. This might create duplicates if the target is not empty. Example:
+
+![Existing records in target](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9a087d42-85dd-4b2f-8593-6f06e52bfe27/screenshot_2026-04-29_at_08.09.56/w=1920,quality=90,fit=scale-down)
+
+Depending on the behaviour of the target, it is also possible that the inserts will fail (no duplicates created but error on insert), e.g. Hubspot requires email addresses to be unique.
+
+If target records might already exist - for example because they were added manually - there are 3 ways to handle this:
+
+- Do a real-time API lookup before each upsert
+- Seed the link table
+- Exclude existing records from the source query
+
+### Lookup in target before upsert
+
+Add custom code that will do a "Lookup" API call in the target before each upsert, to decide if either an update or insert is needed. Note that the lookup cannot be done based on "id", it has to be done based on a common key that exists in both the source and target. For example VAT number for companies or email address for contacts.
+
+Example custom code:
+
+```python
+def transform(source_record, target_record, pq, target_id=None):
+    if target_id is None:
+        # if target_id is not set: Reverse ETL app did not yet process 
+        # this source record, it was not in the link table
+
+        # do look up of company by VAT in target
+        vat = source_record["vat"]
+        vat = vat.lower().replace(".","") # normalize
+        url = f"https://somesaas.com/api/companies/search?vat={vat}"
+        response = requests.get(url)
+        result = response.json()
+        if result and "id" in result:
+            # record found: it already exists in target
+            target_id = result["id"]
+            target_record['id'] = target_id
+
+    return target_record, target_id
+```
+
+<Note>
+  Note that this type of custom code is supported from Reverse ETL version 3.0 and up.
+</Note>
+
+### Seeding the link tables
+
+The Reverse ETL app performs an insert in the target, for each source record, and subsequently it performs updates for these source ids. However, the Reverse ETL app does not "match" source records with pre-existing target records. For example, if you sync companies from a source to a target, the Reverse ETL app will ignore Companies that are already present in the target (not insterted by the Reverse ETL app). In order to take these into account, you can add those target records in the link table first. You could e.g. match source & target companies on VAT number and insert matching rows in the link table.
+
+Example query:
+
+```sql
+WITH matching_companies AS (
+  SELECT 
+     source.id AS source_id,
+     target.id AS target_id
+  FROM hubspot.companies AS source
+  INNER JOIN odoo.partners AS target
+     ON source.vat = target.vat
+)
+INSERT INTO link_tables.companies_1234 (source_id, target_id, status)
+SELECT source_id, target_id, 'matched' AS status
+FROM matching_companies;
+```
+
+### Exclude existing records from the source query
+
+If you want the Reverse ETL app to completely ignore existing records, you can exclude them from your source query. This can be done by joining the source query with the pipeline table of the target.
+
+Example source query where Hubspot companies is the source and Odoo partners is the target and we compare them based on VAT number:
+
+```sql
+SELECT * FROM hubspot.companies AS source 
+LEFT JOIN odoo.partners AS target
+ON source.vat = target.vat
+WHERE target.vat IS NULL
+```
+
+Make sure to run the target pipeline first, to make sure the target table in the Peliqan data warehouse is up to date.
+
+## Settings
+
+### Sync order
+
+Make sure to put parent object types above their children, so they sync first. For example sync Customers first, then Invoices that are linked to Customers.
+
+### Schedule
+
+Once the syncs are working fine, you can add a daily schedule to the Reverse ETL app.
+
+The Reverse ETL app will run in the background and process source records for each sync. If the sync is [configured as incremental](#incremental-sync), the source data will be processed incrementally, based on the timestamp last update that is configured.
+
+**Set a custom schedule**
+
+You can also set a custom schedule (e.g. every 6 hours). Go to the Build section in Peliqan (rocket icon in left pane), open the app and set a schedule. Make sure to use incremental syncs and configure a daily or hourly sync.
+
+![Schedule settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/dbea0747-5f01-45e9-9828-41101542125a/schedule/w=1920,quality=90,fit=scale-down)
+
+### Import/export
+
+Use this to backup your entire Reverse ETL configuration as JSON and to move configurations between Peliqan accounts.
+
+## Writing a source query (source view)
+
+You can write a source query (view) to prepare data for mapping to the target. Write the query first, and next use it as the source table in the Reverse ETL app.
+
+Examples of transformations that are typically handled in a source query:
+
+- Transform date formats from the source format to the target format.
+- Casting of data types from the source to the target data type
+- Combining data from multiple source tables into a single source query
+- Mapping of values from source to target
+- Adding a columns with a static value for fields that need to have a static value in the target
+
+Below is an example where data from a source table contacts is mapped to a target table people.
+
+Example **source** table contacts:
+
+```sql
+id    firstname       lastname      country_code     _sdc_batched_at
+1     Bob             Davis         FR               20205-01-01 00:00:00
+2     Anne            Crome         UK               20205-01-01 00:00:00
+3     ...
+```
+
+Example **target** table people (id not shown, will be set automatically on insert):
+
+```sql
+fullname        country          category
+Bob Davis       France           VIP
+Anne Crome      United Kingdom   VIP
+```
+
+Example query `sync_contacts_source` to use as source table in the Reverse ETL app:
+
+```sql
+SELECT
+    id,                                              -- make sure to include id
+    firstname || ' ' || lastname as fullname,        -- concatenate
+    CASE                                             -- value mapping
+    	WHEN country_code = 'FR' THEN 'France'
+    	WHEN country_code = 'UK' THEN 'United Kingdom'
+    END AS country,
+    "VIP" AS contact_category,                       -- static value
+    _sdc_batched_at                                  -- make sure to include _sdc_batched_at
+FROM contacts
+```
+
+### Nested data in a source query
+
+Nested data can be created in a source query and mapped to a JSON field in the target. An example is **invoice lines** for **invoices**.
+
+<Note>
+  Notes: You can often also sync **child** objects (e.g. invoice lines) as a separate Object Type. Sync the **parents** first (e.g. invoices), next sync the **children** (e.g. invoice lines) with an FK relation (e.g. invoice_id). You can also handle [nested JSON with custom code](#write-nested-json-to-target-api).
+</Note>
+
+Below is an example source query for sales invoices from Odoo, which creates a JSON array with invoice line objects in one column. This column can be mapped to a field "invoice lines" in the target (e.g. Exact Online). Make sure to use the correct keys in the invoice line objects, as needed by the target.
+
+```sql
+SELECT
+  i.id,
+  i.ref,
+  i.date,
+  i.partner_id,
+  i.amount_total,
+  JSON_AGG(
+    JSON_BUILD_OBJECT(
+      'Quantity', l.quantity,
+      'Name', l.name
+    )
+  ) AS invoice_lines_json
+FROM odoo.account_move AS i
+LEFT JOIN odoo.account_move_line AS l
+  ON i.id = l.move_id
+WHERE
+  i.move_type = 'out_invoice' AND line_ids <> '[]'
+GROUP BY
+  i.id,
+  i.ref,
+  i.date,
+  i.partner_id,
+  i.amount_total,
+```
+
+Example result (some columns omitted):
+
+| id | date | invoice_lines_json |
+| --- | --- | --- |
+| 1 | 2025-01-01 | `[ { "Quantity": 4, "Name": "Shoes" }, { "Quantity": 1, "Name": "Socks" } ]` |
+| 2 | 2025-01-02 | `[ { "Quantity": 3, "Name": "Shoes" } ]` |
+
+Make sure the column is of type "json" (`jsonb`) in the source query and **_not_** a text field (`varchar`). Example where a string representation of JSON is casted to a json column:
+
+```sql
+SELECT '{"name": "An", "id": 12}'::jsonb FROM my_table
+```
+
+## Mapping "enum" / select fields
+
+Enum fields (or "Single select fields") are fields that have a value from a preselected list. For example a field "size" with possible values (options) "Small", "Medium", "Large".
+
+The source options often have to be mapped to different options in the target. Example:
+
+| Source option |  | Target option |
+| --- | --- | --- |
+| Extra small | → | S |
+| Small | → | S |
+| Medium | → | M |
+| Large | → | L |
+
+This can be accomplished with a scope query (used as the source).
+
+### Static mapping
+
+New options must be added manually.
+
+Example scope query:
+
+```sql
+SELECT
+  c.id,
+  c.name,
+  c.email,
+  c.company,
+  CASE
+    WHEN c.customfield = 'Option A internal name'
+    THEN 'Option A value'
+    WHEN c.customfield = 'Option B internal name'
+    THEN 'Option B value'
+    WHEN c.customfield = 'Option C internal name'
+    THEN 'Option C value'
+    ELSE NULL
+  END AS target_option
+FROM hubspot.contacts AS c
+```
+
+### Dynamic mapping
+
+New options are automatically mapped.
+
+Below example assumes the options are stored in a separate table and that each option has both a "label" and a "value" and the labels on source & target match.
+
+Source table **field_options**:
+
+| Label | Value |
+| --- | --- |
+| Section A | 100 |
+| Section B | 200 |
+
+Target table **field_options**:
+
+| Label | Value |
+| --- | --- |
+| Section A | 333 |
+| Section B | 444 |
+
+Example scope query:
+
+```sql
+SELECT
+  c.id,
+  c.name,
+  c.email,
+  c.customfield,                         -- e.g. "100"
+  source_option.value AS source_option,  -- e.g. "100"
+  target_option.value AS target_option   -- e.g. "333" = field option value sent to target
+FROM source.contacts AS c
+LEFT JOIN source.field_options AS source_option
+  ON c.customfield = source_option.value
+  AND source_option.field_name = 'source_customfield'
+LEFT JOIN target.field_options AS target_option
+  ON source_option.label = target_option.label 
+  AND target_option.field_name = 'target_customfield'
+```
+
+## Handling deleted records
+
+Deleting records in the target, that were deleted in the source, is currently out of scope for the Reverse ETL app. This can be handled in a separate custom pipeline script. More info: [Handling deleted rows](/low-code-python-data-apps/etl-custom-pipelines/handling-deleted-rows)
+
+## Bulk inserts
+
+To speed up initial syncs (inserts into an empty target) bulk inserts can be enabled on selected tartget connectors such as Odoo. In that case select e.g. **partner_bulk** as target object instead of **partner**.
+
+Keep in mind that an entire batch insert will fail if one record in the batch fails. If most of your bulk inserts succeeded and a couple failed, you could switch back from bulk inserts to individual inserts and run the Reverse ETL again. It will then handle the failed records one by one.
+
+The batch size is 100 by default but can be updated in the source code of the Reverse ETL app.
+
+If you see a `400 Timeout error` in the log files of the Reverse ETL app, make sure to decrease your batch size. Peliqan will wait **maximum 120 seconds** for any API call to complete. If a bulk insert API call takes more time, you will receive a Timeout error, and you will have no information whether the records were actually inserted or not. Example error in the log files for Odoo: `HTTPSConnectionPool(host='xxx.odoo.com', port=443): Read timed out. (read timeout=120)`
+
+## QA checks
+
+You can compare source and target data to check if all data was synced as expected. Make sure to run the pipeline of the target connection before performing a QA compare.
+
+Write a JOIN query that compares source & target data, using the link table as in-between:
+
+`source table —> link table —> target table`
+
+Example show source records with missing target record:
+
+```sql
+SELECT
+   source_table.id 
+FROM hubspot.contacts AS source_table
+LEFT JOIN link_tables.contacts_1234 AS link_table ON
+    source_table.id = link_table.source_id
+LEFT JOIN oodo.partners AS target_table ON
+    link_table.target_id = target_table.id
+WHERE 
+    target_table.id IS NULL
+```
+
+## FAQ & Troubleshooting
+
+**My record was not synced. why ?**
+
+- Is it included in your source table ?
+- If you use a source query, is the record included in this query ?
+- Is it skipped because of incremental sync (e.g. bookmark in Reverse ETL is higher than \_sdc_batched_at in source table.
+- Is the record in the link table (source_id) ? If yes, is it in error status ?
+
+**My record was synced once, but not updated in the target. Why ?**
+
+- Did you change the scope of the source query ? Is the record still included in the scope of the source query ?
+- Is it skipped because of incremental sync (e.g. bookmark in Reverse ETL is higher than \_sdc_batched_at in source table.
+
+## Project scoping
+
+Make sure to plan your Reverse ETL app projects properly. See below for an example scoping and consecutive project steps.
+
+### Project type
+
+The project scoping depends on the type of data sync that is being implemented. We distinguish between 4 types of data sync projects, in increasing order of complexity:
+
+1. **Type 1: Data enrichment**
+   - For example enrich leads in Salesforce with info from support tickets
+   - Goal: extra visibility, e.g. allow sales team to see status of support tickets in their CRM
+   - One system is leading (data sync from a master to a slave)
+2. **Type 2: Automated data syncs**
+   - For example sync Shopify orders to Odoo ERP customers, sales orders, invoices
+   - No human in the loop
+   - Standardized process
+   - Scalable deployment (built as a product for usage by multiple end-customers)
+   - One system is leading (data sync from a master to a slave)
+3. **Type 3: One time migration of historic data**
+   1. For example sync ERP data from a legacy ERP into a new target
+   2. Target is empty
+   3. No updates in target
+   4. One migration run, preceded by multiple test runs
+   5. One system is leading (data sync from a master to a slave)
+4. **Type 4: Data sync to support a business proces**
+   - Example e.g. keep CRM and ERP in sync
+   - Process has **_humans in the loop_**: e.g. the process consists of manual steps (e.g. data entry) and automated steps (the data sync).
+   - The process relies on fields, statuses or other specific data entries set by humans, for example "sync leads once they are set to status 'accepted' in the CRM"
+   - Potentially 2 systems are master, depending on the type of data being synced, potentially 2-way sync or two 1-way syncs (one in each direction)
+   - Data sync supports business processes, e.g. instant syncs are needed to support a hum process
+
+### Planning
+
+<Warning>
+  It's important that **each phase is completed** before moving to the next phase.
+</Warning>
+
+| Phase | Description | Effort estimate |
+| --- | --- | --- |
+| Training of developer(s) | Training on Peliqan platform, Reverse ETL patterns, pipeline management | 2 - 4 days |
+| Assign project manager | Planning, documentation, status calls etc. | 1 - 3 days |
+| Write requirements | Objects to include, fields to map per object, required business logic etc. See below preparation checklist. | 1 - 3 days |
+| Cleaning of source data | Make sure required fields are always filled in etc. | Depends on data quality |
+| Write scope queries | Define input data per sync | 1 - 3 days |
+| Test scope queries | Test query results: speed of query execution, completeness of data etc. | 1 - 3 days |
+| Configure Reverse ETL app | Field mapping etc. | 1 - 3 days |
+| Parent relations (FKs) |  | 2 - 4 days |
+| Handling existing records in target, seeding link table |  | 4- 8 days (optional) |
+| Unit testing | Run tests in Reverse ETL app for individual records | 2 - 4 days |
+| End-to-end testing | Run full sync on staging environment, check time needed, check errors | 2 - 4 days |
+| Incremental sync testing | Test syncing of new & updated records in consecutive runs | 1 - 3 days |
+| Full initial production run | Run full sync on production environment | 2 - 4 days |
+| Production data validation | Validate data in target, get feedback from business users | 2 - 4 days |
+| Bug fixing | Fix edge cases etc. | 2 - 4 days |
+| Monitoring & maintenance | Check for errors in scheduled runs | Ongoing E.g. 1 day per week |
+
+| **MEDIUM SIZE PROJECT** |  |
+| --- | --- |
+| E.g. Automated CRM data sync (one-way), **types 1 - 3** |  |
+| **Total effort** | **15 - 30 days** |
+| **Total project lead time** | **4 - 8 weeks** |
+
+| **FULL SCALE PROJECT** |  |
+| --- | --- |
+| E.g. ERP data sync with business process impact, **type 4** |  |
+| **Total effort** | **30 - 90+ days** |
+| **Total project lead time** | **2 - 6 months** |
+
+### Preperation
+
+[Reverse ETL business intake survey](https://help.peliqan.io/reverse-etl/reverse-etl-preparation-checklist)

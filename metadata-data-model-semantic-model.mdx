@@ -1,0 +1,73 @@
+---
+title: "Metadata, Data models & Semantic models"
+description: "Manage metadata, build business-ready data models, and create semantic models in Peliqan to provide context and expose data to AI agents and BI tools."
+sidebarTitle: "Metadata & Models"
+---
+
+Peliqan automatically stores and tracks metadata of your data assets. This page provides an overview of common types of metadata, how to expose your Data Model (including metadata) to e.g. AI Agents and how to build up a Semantic model.
+
+## Metadata
+
+### Primary keys
+
+Peliqan automatically detects primary keys (PK's) in every table. However, you can change the PK for each table (including queries) by going to the table in the Grid view, click on Details and next click on "Edit" in the top menu bar:
+
+![Edit primary key](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0eb5da28-b9d3-4ae5-82e4-8d1b995dbc5e/PK_edit/w=1920,quality=90,fit=scale-down)
+
+### Foreign keys (relations)
+
+You can manually set a relation on a column. In the Grid view, click on a column header and select "Edit field" from the menu. Choose the column type "Link to table" and set the related table:
+
+![Add foreign key relation](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2c1b55ad-8644-4f22-9950-64abd0c5ebb1/FK_add_link/w=1920,quality=90,fit=scale-down)
+
+Peliqan also provides a template app that can automatically detect relations between tables. In Peliqan go to the Build section (apps) and click on the template "Detect FKs (ERD relations)" to install it in your account:
+
+![Detect FKs template app](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/67e8f474-fa23-4149-98b1-13b90b0074ec/Screenshot_2025-09-11_at_17.47.46/w=1920,quality=90,fit=scale-down)
+
+### Table descriptions
+
+You can document the meaning of tables in a dataset, by adding a description to each table. Click on "Details" in the top menu above a table in the Grid view to edit the metadata of the table, including the description:
+
+![Add table description](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2205850d-ce8d-4883-8741-0377c9c826fa/Table_add_description_\(metadata\)/w=1920,quality=90,fit=scale-down)
+
+### Column descriptions
+
+You can document the meaning of columns per table, by adding a description to each column. Click on a column header in the Grid view, and select Show details from the menu. You will now be able to set a description to the column, as well as a background color and icon:
+
+![Add column description](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/af9fd32b-7d2a-4f98-8a57-b212b7f0b124/Column_add_description_\(metadata\)/w=1920,quality=90,fit=scale-down)
+
+## Data models
+
+Peliqan allows you to build up business-ready data models from your raw data, which was landed in the data warehouse by the ELT pipelines. Depending on the use case, you might want to use a **Medallion data model**, build up a **Star Schema**, use the **Data Vault** modeling technique or simply write views that translate raw data into understandable tables.
+
+<CardGroup cols={2}>
+  <Card title="Building a Star schema" href="/metadata-data-model-semantic-model/building-a-star-schema">
+  </Card>
+
+  <Card title="Building a Medallion architecture" href="/metadata-data-model-semantic-model/building-a-medallion-architecture">
+  </Card>
+</CardGroup>
+
+Data models are built up by writing SQL queries (views) in Peliqan. More info:
+
+[SQL on anything](/sql-on-anything)
+
+[Data transformations](/data-transformations)
+
+Peliqan will automatically keep track of the lineage of your queries. More info:
+
+[Data Lineage](/data-lineage)
+
+You can make your data model available to e.g. AI agents that need to perform text-to-SQL. Peliqan provides a template of an API handler script that allows you to generate and publish your data model, including relevant metadata. In Peliqan go to the Build section (apps) and click on the template to install it in your account:
+
+![Data model template app](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c324d98b-b530-41c3-950d-a6c5f61478a9/Screenshot_2025-09-11_at_17.47.30/w=1920,quality=90,fit=scale-down)
+
+## Semantic models
+
+A semantic model is built up in Peliqan by combining all of the above features, in order to provide context to a dataset. This means building up a business-ready dataset, adding documentation (descriptions on tables and columns), defining relations and publishing the datamodel as e.g. an API endpoint for consumption.
+
+Existing semantic models (e.g. Yaml files) can be imported using a script in Peliqan, so that the metadata (descriptions etc.) are available in Peliqan.
+
+See also how to retrieve and update metadata in Peliqan from scripts:
+
+[Working with metadata in scripts](/low-code-python-data-apps/advanced)

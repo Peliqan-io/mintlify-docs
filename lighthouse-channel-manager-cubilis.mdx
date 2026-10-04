@@ -1,0 +1,86 @@
+---
+title: "Lighthouse Channel Manager (Cubilis)"
+sidebarTitle: "Lighthouse CM"
+description: "Sync hotel reservation data from Lighthouse Channel Manager (formerly Cubilis) into Peliqan and use a custom Python pipeline to confirm receipt by clearing the queue."
+---
+
+**Lighthouse Channel Manager (CM)** is hospitality software for hotels to manage their bookings on OTA's such as booking.com, Expedia and 200+ other booking platforms. The old name of Lighthouse Channel Manager is Cubilis, a product of Stardekk (now part of Lighthouse, which used to be called "OTA Insights").
+
+This article provides an overview to get started with the **Lighthouse Channel Manager (CM)** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Remove synced reservations from the queue in Lighthouse CM
+
+Make sure to add the following custom pipeline script to your account, with an hourly schedule, which will fetch reservations from the Cubilis queue and removes synced reservations from the queue in Lighthouse Channel Manager.
+
+```python
+# Run this script with e.g. an hourly schedule.
+# This script will run the Cubilis pipeline, 
+# and it will remove Cubilis synced reservations from the Cubilis "queue".
+# Removing from the queue means confirmation of receipt.
+#
+# Cubilis puts reservations on the queue per 25.
+# Only after we remove them, new reservations are added to the queue (almost instantly).
+#
+# Sync all historic data:
+# Lighthouse support can re-add all reservations to the queue.
+# On each API call 25 new reservations will be fetched from the queue.
+# 
+# For testing: reservations can be added to the queue again manually
+# with the "Send to PMS" button in Cubilis (Lighthouse Channel Manager).
+
+schema_name = 'cubilis'
+
+connections_to_process = [
+    {
+        "connection_name": "Cubilis Hotel X",
+        "hotel_name": "Hotel X"
+    },
+    {
+        "connection_name": "Cubilis Hotel Y",
+        "hotel_name": "Hotel Y"
+    }
+]
+
+from datetime import datetime, timedelta
+import time
+
+dbconn = pq.dbconnect(pq.DW_NAME)
+
+for connection in connections_to_process:
+    st.header(connection["connection_name"])
+    cubilis_api = pq.connect(connection["connection_name"])
+
+    i = 0
+    # Keep fetching reservations from the queue until the queue is empty
+    # For safety max 1K API calls per run per connection (more if needed will be done in next run)
+    while i<1000:
+        i += 1
+        time.sleep(2) # Not sure if needed, give some time for new items to be added to the queue after removing them
+        reservations = cubilis_api.get('reservations')
+        st.write(f"Reservations fetched from queue: %s" % len(reservations))
+        #st.json(reservations)
+        
+        if not len(reservations):
+            st.write(f"No more reservations on the queue, stop processing for connection %s" % connection["connection_name"])
+            break
+            
+        # Add hotel name (source) to each reservation, sync all hotels to same tables
+        for reservation in reservations:
+            reservation["hotel_name"] = connection["hotel_name"]
+        
+        result = dbconn.write(schema_name, 'reservations', records = reservations, pk = 'id')
+        
+        for reservation in reservations:
+            #check if reservation correctly written to DWH
+            query = f"SELECT id FROM {schema_name}.reservations WHERE hotel_name = '{connection['hotel_name']}' AND id = '{reservation['id']}'"
+            query_result = dbconn.fetch(pq.DW_NAME, query = query)
+            if len(query_result)<1 or "id" not in query_result[0]:
+                st.write(f"ERROR: reservation id {reservation['id']} not written to DWH !")
+                st.write(reservation)
+                print(f"ERROR: reservation id {reservation['id']} not written to DWH !") # for log
+                print(reservation)
+                exit()
+            
+            st.write(f"Removing reservation with resid_value {reservation['resid_value']} from queue")
+            result = cubilis_api.delete('reservation_from_queue', reservation_id = reservation["resid_value"])    
+```

@@ -1,0 +1,73 @@
+---
+title: "SFTP - Getting started in Peliqan"
+sidebarTitle: "SFTP"
+description: "Learn how to read and write files on an SFTP server from Peliqan, sync CSV data to your data warehouse, and use the built-in SFTP CSV Data Sync template."
+---
+
+You can handle files on an SFTP server in Peliqan using the SFTP connector. Add an SFTP connection under "Connections" first (host, port, username, password etc.). Next, write a Python script in Peliqan to e.g. import data from CSV or JSON files. In your Python script you can read the data and insert into a table in your data warehouse.
+
+<Tip>
+  You can request an SFTP account from the Peliqan market place!
+</Tip>
+
+## Reading data from SFTP
+
+Example script to read a **JSON** file from an SFTP server:
+
+```python
+dw = pq.dbconnect(pq.DW_NAME)     # your data warehouse
+sftp = pq.sftpconnect("SFTP")
+
+files = sftp.dir("/")
+for file in files["detail"]:
+    if file["type"] == "file": # type can be "file" or "folder"
+        jsonStr = sftp.read_file(file["name"])  # assuming one object in file
+        record = json.loads(jsonStr)
+        dw.insert("my_db", "my_schema", "my_table", record)
+```
+
+## Writing data to SFTP
+
+Note: writing data to SFTP is not done through the `pq` function.
+
+Example script to write a CSV file to an SFTP server:
+
+```python
+import pysftp
+import io
+import csv
+
+cnopts = pysftp.CnOpts()
+cnopts.hostkeys = None # do not verify hostname
+
+# Add a connection first of type "Peliqan Secret store"
+password = pq.get_secret("Peliqan Secret Store - SFTP password")
+sftpconn = pysftp.Connection(host = "sftp.eu.peliqan.io", username = "testuser", password = password, port = 2022, cnopts = cnopts)
+
+dbconn = pq.dbconnect(pq.DW_NAME)
+query = "SELECT * FROM odoo.accounts LIMIT 5"
+df = dbconn.fetch(pq.DW_NAME, query = query, df = True)
+st.write(df)
+
+csv_buffer = io.StringIO()
+df.to_csv(csv_buffer, index=False, quotechar='"', quoting=csv.QUOTE_ALL)
+csv_buffer.seek(0)
+
+with sftpconn:
+    with sftpconn.open('data.csv', 'w') as remote_file:
+        remote_file.write(csv_buffer.getvalue())
+```
+
+## SFTP Data Sync: CSV files to tables in the data warehouse
+
+You can use the app template "SFT CSV Data Sync" in Peliqan, to set up automated data imports from CSV files on an SFTP server, into tables in the data warehouse.
+
+In Peliqan, go to the Build section, find the template and click on "Use template":
+
+<img
+  src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4e9998c6-5cf0-475c-9fae-bcac1e8b9c29/Screenshot_2025-12-07_at_11.42.35/w=1920,quality=90,fit=scale-down"
+  alt="SFT CSV Data Sync template in Peliqan Build section"
+  style={{ width:"33%" }}
+/>
+
+Next, run the app in Interactive Mode to configure it.

@@ -1,0 +1,361 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Peliqan documentation",
+  "colors": {
+    "primary": "#FF7F2F",
+    "light": "#F69C63",
+    "dark": "#FF7F2F"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Basics",
+            "pages": [
+              "index",
+              "overview-and-concepts",
+              "connect-to-data",
+              "working-with-data-in-the-grid-view",
+              "data-warehouse-materialize-tables",
+              {
+                "group": "Connect Your BI Tool",
+                "root": "connect-your-bi-or-db-tool",
+                "pages": [
+                  "connect-your-bi-or-db-tool/ssl-certificates-for-the-peliqan-data-warehouse",
+                  "connect-your-bi-or-db-tool/excel-odbc"
+                ]
+              },
+              "excel-add-in",
+              "permissions",
+              "market-place",
+              "frequently-asked-questions",
+              "feature-list-roadmap-and-architecture",
+              "platform-status",
+              "contact-support"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "sql-on-anything",
+              "joining-data",
+              "data-transformations",
+              "metadata-data-model-semantic-model",
+              "materialize",
+              "data-lineage",
+              "reverse-etl",
+              "data-mapper",
+              "ip-whitelisting",
+              {
+                "group": "On-prem Connectivity",
+                "root": "on-prem-connectivity",
+                "pages": [
+                  "on-prem-connectivity/peliqan-satellite-windows-on-prem-data-sync-agent",
+                  "on-prem-connectivity/netbird-vpn",
+                  "on-prem-connectivity/site-to-site-ipsec-vpn"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "For Partners",
+            "pages": [
+              "multi-customer-management",
+              "manage-sub-accounts",
+              "whitelabel",
+              "whitelabel/whitelabel",
+              "whitelabel/partner-api-embed-api",
+              "whitelabel/embedding",
+              "pipeline-webhooks",
+              "pq-functions-for-partners"
+            ]
+          },
+          {
+            "group": "For AI Creators",
+            "pages": [
+              "low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/peliqan-mcp-server",
+              "build-ai-agents-in-peliqan",
+              "build-ai-agents-with-n8n-and-peliqan",
+              "low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan",
+              "build-ai-agents-in-peliqan/rag"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "For Developers",
+        "groups": [
+          {
+            "group": "Data Apps",
+            "pages": [
+              "data-apps",
+              "low-code-python-data-apps/basics-of-data-apps",
+              "low-code-python-data-apps/reading-data-from-tables",
+              "low-code-python-data-apps/writing-data-to-tables",
+              "low-code-python-data-apps/running-apps-manual-schedule-etc",
+              {
+                "group": "Publish Apps",
+                "root": "low-code-python-data-apps/publish-apps",
+                "pages": [
+                  "low-code-python-data-apps/publish-apps/embed-apps-in-sharepoint",
+                  "low-code-python-data-apps/publish-apps/embed-apps-in-odoo"
+                ]
+              },
+              "low-code-python-data-apps/adding-login-to-your-app",
+              "low-code-python-data-apps/flows",
+              "low-code-python-data-apps/peliqan-python-client",
+              "low-code-python-data-apps/available-python-modules",
+              "low-code-python-data-apps/reference"
+            ]
+          },
+          {
+            "group": "Data App Use Cases",
+            "pages": [
+              "low-code-python-data-apps/data-visualization",
+              "low-code-python-data-apps/interactive-apps",
+              {
+                "group": "Writeback and Data Sync",
+                "root": "low-code-python-data-apps/writeback-reverse-etl-data-sync",
+                "pages": [
+                  "low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports",
+                  "low-code-python-data-apps/writeback-reverse-etl-data-sync/incremental-processing"
+                ]
+              },
+              "low-code-python-data-apps/alerting-messaging",
+              "send-alert-to-msteams",
+              "low-code-python-data-apps/predictions-machine-learning-templates/send-alerts-to-slack",
+              "low-code-python-data-apps/data-enrichment",
+              {
+                "group": "Reporting",
+                "root": "low-code-python-data-apps/reporting",
+                "pages": [
+                  "low-code-python-data-apps/reporting/generate-a-pdf-using-html"
+                ]
+              },
+              {
+                "group": "Working with Files",
+                "root": "low-code-python-data-apps/working-with-files",
+                "pages": [
+                  "low-code-python-data-apps/working-with-files/manual-file-uploads",
+                  "low-code-python-data-apps/working-with-files/working-with-parquet-files"
+                ]
+              },
+              "low-code-python-data-apps/etl-custom-pipelines",
+              "low-code-python-data-apps/etl-custom-pipelines/handling-deleted-rows",
+              {
+                "group": "Predictions and ML",
+                "root": "low-code-python-data-apps/predictions-machine-learning-templates",
+                "pages": [
+                  "low-code-python-data-apps/predictions-machine-learning-templates/basic-ml-prediction-example",
+                  "low-code-python-data-apps/predictions-machine-learning-templates/lead-conversion",
+                  "low-code-python-data-apps/predictions-machine-learning-templates/churn-prediction",
+                  "low-code-python-data-apps/predictions-machine-learning-templates/sentiment-analysis",
+                  "low-code-python-data-apps/predictions-machine-learning-templates/detect-anomalies-fraud-detection",
+                  "low-code-python-data-apps/predictions-machine-learning-templates/write-predictions-to-a-table",
+                  "low-code-python-data-apps/predictions-machine-learning-templates/create-an-app-for-business-users-to-get-predictions",
+                  "low-code-python-data-apps/predictions-machine-learning-templates/write-predictions-to-a-saas-app",
+                  "low-code-python-data-apps/predictions-machine-learning-templates/synthetic-data"
+                ]
+              },
+              "low-code-python-data-apps/data-quality-monitoring",
+              "low-code-python-data-apps/data-contracts",
+              "low-code-python-data-apps/advanced",
+              "low-code-python-data-apps/generating-union-queries",
+              "generate-union-query",
+              "low-code-python-data-apps/sync-data-between-parent-sub-accounts",
+              {
+                "group": "By Protocol",
+                "root": "low-code-python-data-apps/by-protocol-rest-webhooks-mqtt",
+                "pages": [
+                  "low-code-python-data-apps/mqtt"
+                ]
+              },
+              "low-code-python-data-apps/slow-changing-dimensions-history-tables",
+              "low-code-python-data-apps/data-masking-obfuscation"
+            ]
+          },
+          {
+            "group": "Platform and APIs",
+            "pages": [
+              "vibe-coding-apps-peliqan-as-backend",
+              "permission-layer-for-ai-agents",
+              "publish-apis",
+              "peliqan-api",
+              "incoming-webhooks"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Connector Guides",
+        "groups": [
+          {
+            "group": "Connectors A to F",
+            "pages": [
+              "connectors",
+              "adminpulse-getting-started-in-peliqan",
+              "adsolut-getting-started-in-peliqan",
+              "afas-getting-started-in-peliqan",
+              "connect-to-data/getting-started-with-airtable-in-peliqan",
+              "attio-getting-start-in-peliqan",
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/aws-s3",
+              "azure-blob-storage-getting-started-in-peliqan",
+              "connect-to-data/getting-started-with-bamboohr",
+              "bank-transactions-getting-started-in-peliqan",
+              "bigquery-getting-started-in-peliqan",
+              "billit-invoicing-getting-started-in-peliqan",
+              "bloqs-software-getting-started-in-peliqan",
+              "connect-to-data/getting-started-with-careerpro-fla-federal-learning-account-in-peliqan",
+              "convex-getting-started-in-peliqan",
+              "creditsafe-getting-started-in-peliqan",
+              "dropbox-getting-started-in-peliqan",
+              "enk-getting-started-in-peliqan",
+              "exact-globe-getting-started-in-peliqan",
+              "connect-to-data/getting-started-with-exact-online-connector-in-peliqan",
+              "exact-venice-getting-started-in-peliqan",
+              "expertm-getting-started-in-peliqan",
+              "facebook-ads-getting-started-in-peliqan",
+              "filemaker-getting-started-in-peliqan",
+              "fiscaal-gemak-getting-started-in-peliqan",
+              "fortnox-getting-started-in-peliqan",
+              "freshdesk-getting-started-in-peliqan"
+            ]
+          },
+          {
+            "group": "Connectors G to M",
+            "pages": [
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/github",
+              "google-analytics-getting-started-in-peliqan",
+              "google-calendar-getting-started-in-peliqan",
+              "google-cloud-document-ai-getting-started-in-peliqan",
+              "google-docs-getting-started-in-peliqan",
+              "google-drive-getting-started-in-peliqan",
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/google-sheets",
+              "connect-to-data/hubspot",
+              "ibm-db2-as400-getting-started-in-peliqan",
+              "instagram-getting-started-in-peliqan",
+              "ionbiz-getting-started-in-peliqan",
+              "lighthouse-channel-manager-cubilis",
+              "lightspeed-retail-r-series-getting-started-in-peliqan",
+              "linkedin-ads-getting-started-in-peliqan",
+              "lucanet-getting-started-in-peliqan",
+              {
+                "group": "MS Dynamics 365 Business Central",
+                "root": "connect-to-data/microsoft-dynamics-365-business-central",
+                "pages": [
+                  "connect-to-data/microsoft-dynamics-365-business-central/ms-business-central-extension",
+                  "microsoft-dynamics-365-business-central-custom-api-getting-started-in-peliqan"
+                ]
+              },
+              "microsoft-dynamics-365-project-operations-getting-started-in-peliqan",
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/microsoft-excel-365",
+              "microsoft-outlook-getting-started-in-peliqan",
+              "microsoft-outlook-calendar-getting-started-in-peliqan",
+              "microsoft-planner-getting-started-in-peliqan",
+              "sharepoint-getting-started-in-peliqan",
+              "connect-to-data/getting-started-with-microsoft-teams",
+              "monday-getting-started-in-peliqan",
+              "connect-to-data/mongodb",
+              "mysql-getting-started-in-peliqan"
+            ]
+          },
+          {
+            "group": "Connectors N to S",
+            "pages": [
+              "notion-getting-started-in-peliqan",
+              "nmbrs-getting-started-in-peliqan",
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/odoo",
+              "officient-getting-started-in-peliqan",
+              "oracle-getting-started-in-peliqan",
+              "pipedrive-getting-started-in-peliqan",
+              "piwik-getting-started-in-peliqan",
+              "plenion-getting-started-in-peliqan",
+              "postgres-getting-started-in-peliqan",
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/postmark",
+              "q7leader-getting-started-in-peliqan",
+              "qonic-getting-started-in-peliqan",
+              "robaws-getting-started-in-peliqan",
+              "connect-to-data/getting-started-with-salesforce-in-peliqan",
+              "sap-getting-started-in-peliqan",
+              "shopify-getting-started-in-peliqan",
+              "simplicate-getting-started-in-peliqan",
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/sftp",
+              "shiji-reviewpro-getting-started-in-peliqan",
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/slack",
+              "sd-worx-getting-started-in-in-peliqan",
+              "smtp2go-getting-started-in-peliqan",
+              "snelstart-getting-started-in-peliqan",
+              "snowflake-getting-started-in-peliqan",
+              "stripe-getting-started-in-peliqan",
+              "supabase-getting-started-in-peliqan",
+              "sybase-sap-sql-anywhere-getting-started-in-peliqan"
+            ]
+          },
+          {
+            "group": "Connectors T to Z",
+            "pages": [
+              "connect-to-data/getting-started-with-teamleader-in-peliqan",
+              "getting-started-with-teamleader-orbit",
+              "telegram-getting-started-in-peliqan",
+              "trello-getting-started-in-peliqan",
+              "twinfield-getting-started-in-peliqan",
+              "uniconta-getting-started-in-peliqan",
+              "visma-bouwsoft-getting-started-in-peliqan",
+              "vismanet-getting-started",
+              "visual-planning-getting-started-in-peliqan",
+              "weclapp-getting-started-in-peliqan",
+              "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/whatsapp",
+              "workday-getting-started-in-peliqan",
+              "yuki-getting-started-in-peliqan",
+              "zenvoices-getting-started-in-peliqan",
+              "zoho-creator-getting-started-in-peliqan"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/images/peliqan-logo-gradient.png",
+    "dark": "/images/peliqan-logo-gradient.png",
+    "href": "https://docs.peliqan.io"
+  },
+  "navbar": {
+    "links": [
+      {
+        "href": "/connectors",
+        "label": "Connectors"
+      },
+      {
+        "href": "https://peliqan.io/contact-us",
+        "label": "Contact support"
+      },
+      {
+        "href": "https://helpdesk.peliqan.io/tickets",
+        "label": "Helpdesk portal"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Book a demo",
+      "href": "https://peliqan.io/contact/"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "description": "Peliqan.io - the trust layer for AI."
+}

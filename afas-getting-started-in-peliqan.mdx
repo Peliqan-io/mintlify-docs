@@ -1,0 +1,24 @@
+---
+title: "AFAS - Getting started in Peliqan"
+sidebarTitle: "AFAS"
+description: "Learn how to connect AFAS Profit to Peliqan using GetConnectors and an API token to sync finance, HR, payroll, CRM, and ERP data to the data warehouse."
+---
+
+AFAS is a Dutch software company that provides integrated business management solutions for finance, HR, payroll, CRM, and ERP. Its flagship platform, **AFAS Profit**, helps organizations automate and streamline core business processes, improving efficiency and reducing administrative work. AFAS serves thousands of organizations across various sectors, including healthcare, education, government, and commercial businesses.
+
+This article provides an overview to get started with the **AFAS** connector in Peliqan. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect AFAS
+
+- Create one or more GetConnectors in AFAS First. More info: [https://help.afas.nl/help/NL/SE/App_Con_GS_AOL_Get_Add.htm](https://help.afas.nl/help/NL/SE/App_Con_GS_AOL_Get_Add.htm)
+- Create a Token. More info: [Handmatig gebruikerstoken aan eigen app connector toevoegen](https://help.afas.nl/help/nl/se/App_Apps_Custom_Tokens_Manual.htm)
+- In Peliqan go to Connections > Add connection and search for AFAS.
+- Enter your AFAS details:
+  - Token: format should be `<token>...</token>`
+  - Subdomain: e.g. `12345` if your AFAS URL is `https://12345.rest.afas.online`
+  - Primary key override: optional, use this to set a custom primary key. Example format: `{"Connector1": ["field1", "field2"], "Connector2": ["field3"]}`
+    - In this example we have a GetConnector with name Connector1 and the primary key is composed for field1 and field2, and we have a GetConnector with name Connector2 which uses field3 as the primary key.
+
+![AFAS connection settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d3576461-53d4-4f2d-806a-0bedee06f6bd/screenshot_2026-05-26_at_14.59.33/w=1920,quality=90,fit=scale-down)
+
+The Peliqan connector will automatically discover all the **GetConnectors** that you enabled in AFAS, fetch the data for each and store the data in a separate table in the data warehouse.

@@ -1,0 +1,65 @@
+---
+title: "Zenvoices - Getting started in Peliqan"
+sidebarTitle: "Zenvoices"
+description: "Connect Zenvoices to Peliqan using your username, password, and tenancy name. Sync invoice processing data to Peliqan's data warehouse for analysis and reporting."
+---
+
+**_Zenvoices_** _is a modern HR and workforce management platform designed to streamline employee data, time tracking, payroll, and compliance. It provides intelligent software solutions to automate invoice processing for accountants and small to medium-sized businesses (SMEs).It is useful in automating the processing of E-invoices. Website :_ [https://www.zenvoices.com/](https://www.zenvoices.com/)
+
+Zenvoices supports secure API-based access with _organization-specific tenancy name_, ensuring controlled and structured data retrieval. The connector features customizable date ranges, field mappings, and incremental sync options for efficient data handling.This connector is ideal for businesses looking to:
+
+- Automate HR data flows into analytics or ERP systems
+- Sync employee records with other business applications
+- Ensure real-time updates between Zenvoices and reporting tools
+
+This article provides an overview to get started with the **Zenvoices** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Connect to Zenvoices in Peliqan
+
+Connect Zenvoices through the Peliqan Connectivity module:
+
+![Zenvoices connection configuration in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/64cbde68-678e-4081-a9e8-119e49f5344f/Screenshot_2025-06-11_at_11.45.39_AM/w=1920,quality=90,fit=scale-down)
+
+### **Prerequisites**
+
+- Valid **Zenvoices account** with admin or API access (Navigate to Manage **\>** Organization **\>** Users in the Zenvoices portal. Create/Edit a user and edit permissions of the user to grant API permissions)
+- Organization's **tenancy name** (provided by Zenvoices)
+- Correct **username/email** and **password**
+
+### **Configuration Steps**
+
+#### **1. Username/Email** **_(Required)_**
+
+- Input the **email address** associated with your Zenvoices account.
+- Example: `your.name@company.com`
+
+#### **2. Password** **_(Required)_**
+
+- Enter the **password** for your Zenvoices account.
+- Ensure the password is correct to avoid authentication failures.
+
+#### **3. Tenancy Name** **_(Required)_**
+
+- This is your **organization's unique name** available in Zenvoices instance URL
+- Example: If your Zenvoices URL is `https://{tenancy-name}.zenvoices.com`, use `{tenancy-nam}`.
+
+#### **4. Start Date** **_(Required)_**
+
+- Format: `YYYY-MM-DD` (e.g., `2025-06-01`).
+- This defines the **oldest data** the connector will fetch.
+
+## Zenvoices data sync to a data warehouse
+
+Peliqan offers an out-of-the-box data warehouse. Optionally, you can choose to sync Zenvoices data to your own data warehouse such as Snowflake, Google BigQuery, MS SQL, etc.
+
+Data will be synced to the selected data warehouse and made available through the **Peliqan UI** for browsing and analysis:
+
+![Zenvoices data in Peliqan gridview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/96b796e9-b117-4d65-9b49-754340008099/Screenshot_2025-06-12_at_1.39.03_AM/w=1920,quality=90,fit=scale-down)
+
+With the Peliqan federated query engine, you can write queries on Zenvoices data, transform it, and join it with other data sources—enabling a unified view of your accounting and business operations.
+
+![SQL query on Zenvoices data in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f1164323-2523-486c-952a-2463c867203f/redacted-image/w=1920,quality=90,fit=scale-down)
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](mailto:support@peliqan.io).

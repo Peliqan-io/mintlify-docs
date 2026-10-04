@@ -1,0 +1,233 @@
+---
+title: "Microsoft Outlook - Getting started in Peliqan"
+sidebarTitle: "Outlook"
+description: "Connect Microsoft Outlook to Peliqan via OAuth and use low-code Python scripts to fetch emails, send messages with attachments, and send mail on behalf of others."
+---
+
+This article provides an overview to get started with the **Microsoft Outlook** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
+
+## Content
+
+- [Connecting Microsoft Outlook in Peliqan](#connecting-microsoft-outlook-in-peliqan)
+  - [Authentication](#authentication)
+- [Microsoft Teams Data Activation](#microsoft-teams-data-activation)
+  - [Fetching all Mails](#fetching-all-mails)
+  - [Sending an Email](#sending-an-email)
+  - [Sending an E-mail with Attachment](#sending-an-e-mail-with-attachment)
+  - [Sending E-mail on Someone's behalf](#sending-e-mail-on-someones-behalf)
+- [Need further help](#need-further-help)
+
+## Connecting Microsoft Outlook in Peliqan
+
+Peliqan connects to Microsoft Outlook performing OAuth flow. Peliqan App is verified by Microsoft and signs in on behalf of the Authenticated User once OAuth flow is completed.
+
+![Microsoft Outlook connection in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7972f2c7-a23f-4c5a-a988-cd193bc458e5/image/w=1920,quality=90,fit=scale-down)
+
+### Authentication
+
+1. Start the OAuth Connection flow by clicking on '**Connect Microsoft Outlook'.**
+2. If you are signed in with multiple Microsoft accounts on browser, select the Microsoft Outlook account and authenticate yourself by entering credentials.
+3. Allow **Peliqan** app to login on your behalf and access Microsoft Outlook data.
+
+![Microsoft Outlook OAuth authorization](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/65eb4288-b0be-4e46-9947-cbc82463529a/image/w=1920,quality=90,fit=scale-down)
+
+4. Once OAuth flow is completed, you will be redirected back to Peliqan to perform Writeback operations.
+
+## Microsoft Teams Data Activation
+
+Peliqan provides lot of data activation function which enables users to communicate with Microsoft Outlook application through Python Scripts.
+
+### Fetching all Mails
+
+_Get Mails_ method allows to fetch metadata of all the mails under the authenticated account.
+
+```python
+outlook_api = pq.connect('Microsoft Outlook')
+result = True
+skip_value = 0
+while result:
+    mails = { 'skip': skip_value }   
+    result = outlook_api.get('mails', mails)
+    st.json(result)
+    skip_value+=100  # increasing by 100 for paged results
+```
+
+By default, metadata of first 100 mails are received, use **skip** to fetch next 100 result.
+
+### Sending an Email
+
+_Add Mail_ method is used to send an E-mail.
+
+```python
+outlook_api = pq.connect('Microsoft Outlook')
+mail = {
+    "message":{
+        "subject" : "Sample Subject",
+        "body" : {
+            "contentType" : "HTML",
+            "content" : "Hi Dev,<br> <p style='bgcolor:red'> Spaming you again, only testing :P Sample content testing the process of sending E-mail. let me know if it works./p>"
+        },
+        "toRecipients" : [
+            {
+                "emailAddress" : {
+                    "address" : "receiver@peliqan.io"
+                }
+            }
+        ],
+        "ccRecipients" : [
+            {
+                "emailAddress" : {
+                    "address" : "hello@peliqan.io"
+                }
+            }
+        ]
+    },
+    "saveToSentItems" : True
+}
+result = outlook_api.add('mail', mail)
+st.json(result)
+```
+
+### Sending an E-mail with Attachment
+
+_Add Mail with Attachment_ method is used to send an E-mail adding any file/document along with E-mail
+
+```python
+outlook_api = pq.connect('Microsoft Outlook')
+mail_with_attachment = {
+    'message': {
+    "subject": "Meet for lunch?",
+    "body": {
+      "contentType": "Text",
+      "content": "The new cafeteria is open."
+    },
+    "toRecipients": [
+      {
+        "emailAddress": {
+          "address": "meganb@contoso.com"
+        }
+      }
+    ],
+    "attachments": [
+      {
+        "@odata.type": "#microsoft.graph.fileAttachment",
+        "name": "attachment.txt",  
+        "contentType": "text/plain", 
+        "contentBytes": "SGVsbG8gV29ybGQh" # base64 encoded bytes
+      },
+      {
+        "@odata.type": "#microsoft.graph.fileAttachment",
+        "name": "attach.png",  
+        "contentType": "image/png", 
+        "contentBytes": "SGVjkkk394odood" 
+      }
+    ]
+  },
+  'saveToSentItems': True,
+}
+result = outlook_api.add('mail_with_attachment', mail_with_attachment)
+st.json(result)
+```
+
+**Please find below an example code sharing a text file through E-mail using Peliqan.**
+
+Streamlit is used to upload the file from local computer. One can also fetch reports from any source and send it directly Peliqan.
+
+```python
+# Required Imports
+import base64
+
+# Required Connections
+outlook_api = pq.connect('Microsoft Outlook')
+
+# Required Inputs
+base64_attachment_data = None
+uploaded_file = None
+
+uploaded_file = st.file_uploader("Upload file - ", type=['txt'])
+if uploaded_file:
+    bytes_data = uploaded_file.getvalue()
+    # Convert bytes to base64
+    base64_attachment_data = base64.b64encode(bytes_data).decode('utf-8')
+
+    mail_with_attachment = {
+        'message': {
+            'body': {
+                'content': "Hi Peliqan, Hope you are doing good.",
+                'contentType': "HTML",
+            },
+            'subject': "Sample Subject",
+            'toRecipients': [
+			            {'emailAddress': {
+						            'address': 'peliqandev@outlook.com'
+						            }
+						      }],
+            'attachments': [
+                {
+                    'name': 'sample_attach.txt',
+                    '@odata.type': '#microsoft.graph.fileAttachment', 
+                    'contentType': 'text/plain',
+                    'contentBytes': base64_attachment_data
+                }
+            ]
+        },
+        'saveToSentItems': True,
+    }
+    result = outlook_api.add('mail_with_attachment', mail_with_attachment)
+    st.json(result)
+```
+
+### Sending E-mail on Someone's behalf
+
+Exchange Online provides mailbox permisions that allow a user to send mail that appears to be sent from another user, distribution list, group, resource, or shared mailbox. With Peliqan's, _Add Mail On Behalf_ method, user can send an E-mail on behalf of another user or through a shared Mailbox.
+
+<Tip>
+  This feature is only available for Microsoft Work or Enterprise Accounts, not for personal account.
+</Tip>
+
+<Tip>
+  User trying to imposter another user must have delegated rights provided by the person on whose behalf mail is being sent
+</Tip>
+
+Steps Global Administrator can follow to provide delegate Mailbox permissions to another user:
+
+- Go to the [Microsoft 365 admin center](https://admin.microsoft.com/)
+- Go to **Users** > **Active users**.
+- Select the user (e.g., the manager) you want to grant permission to.
+- Go to **Mail** > **Manage mailbox permissions**.
+- In the "Send on behalf" section, click **Edit**.
+- Add the delegate's email address ( address of the person whom you want to send e-mail on your behalf ).
+
+Below is the script to send E-mail on someone's behalf:
+
+```python
+outlook_api = pq.connect('Microsoft Outlook')
+mail_on_behalf = {
+    'message': {
+    "subject": "Sample Subject",
+    "body": {
+      "contentType": "Text",
+      "content": "Testing for sending mail on behalf of another user"
+    },
+    "toRecipients": [
+      {
+        "emailAddress": {
+          "address": "hello@example.com"
+        }
+      }
+    ],
+    "from": {
+      "emailAddress": {
+        "address": "sender@example.com"
+      }
+    }
+  },
+    'saveToSentItems': True,
+}
+result = outlook_api.add('mail_on_behalf', mail_on_behalf)
+st.json(result)
+```
+
+## Need further help
+
+Please contact our support for any further assistance via [support@peliqan.io](/).

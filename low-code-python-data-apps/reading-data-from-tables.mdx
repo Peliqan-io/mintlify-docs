@@ -1,0 +1,127 @@
+---
+title: "Reading data from tables"
+description: "Learn how to fetch data from Peliqan tables into Python as objects or Pandas dataframes, iterate rows, and write SQL queries using PyPika."
+sidebarTitle: "Reading Data"
+---
+
+You can load data from any table into your Python code. The response `rows` is a list of objects, or when `df=True` is used the response is a Pandas dataframe.
+
+## Loading data
+
+```python
+# Open a connection to the Peliqan data warehouse
+dbconn = pq.dbconnect(pq.DW_NAME) # See your DW name under My Connections
+
+# Open a connection to a connected database
+dbconn = pq.dbconnect('connection_name') # See connection name under My Connections
+
+# Load a table
+rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
+
+# Using a custom SQL SELECT query
+rows = dbconn.fetch('db_name', query = 'SELECT * FROM schema_name.table_name')
+
+# Get a dataframe as response
+rows = dbconn.fetch('db_name', 'schema_name', 'table_name', df=True)
+
+# More options for dbconn.fetch():
+#
+# df = True: set to True to return a Dataframe instead of a list of objects
+# fillna_with = '': replace Na (not a number) with a given value, e.g. in empty string
+# fillnat_with= '': replace NaT (not a date)
+# enable_python_types = True: use Python types in response
+# enable_datetime_as_string = True: return datetime columns as string
+# tz='UTC': timezone for datetimes
+```
+
+## Working with data
+
+```python
+dbconn = pq.dbconnect(pq.DW_NAME) 
+rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
+
+# Select the first row
+row = rows[0]
+
+# Select one element (cell value) in a row
+value = rows[0]["column_name"]  # first row
+value = rows[1]["column_name"]  # second row
+
+# Loop over all rows:
+for row in rows:
+    st.text(row) #print the row
+
+# Loop over all rows and access one element
+for row in rows:
+    st.text(row["column-name"])
+
+# Loop over the column names of one row
+row = rows[0]
+for column_name in row:
+  st.text(column_name)
+
+# Loop over all elements of row and get both key & value  
+row = rows[0]
+for key, val in row.items():
+  st.text('Key %s has value %s' % (key, val))
+```
+
+## Working with dataframes
+
+Here are basic examples of working with dataframes:
+
+```python
+data = dbconn.fetch('db_name', 'schema_name', 'table_name', df=True)
+
+# Select only a few columns:
+data2 = data[["column1", "column2"]]
+
+# Select the first row
+row = data.iloc[0]
+
+# Select the first element in a column
+value = data["column_name"].iloc[0]
+
+# Loop over all rows:
+for i, row in data.iterrows():
+    st.text(row) #print the row
+
+# Loop over all rows and access each element (also loop over columns):
+for i, row in data.iterrows():
+    for col in row:
+      st.text(col) # print the element (col)
+```
+
+## Writing SQL queries using code
+
+You can use `PyPika` to write SQL queries in code. Example:
+
+```python
+from pypika import Query, Table
+
+# Define tables
+tasks = Table('myerp.task')
+task_logs = Table('myerp.task_log')
+
+# Build up query using PyPika
+query = (
+    Query.from_(tasks)
+    .left_join(task_logs).on(tasks.id == task_logs.task_id)
+    .where(task_logs.processed.isnull())
+    .where(tasks.title.like('%important%'))
+    .limit(1000)
+    .select('*')
+)
+
+# Convert query to string
+sql_query = str(query)
+
+# Add some line breaks and show on screen
+# Optional, only for visualizing the final SQL query on screen
+sql_query = sql_query.replace("LEFT", "\nLEFT").replace("ON", "\nON").replace("WHERE", "\nWHERE").replace("AND", "\nAND").replace("LIMIT", "\nLIMIT")
+st.code(sql_query, language = "sql")
+
+# Fetch data using the query
+dbconn = pq.dbconnect(pq.DW_NAME)
+assortiment_data = dbconn.fetch(pq.DW_NAME, query = sql_query)
+```

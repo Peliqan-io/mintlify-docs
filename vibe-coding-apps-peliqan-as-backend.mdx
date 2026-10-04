@@ -1,0 +1,95 @@
+---
+title: "Peliqan Machines - deploy vibe coded apps"
+sidebarTitle: "Peliqan Machines"
+description: "Deploy vibe coded web apps on Peliqan Machines VMs with any framework, and use Peliqan as the backend for auth, databases, and APIs."
+---
+
+Peliqan supports two types of apps that can be built and deployed on Peliqan infrastructure:
+
+|  | Data app | Vibe coded web app |
+| --- | --- | --- |
+| **Structure** | Single file script | Multi-file project |
+| **Coding language** | Python | Any language & framework |
+| **Front-end (UI)** | Streamlit | Any framework (React…) |
+| **Use cases** | Automations, Data visualizations, Set up Data APIs, custom MCP servers… | Build any rich web app |
+| **IDE (coding editor)** | Peliqan Data App editor | VScode (or any other IDE) |
+| **Complexity to write, deploy, run** | Simple | Moderate |
+| **Execution environment** | Peliqan Data app VMs | Peliqan Machines (VMs) |
+
+## Peliqan Machines
+
+Peliqan Machines allow you to host your vibe coded web apps on Peliqan. These VMs are the next generation deployment environment from Peliqan.
+
+Compared to traditional Data Apps, vibe coded apps running on Peliqan Machines provide endless flexibility to build & deploy any type of app.
+
+### Deploying your vibe coded apps on Peliqan Machines
+
+In Peliqan, in the left menu pane, go to Peliqan Machine:
+
+![Peliqan Machine menu option in left sidebar](https://file.notion.com/f/f/b0da9e1c-6b82-4fb7-9b82-5ac35567e1af/f7a30b18-7d47-4425-a9fd-839716490b85/Screenshot_2026-09-24_at_16.32.20.png?table=block&id=3e51aa9b-3879-8075-8f93-c228ac751489&spaceId=b0da9e1c-6b82-4fb7-9b82-5ac35567e1af&expirationTimestamp=1790287200000&signature=EPFNv5ejgozMHi40mGotuu-a6HGVuV67VDjU3pAudLA)
+
+Click on the button "+ New machine" in the right top corner. Enter a name and short description. Based on the description, Peliqan AI will scaffold a boilerplate web app.
+
+![New machine creation dialog in Peliqan](https://file.notion.com/f/f/b0da9e1c-6b82-4fb7-9b82-5ac35567e1af/c11d0e62-3165-44f3-b929-4287df9f7b27/Screenshot_2026-09-24_at_16.45.52.png?table=block&id=3e51aa9b-3879-80b7-8504-c757e3d8c06c&spaceId=b0da9e1c-6b82-4fb7-9b82-5ac35567e1af&expirationTimestamp=1790287200000&signature=-JBaqxk2NhyTa_ggS3ECF0KqD_Ie8G0nJ9zjFQdF1bw)
+
+Wait for the machine to be provisioned.
+
+![Machine provisioning status screen](https://file.notion.com/f/f/b0da9e1c-6b82-4fb7-9b82-5ac35567e1af/0931a35a-de5c-472c-84fc-9e5f89bb4a3f/Screenshot_2026-09-24_at_16.33.56.png?table=block&id=3e51aa9b-3879-8004-a745-cff875e8cf49&spaceId=b0da9e1c-6b82-4fb7-9b82-5ac35567e1af&expirationTimestamp=1790287200000&signature=0-4lJODwqnIqc-e5vRxTwEvallHyaqF4JLpzG2K3o6c)
+
+When the machine is ready, click on the button "Connect your agent" in the right top corner and follow the instructions:
+
+1. Install the Peliqan CLI on your local computer
+2. Sign in on Peliqan CLI with your Peliqan account
+3. Connect to your Peliqan Machine
+4. Download the `instructions.md` file for your coding agent (e.g. Claude Code).
+
+![Connect your agent instructions screen](https://file.notion.com/f/f/b0da9e1c-6b82-4fb7-9b82-5ac35567e1af/7dcd7401-5348-488d-b1b4-a246d489777e/Screenshot_2026-09-24_at_16.32.52.png?table=block&id=3e51aa9b-3879-80d8-81f7-c20974b6326b&spaceId=b0da9e1c-6b82-4fb7-9b82-5ac35567e1af&expirationTimestamp=1790287200000&signature=2nXdzuP13bQUxCeKi1xP_Ssp29kA4vVqAdIXmEQZwOA)
+
+The `instructions.md` file outlines the high-level sequence of operations for the agent to deploy your code, and it indicates where specific skill files are located within the generated base project files.
+
+Vibe code your app in your favorite environment (e.g. using Claude Code) and make sure to instruct your agent to read and follow the instructions in `instructions.md`.
+
+Ask your agent to deploy your app, it will use a secure SSH connection to your Peliqan Machine (using the peliqan CLI).
+
+### Preview app
+
+You can preview your deployed app under "Preview". You can copy the preview URL of your app and use it outside of Peliqan:
+
+![App preview screen with URL](https://file.notion.com/f/f/b0da9e1c-6b82-4fb7-9b82-5ac35567e1af/3a07d524-b65c-4065-be14-abfefe2c843b/Screenshot_2026-09-22_at_22.00.07.png?table=block&id=3e51aa9b-3879-80e9-849b-cd8fd1a81539&spaceId=b0da9e1c-6b82-4fb7-9b82-5ac35567e1af&expirationTimestamp=1790287200000&signature=qnZt7gU19CtRqoC5Oq9boGTaMfUkV52zHQrTrR5cLto)
+
+### Browse files
+
+You can see all deployed files of your project under "Code".
+
+![Browse files screen showing deployed project files](https://file.notion.com/f/f/b0da9e1c-6b82-4fb7-9b82-5ac35567e1af/19582a2b-f11a-4458-920f-2639cd5e4df2/Screenshot_2026-09-24_at_16.40.53.png?table=block&id=3e51aa9b-3879-8057-adb1-e87e3e9e4478&spaceId=b0da9e1c-6b82-4fb7-9b82-5ac35567e1af&expirationTimestamp=1790287200000&signature=OxV1LKwcisH5LeEVbYQnI8r5N2tfS81yJ4KheiV6Cz8)
+
+### Deployment logs
+
+View the deployment logs for any errors.
+
+### Settings
+
+Use Settings to e.g. restart your environment.
+
+### Publish to production
+
+In order to make your app permanently available to users, you have to publish it to production, using the button "Publish to production" in the right top corner.
+
+## Peliqan as backend
+
+Use Peliqan as the backend for your vibe coded apps, and allow multiple apps to share the same backend. Peliqan as a backend includes:
+
+- Authorization and authentication via Peliqan
+- Built-in Postgres database
+- Peliqan data warehouse (businesss data)
+- Peliqan writeback connectors (connect to your ERP, CRM…)
+
+More info:
+
+[How to integrate with the Peliqan OAuth2 server](https://help.peliqan.io/vibe-coding-apps-peliqan-as-backend/how-to-integrate-with-the-peliqan-oauth2-server) [Peliqan REST API](/peliqan-api) [Build a custom MCP Server on Peliqan](/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan)
+
+## Data apps
+
+Data Apps are low-code single file Python scripts, using Streamlit for the UI. These are an alternative to vibe coded web apps. More info:
+
+[Data Apps - low code Python](/low-code-python-data-apps)
