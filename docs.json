@@ -89,6 +89,7 @@
       {
         "tab": "For Developers",
         "pages": [
+          "for-developers",
           {
             "group": "Data Apps",
             "pages": [
@@ -187,8 +188,7 @@
               "peliqan-api",
               "incoming-webhooks"
             ]
-          },
-          "for-developers"
+          }
         ]
       },
       {
