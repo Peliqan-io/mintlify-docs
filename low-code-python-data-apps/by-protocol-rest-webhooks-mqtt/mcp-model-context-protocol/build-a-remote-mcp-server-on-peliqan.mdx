@@ -53,7 +53,7 @@ Peliqan has an [out-of-the-box MCP Server](/low-code-python-data-apps/by-protoco
 
   **Troubleshooting in Copilot Studio**
 
-  If you don't have permissions to publish you agent, follow the below steps to allow a user to publish an agent:
+  If you don't have permissions to publish your agent, follow the below steps to allow a user to publish an agent:
 
   Add a security group (to which the user belongs) in Power Automate Admin center, for the setting Manage > Tenant settings > "Copilot studio authors".
 
@@ -129,7 +129,7 @@ See the MCP Server template for an example on how to implement your own custom t
 
 ## Implement intent detection
 
-Intent detection (logging the original intent of the user) is useful to improve your MCP implementation. See example code below. Without intent detection you will only be able to log tool invokations, without knowing what the user (using the MCP) wanted to achieve.
+Intent detection (logging the original intent of the user) is useful to improve your MCP implementation. See example code below. Without intent detection you will only be able to log tool invocations, without knowing what the user (using the MCP) wanted to achieve.
 
 <Accordion title="Example custom MCP Server with intent detection">
   ```python

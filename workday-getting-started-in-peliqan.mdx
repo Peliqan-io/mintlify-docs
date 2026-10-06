@@ -73,39 +73,3 @@ Next, use a custom pipeline script in Peliqan to fetch the data.
   get_wql_data_allWorkers()
   ```
 </Accordion>
-
-<Accordion title="Example custom pipeline to fetch Workday data using a WQL query (e.g. report data), click to expand">
-  ```python
-  dbconn = pq.dbconnect(pq.DW_NAME)    
-  workday_api = pq.connect('Workday')
-  
-  def get_wql_data_allWorkers():
-      table_name = "allworkers"
-      query = "SELECT workerID, worker, employee, position FROM allWorkers"
-  
-      workday_api.get('wql', limit=1, offset="", query=query) # first API request needs to be without offset
-      
-      offset = 0
-      limit = 1000
-      
-      while True:
-          st.text(f"Fetching wQL query data with limit {limit} and offset {offset}.")
-          result = workday_api.get('wql', limit=limit, offset=offset, query=query)
-  
-          if not "data" in result:
-              break
-          else:
-              data = result["data"]
-              
-              for record in data:
-                  record["id"] = record.get("worker", {}).get("id", "") + "_" + record.get("employee", {}).get("id", "")    # create unique id for each row
-              
-              dbconn.write('wql', table_name, records=data, pk='id')
-          
-              offset += limit
-              if len(data)==0:
-                  break
-  
-  get_wql_data_allWorkers()
-  ```
-</Accordion>

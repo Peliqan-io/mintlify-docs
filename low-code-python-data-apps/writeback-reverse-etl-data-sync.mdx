@@ -24,7 +24,7 @@ slack_api.add('message', channel = 'QA', text = 'Data quality alert')
 
 Every writeback function will automatically do retries, e.g. when the API responds with a `429 Rate Limit` response code. Retries will be executed with a pause in between. This means that one insert or update could take multiple minutes to complete if rate limiting occurs.
 
-Peliqan will wait for a **maximum of 120 seconds for one individual API call** to complete. If an API does not respond within 120 seconds, Peliqan will retry (if `timeout=False`) or throw a Timeout error (if `timeout=True)`.
+Peliqan will wait for a **maximum of 120 seconds for one individual API call** to complete. If an API does not respond within 120 seconds, Peliqan will retry (if `timeout=False`) or throw a Timeout error (if `timeout=True`).
 
 Add the optional parameter `timeout=True` to lower the amount of retries, which will reduce the maximum execution time of one writeback function to complete.
 

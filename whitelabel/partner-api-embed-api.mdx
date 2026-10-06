@@ -16,7 +16,7 @@ There are 2 options:
 - Partner: SaaS company or ISV
 - End-customer: the customer of the Partner
 - Partner account: the Peliqan.io account to which the Partner logs in, also called the "parent" account
-- End-customer account: a Peliqan account for the End-customer, als referred to as a "sub account"
+- End-customer account: a Peliqan account for the End-customer, also referred to as a "sub account"
 
 # Peliqan Partner REST API
 
@@ -145,7 +145,7 @@ The response also includes a list of available tables (see `available_streams`) 
 
 ## Add a connection
 
-Get the "connect form" first (see above), and include the required connection fields when creating a new connection on behalve of an end-customer. A connection is called a "server" in the API.
+Get the "connect form" first (see above), and include the required connection fields when creating a new connection on behalf of an end-customer. A connection is called a "server" in the API.
 
 API endpoint:
 
@@ -253,7 +253,7 @@ Optional querystring parameters:
   - `pipeline=true`: run a sync pipeline for a SaaS source (use this to run an ELT pipeline)
   - `pipeline=false`: discover tables, schemas, tables in a connected database
 - `skip_refresh`: boolean (true or false)
-  - `skip_refresh=true`: do not rediscover tables in target dchema
+  - `skip_refresh=true`: do not rediscover tables in target schema
   - `skip_refresh=false`: do a rediscover of target schema
 
 Example running an ELT pipeline for one table:

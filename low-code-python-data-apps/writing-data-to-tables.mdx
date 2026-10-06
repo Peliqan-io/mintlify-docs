@@ -100,7 +100,7 @@ On the first write, the target table does not exist yet. If an `object_schema` i
 
 From the second write into an existing table, the column types are fixed and will not change, unless an `object_schema` is set. If there is a conflict between the `object_schema` and an existing column, the existing column will be split, see detail below. New columns will be added as needed.
 
-Once the `object_schema` is determined (because it is set or because the existing columns are used or because of introspection) each row if the input data is transformed, see betails below.
+Once the `object_schema` is determined (because it is set or because the existing columns are used or because of introspection) each row of the input data is transformed, see details below.
 
 ### Setting an object_schema
 

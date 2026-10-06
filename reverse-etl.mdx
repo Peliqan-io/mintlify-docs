@@ -31,7 +31,7 @@ The entire data flow consists of 2 phases:
 
 ## Prerequisites
 
-Before usign the Peliqan Reverse ETL app, make sure you have a good understanding of following basic concepts in the Peliqan data platform:
+Before using the Peliqan Reverse ETL app, make sure you have a good understanding of following basic concepts in the Peliqan data platform:
 
 - [ELT pipelines: sync data into the data warehouse](/connect-to-data)
 - [Data explorer: explore source data](/working-with-data-in-the-grid-view)
@@ -100,7 +100,7 @@ Enable "Alert emails" on the Reverse ETL script (under Build) to receive emails 
 
 ### 2-way sync
 
-Use this when syncing in 2 directions. In this case one sync is configured for each direction and each sync is linked to its "equivalent" sync in the other direction. This is to avoid unnessary updates and eternal loops. Note that the "hash" feature (see below) also avoids eternal loops.
+Use this when syncing in 2 directions. In this case one sync is configured for each direction and each sync is linked to its "equivalent" sync in the other direction. This is to avoid unnecessary updates and eternal loops. Note that the "hash" feature (see below) also avoids eternal loops.
 
 Example syncing Companies and Contacts between Hubspot and Odoo in both directions. Syncs to configure:
 
@@ -145,7 +145,7 @@ Do not use "id" fields in the target (column on the right). Those fields are oft
 
 Click on the edit icon (pencil) in the left column to enter a static value.
 
-For example enter a static value `555` that needs to be used for all records, and whic is mapped to a target field `division_id` (assuming all synced records in the target need to have division_id=555).
+For example enter a static value `555` that needs to be used for all records, and which is mapped to a target field `division_id` (assuming all synced records in the target need to have division_id=555).
 
 ### Custom fields
 
@@ -171,7 +171,7 @@ The Reverse ETL app will perform this type of lookup when you configure the FK's
 
 ![FK relation configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1df86476-c315-4161-bc2d-eca16343042d/FK_relation/w=1920,quality=90,fit=scale-down)
 
-The lookup to find the FK for the tarfget, is done in the link table of the parent object (green line in the above drawing). See below for more info on link tables.
+The lookup to find the FK for the target, is done in the link table of the parent object (green line in the above drawing). See below for more info on link tables.
 
 ## Data tab
 
@@ -183,7 +183,7 @@ You can test the sync under "Data" by selecting one source record and performing
 
 ### View the status of a sync
 
-View the status of each sync under "Status". This shows the link table which contains all source ids that have been synced, the timetamps and errors if any.
+View the status of each sync under "Status". This shows the link table which contains all source ids that have been synced, the timestamps and errors if any.
 
 ![Sync status view](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/948410d5-61b1-4970-a557-371a601d0e7a/status/w=1920,quality=90,fit=scale-down)
 
@@ -322,7 +322,7 @@ def transform(source_record, target_record, pq, target_id=None):
 
 ### Seeding the link tables
 
-The Reverse ETL app performs an insert in the target, for each source record, and subsequently it performs updates for these source ids. However, the Reverse ETL app does not "match" source records with pre-existing target records. For example, if you sync companies from a source to a target, the Reverse ETL app will ignore Companies that are already present in the target (not insterted by the Reverse ETL app). In order to take these into account, you can add those target records in the link table first. You could e.g. match source & target companies on VAT number and insert matching rows in the link table.
+The Reverse ETL app performs an insert in the target, for each source record, and subsequently it performs updates for these source ids. However, the Reverse ETL app does not "match" source records with pre-existing target records. For example, if you sync companies from a source to a target, the Reverse ETL app will ignore Companies that are already present in the target (not inserted by the Reverse ETL app). In order to take these into account, you can add those target records in the link table first. You could e.g. match source & target companies on VAT number and insert matching rows in the link table.
 
 Example query:
 
@@ -556,7 +556,7 @@ Deleting records in the target, that were deleted in the source, is currently ou
 
 ## Bulk inserts
 
-To speed up initial syncs (inserts into an empty target) bulk inserts can be enabled on selected tartget connectors such as Odoo. In that case select e.g. **partner_bulk** as target object instead of **partner**.
+To speed up initial syncs (inserts into an empty target) bulk inserts can be enabled on selected target connectors such as Odoo. In that case select e.g. **partner_bulk** as target object instead of **partner**.
 
 Keep in mind that an entire batch insert will fail if one record in the batch fails. If most of your bulk inserts succeeded and a couple failed, you could switch back from bulk inserts to individual inserts and run the Reverse ETL again. It will then handle the failed records one by one.
 
@@ -624,12 +624,12 @@ The project scoping depends on the type of data sync that is being implemented. 
    3. No updates in target
    4. One migration run, preceded by multiple test runs
    5. One system is leading (data sync from a master to a slave)
-4. **Type 4: Data sync to support a business proces**
+4. **Type 4: Data sync to support a business process**
    - Example e.g. keep CRM and ERP in sync
    - Process has **_humans in the loop_**: e.g. the process consists of manual steps (e.g. data entry) and automated steps (the data sync).
    - The process relies on fields, statuses or other specific data entries set by humans, for example "sync leads once they are set to status 'accepted' in the CRM"
    - Potentially 2 systems are master, depending on the type of data being synced, potentially 2-way sync or two 1-way syncs (one in each direction)
-   - Data sync supports business processes, e.g. instant syncs are needed to support a hum process
+   - Data sync supports business processes, e.g. instant syncs are needed to support a human process
 
 ### Planning
 
@@ -668,6 +668,6 @@ The project scoping depends on the type of data sync that is being implemented. 
 | **Total effort** | **30 - 90+ days** |
 | **Total project lead time** | **2 - 6 months** |
 
-### Preperation
+### Preparation
 
 [Reverse ETL business intake survey](https://help.peliqan.io/reverse-etl/reverse-etl-preparation-checklist)

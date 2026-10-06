@@ -126,11 +126,11 @@ With the Peliqan federated query engine, queries on the Exact Online data can be
 
 ## Configure custom sync frequency for selected tables
 
-We've set the default sync frequency for the Exact Online connector to every 6hours due to the heavy rate limits Exact Online imposes.
+We've set the default sync frequency for the Exact Online connector to every 6 hours due to the heavy rate limits Exact Online imposes.
 
 ![Exact Online sync frequency settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b77a28fa-a024-4541-bdf5-cad78f3385fb/Untitled/w=1920,quality=90,fit=scale-down)
 
-However for many cases it is required to have a higher sync frequency for a specific set of tables: e.g. TransactionLines. With the Peliqan data activation library you con configure a more frequent sync for desired tables:
+However for many cases it is required to have a higher sync frequency for a specific set of tables: e.g. TransactionLines. With the Peliqan data activation library you can configure a more frequent sync for desired tables:
 
 ![Exact Online custom sync frequency example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0c2f3d71-e7b2-42dc-83a9-2a31e352793a/Untitled/w=1920,quality=90,fit=scale-down)
 
@@ -245,7 +245,7 @@ With document_update endpoint we can easily update the document object details a
 
 ### Upserting a Document
 
-"document_upsert" method allows users to add or update an object if the document with provided unique document name is present. In the below example, we performed upsert on document with "Subject" as serachfield that represents document name, which first searches for document with name = "327_INV/2024/00003", and once it founds the object it updates the document details.
+"document_upsert" method allows users to add or update an object if the document with provided unique document name is present. In the below example, we performed upsert on document with "Subject" as searchfield that represents document name, which first searches for document with name = "327_INV/2024/00003", and once it finds the object it updates the document details.
 
 ![Exact Online upsert document](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f476ef12-37a5-4bf8-b6aa-ab3f17ba9c5d/Untitled/w=1920,quality=90,fit=scale-down)
 

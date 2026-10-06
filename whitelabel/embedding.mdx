@@ -32,75 +32,11 @@ Make a server-side API call to fetch a short-lived (30 min) integration_token fo
 
 `POST https://app.eu.peliqan.io/api/partner/sub-account/integrate/`
 
-_Note: the trailing slash at the end of the URL is required !Note: the trailing slash at the end of the URL is required !_
+_Note: the trailing slash at the end of the URL is required !_
 
-Authorization: JWT `<partner_token>`Authorization: JWT `<partner_token>`
+Authorization: JWT `<partner_token>`
 
-Request PayloadRequest Payload
-
-```json
-{
-    "external_id": user.id,  # unique entity ID
-    "first_name": user.first_name,
-    "last_name": user.last_name,
-    "email": user.email,
-    "company_name": user.organization.name, # your user's organization name
-}
-```
-
-### 1.2 Embedding step 2: add the Peliqan widget in your own UI
-
-Add inside the `<head>` tag of your UI:
-
-```html
-<script type="module" src="https://peliqan.io/embed/v1.6/peliqan-integration.js"></script>
-```
-
-Add a button for users to add connections (integrations):
-
-```html
-<div id="peliqan-integration-button">Add connection</div>
-```
-
-Add the following script in your page:
-
-<Accordion title="Show JS code">
-  ```html
-  <script type="text/javascript">
-    // Wait for the document to be fully loaded
-  	document.onreadystatechange = () => {
-      if (document.readyState === 'complete') {
-        const token = "xxx" // Peliqan integration_token for current end-customer (fetch server-side)
-  	    const base_url = "https://yourwhitelabel.peliqan.io" //replace with your Peliqan whitelabel URL
-  	    const baseUrl = new URL(base_url)
-  	    
-  	    // Instantiate the Peliqan integration
-  	    // initialize must be called before openIntegration in order to set the required properties
-  	    Peliqan.initialize({
-  	      integrationToken: token, 
-  	      baseUrl:`${baseUrl.protocol}//${baseUrl.hostname}`,
-  	      onConnected: handleOnConnected, // Optional call-back function, after a successful connection is made
-  	      loaderHtml: '' // Optional custom loader HTML element that will override the default loading element
-  	    })
-      }
-    }
-    
-    // Event listener for a button click
-    const button = document.getElementById('peliqan-integration-button')
-    button.addEventListener('click', async function () {
-  	  // Open the Peliqan integration modal where user can select & add a connection
-      // This modal will list all available connectors in Peliqan.
-      Peliqan.openIntegration()
-    }
-  </script>
-  ```
-</Accordion>
-
-Note that your end-customer will automatically be provisioned (on Peliqan with a new sub-account, linked to your Peliqan partner account) the first time you invoke the Peliqan integration with a token for that specific end-customer.
-
-### 1.3 Customised list of available connectors
-
-You can optionally provide a list of connectors that should be shown to the user when the modal opens by passing an array of connector names to the `availableConnectors` property.
+Request Payload
 
 ```json
 {
@@ -166,7 +102,7 @@ Note that your end-customer will automatically be provisioned (on Peliqan with a
 
 You can optionally provide a list of connectors that should be shown to the user when the modal opens by passing an array of connector names to the `availableConnectors` property.
 
-The list should be a sub set of connectors available in Peliqan.The list should be a sub set of connectors available in Peliqan.
+The list should be a sub set of connectors available in Peliqan.
 
 <Accordion title="Show JS code">
   ```html
@@ -185,26 +121,9 @@ The list should be a sub set of connectors available in Peliqan.The list should 
   ```
 </Accordion>
 
-<Accordion title="Show JS code">
-  ```html
-  <script>
-  	// Event listener for a button click
-    const button = document.getElementById('peliqan-integration-button')
-    button.addEventListener('click', async function () {
-      Peliqan.openIntegration({
-  	    // A list of available connectors that the user can select from.
-  	    // The list is specific to this instance of the modal.
-  	    availableConnectors: ['exact online', 'zoho invoice', 'slack'],
-  	    selectedTables: {'exact online': ['contacts', 'salesinvoices'], 'slack': ['messages']}   //optional, to limit the tables that will be synced for given connectors
-  	  })
-    }
-  </script>
-  ```
-</Accordion>
+### 1.4 Pre-select a connector
 
-### 1.4 Pre-select a connector4 Pre-select a connector
-
-You can optionally set a connector that should be auto selected when the modal opens. This can be done by providing a connector name to the `selectedConnector` property.You can optionally set a connector that should be auto selected when the modal opens. This can be done by providing a connector name to the `selectedConnector` property.
+You can optionally set a connector that should be auto selected when the modal opens. This can be done by providing a connector name to the `selectedConnector` property.
 
 The user will be shown a connection form where they can fill in the connection details.
 
@@ -228,39 +147,15 @@ The user will be shown a connection form where they can fill in the connection d
 
 ### 1.5 Pre-select a connector and skip the Peliqan screen with connection settings
 
-The user will be shown a connection form where they can fill in the connection details.
-
-<Accordion title="Show JS code">
-  ```html
-  <script>
-   // Event listener for button click
-    const button = document.getElementById('peliqan-integration-button')
-    button.addEventListener('click', async function () {
-      Peliqan.openIntegration({
-  	    // A connection form will be shown for this selected connector. 
-  	    // The user will not be able to select a different connector.
-  	    // The selection is specific to this instance of the modal.
-  	    selectedConnector: 'exact online',
-  	    selectedTables: ['contacts', 'salesinvoices']   //optional, to limit the tables that will be synced for this connector
-  	  })
-    }
-  </script>
-  ```
-</Accordion>
-
-### 1.5 Pre-select a connector and skip the Peliqan screen with connection settings
-
-If you want to skip the Peliqan connection settings screen (where the user enters e.g. an API key and other required parameters), you need to implement a server-side flow that uses the Peliqan Partner API. In this case there is no front-end embedding.If you want to skip the Peliqan connection settings screen (where the user enters e.g. an API key and other required parameters), you need to implement a server-side flow that uses the Peliqan Partner API. In this case there is no front-end embedding.
+If you want to skip the Peliqan connection settings screen (where the user enters e.g. an API key and other required parameters), you need to implement a server-side flow that uses the Peliqan Partner API. In this case there is no front-end embedding.
 
 The connection is added through API calls only and the required parameters need to be requested in the UI from the Partner first.
 
-The connection is added through API calls only and the required parameters need to be requested in the UI from the Partner first.
+See [Partner API > "Add a connection"](https://help.peliqan.io/whitelabel/partner-api-embed-api#block-fbd1663dd99b43d394916a3519e5d0b3) for more info.
 
-See [Partner API > "Add a connection"](https://help.peliqan.io/whitelabel/partner-api-embed-api#block-fbd1663dd99b43d394916a3519e5d0b3) for more infoSee [Partner API > "Add a connection"](https://help.peliqan.io/whitelabel/partner-api-embed-api#block-fbd1663dd99b43d394916a3519e5d0b3) for more info.
+### 1.6 Callback function
 
-### 1.6 Callback function6 Callback function
-
-You can optionally implement a call-back function in JS that Peliqan will invoke once a user successfully added a connection. This allows you to e.g. handle the new connection in your front-end. Example:implement a call-back function in JS that Peliqan will invoke once a user successfully added a connection. This allows you to e.g. handle the new connection in your front-end. Example:
+You can optionally implement a call-back function in JS that Peliqan will invoke once a user successfully added a connection. This allows you to e.g. handle the new connection in your front-end. Example:
 
 ```html
 <script type="text/javascript">
@@ -270,15 +165,7 @@ You can optionally implement a call-back function in JS that Peliqan will invoke
 </script>
 ```
 
-```html
-<script type="text/javascript">
-	const handleOnConnected = (responseData) => {
-     console.log(responseData)
-}
-</script>
-```
-
-<Accordion title="Example responseData from callback (click to expand)Example responseData from callback (click to expand)">
+<Accordion title="Example responseData from callback (click to expand)">
   ```json
   {
       "id": 1234, # id of the new connection in Peliqan
@@ -370,9 +257,9 @@ You can optionally implement a call-back function in JS that Peliqan will invoke
   ```
 </Accordion>
 
-### 1.7 Set style of the popup modal where the user selects and configures a connector (optional)7 Set style of the popup modal where the user selects and configures a connector (optional)
+### 1.7 Set style of the popup modal where the user selects and configures a connector (optional)
 
-Customise the style of the integration modal by passing a `modalStyle` object. All properties are optional. You can set a default style during `initialize`, and optionally override it per `openIntegration` callCustomise the style of the integration modal by passing a `modalStyle` object. All properties are optional. You can set a default style during `initialize`, and optionally override it per `openIntegration` call.
+Customise the style of the integration modal by passing a `modalStyle` object. All properties are optional. You can set a default style during `initialize`, and optionally override it per `openIntegration` call.
 
 **Set default style during initialization:**
 
@@ -463,7 +350,7 @@ You need to fetch a **sub-account token**, in order to fetch data for a specific
 
 ```html
 GET https//api.eu.peliqan.io/api/partner/sub-account/identity/?external_id=123
-Authorization: JWT <partner_token><partner_token>
+Authorization: JWT <partner_token>
 ```
 
 ### Fetch active customers on Peliqan
@@ -472,7 +359,7 @@ Each end-customer has a Sub account under your Partner account in Peliqan. List 
 
 ```html
 GET https://app.eu.peliqan.io/api/partner/sub-accounts
-Authorization: JWT <partner_token><partner_token>
+Authorization: JWT <partner_token>
 ```
 
 ### Fetch a list of databases from a customer
@@ -481,7 +368,7 @@ By default your end-customer will have one data warehouse in Peliqan. Data wareh
 
 ```html
 GET https://app.eu.peliqan.io/api/applications/?exclude_tables=1
-Authorization: JWT <sub_account_token><sub_account_token>
+Authorization: JWT <sub_account_token>
 ```
 
 ### Read data
@@ -490,7 +377,6 @@ List tables:
 
 ```html
 GET https://app.eu.peliqan.io/api/database/tables/database/{database_id}/
-Authorization: JWT <sub_account_token>{database_id}/
 Authorization: JWT <sub_account_token>
 ```
 
@@ -498,7 +384,6 @@ Read rows (data) from table:
 
 ```html
 GET https://app.eu.peliqan.io/api/database/rows/table/{table_id}/?user_field_names=True
-Authorization: JWT <sub_account_token>{table_id}/?user_field_names=True
 Authorization: JWT <sub_account_token>
 ```
 
@@ -588,7 +473,7 @@ const { running } = await Peliqan.getServerSyncRunStatus({
 
 ### `reAuthoriseServer`
 
-Use this if you wish to re-authorise any oAuth connection .
+Use this if you wish to re-authorise any oAuth connection.
 
 This function opens the required authorization URL in a new browser tab.
 

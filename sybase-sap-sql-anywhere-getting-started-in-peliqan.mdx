@@ -4,7 +4,7 @@ sidebarTitle: "Sybase"
 description: "Learn how to sync data from a Sybase (SAP SQL Anywhere) database to your Peliqan data warehouse using a custom Python pipeline with incremental bookmark support."
 ---
 
-You can connect a Sybase database (now called SAP SQL Anywhere) in Peliqan using a custom pipeline script. The pipeline will sync a selection of tables (or all tables) from a Sybase database into the Peliqan data warehouse. The data will be synced incrementally, based on a timestamp column. If that is not present, a full sync can be performed. The script will store the "bookmark" per table in the state, in order to reminder from which timestamp to sync new and updated records. Note that the script does not handle deleted records.s.
+You can connect a Sybase database (now called SAP SQL Anywhere) in Peliqan using a custom pipeline script. The pipeline will sync a selection of tables (or all tables) from a Sybase database into the Peliqan data warehouse. The data will be synced incrementally, based on a timestamp column. If that is not present, a full sync can be performed. The script will store the "bookmark" per table in the state, in order to remember from which timestamp to sync new and updated records. Note that the script does not handle deleted records.
 
 Copy the below code in your account, and make following changes to the script:
 

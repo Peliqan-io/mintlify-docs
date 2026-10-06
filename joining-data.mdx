@@ -14,7 +14,7 @@ INNER JOIN xero.customers
 ON hubspot.companies.vat = xero.customers.vat_number
 ```
 
-When you want to JOIN data from two different databases (e.g. between a table in MySQL and a table in Postgres), you need to run your query using Peliqan's built-in federated query engine Trino. Can you enable this under the Settings icon of the query in the SQL query editor:
+When you want to JOIN data from two different databases (e.g. between a table in MySQL and a table in Postgres), you need to run your query using Peliqan's built-in federated query engine Trino. You can enable this under the Settings icon of the query in the SQL query editor:
 
 ![Enable Trino setting](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/310f80c8-af5d-4cf6-afce-10c76e8ec7d7/enable_Trino/w=1920,quality=90,fit=scale-down)
 
@@ -24,7 +24,7 @@ The different types of joins are described below:
 
 - **Left join**: take all rows from the left table and match with the right table; right table columns could be NULL in join.
 - **Right join**: take all rows from the right table and match with the left table; left table columns could be NULL in join.
-- **Inner join**: take only rows that match on both sides; not all rows if left table and not all rows from right table will be included.
+- **Inner join**: take only rows that match on both sides; not all rows of left table and not all rows from right table will be included.
 - **Outer join**: combine every row from the left table with every row from the right table; if there are 5 rows left and 3 rows right, there will be 5 x 3 = 15 rows in the result
 
 ## Preparing data for joins
