@@ -1,0 +1,4 @@
+/* Central content pane width (all pages) */
+#content-area {
+  max-width: 730px !important;
+}
