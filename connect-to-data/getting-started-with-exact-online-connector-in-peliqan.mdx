@@ -8,41 +8,16 @@ _Exact Online is the business software market leader in the Benelux. Exact Onlin
 
 This article provides an overview to get started with the **Exact Online** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
 
-# Contents
-
-- [Contents](#contents)
-- [Exact Online Data Pipeline](#exact-online-data-pipeline)
-- [Connect Exact Online](#connect-exact-online)
-- [Connect Exact Online (Private App) — Setup Guide](#connect-exact-online-private-app--setup-guide)
-- [Exact Online data sync to a data warehouse](#exact-online-data-sync-to-a-data-warehouse)
-- [Configure custom sync frequency for selected tables](#configure-custom-sync-frequency-for-selected-tables)
-- [Troubleshooting](#troubleshooting)
-  - [Connection starts failing after some time (no valid token)](#connection-starts-failing-after-some-time-no-valid-token)
-  - [Exact Online user cannot add a connection in Peliqan](#exact-online-user-cannot-add-a-connection-in-peliqan)
-  - [No access to some tables such as "Goods Delivered"](#no-access-to-some-tables-such-as-goods-delivered)
-  - [403 "Forbidden" error on some or all tables](#403-forbidden-error-on-some-or-all-tables)
-  - [No data for Wholesale, Manufacturing or Project](#no-data-for-wholesale-manufacturing-or-project)
-  - [429 Rate limit errors in logs and not all data is synced](#429-rate-limit-errors-in-logs-and-not-all-data-is-synced)
-- [Exact Online Data Activation](#exact-online-data-activation)
-  - [Report Exact Online data to Spreadsheets and BI tools](#report-exact-online-data-to-spreadsheets-and-bi-tools)
-  - [Dealing with Documents](#dealing-with-documents)
-    - [Creating a Document](#creating-a-document)
-    - [Updating a document](#updating-a-document)
-    - [Finding a Document](#finding-a-document)
-    - [Upserting a Document](#upserting-a-document)
-    - [Finding Document Attachments](#finding-document-attachments)
-    - [Adding Attachments to a Document](#adding-attachments-to-a-document)
-  - [Delete records in the DWH that were deleted in Exact Online](#delete-records-in-the-dwh-that-were-deleted-in-exact-online)
-  - [Custom ETL pipeline to sync a selection of divisions from Exact Online](#custom-etl-pipeline-to-sync-a-selection-of-divisions-from-exact-online)
-- [Need further help](#need-further-help)
-
 # Exact Online Data Pipeline
 
 ## Connect Exact Online
 
 Connect Exact online through the Peliqan Connectivity module:
 
-![Exact Online connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/481a2cc8-0877-4534-bf6c-e7b819efd6e9/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled.png"
+  alt="Exact Online connection form"
+/>
 
 Configuration options:
 
@@ -57,7 +32,12 @@ Start the oAuth connection flow by selecting 'Connect Exact Online':
 
 Select the required divisions you want the data to be synced from and select 'Connect Exact Online':
 
-![Exact Online division selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7ecc20f1-d803-4e15-861b-978f6e01473e/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 1.png"
+  alt="Exact Online division selection"
+  className="mx-auto"
+  style={{ width:"60%" }}
+/>
 
 <Tip>
   The Exact Online API has heavy **API rate limitations**. It is advised to limit the data that will be synced by selecting only the tables needed and set a starting year that is not too far in the past. The Peliqan default schedule is every **6 hours**. A more frequent sync is not advised !
@@ -95,7 +75,12 @@ Once the app is created, Exact shows a Client ID and Client Secret. Copy the sec
 
 1. In Peliqan, go to Connections → Add Connection and search for **Exact Online (Private App).**
 
-![Exact Online Private App connector](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/303dee1c-39d7-4afa-8205-4edd977885fc/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/image.png"
+  alt="Exact Online Private App connector"
+  className="mx-auto"
+  style={{ width:"60%" }}
+/>
 
 2. Fill in the connect form:
    - Client ID and Client Secret from Step 3
@@ -118,21 +103,35 @@ Peliqan offers an out of the box data warehouse. Optionally the user can choose 
 
 Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
 
-![Exact Online data warehouse sync](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8862e659-a3e1-4530-bc46-e9745d8ee56e/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 2.png"
+  alt="Exact Online data warehouse sync"
+/>
 
 With the Peliqan federated query engine, queries on the Exact Online data can be written and data can be transformed and combined with other sources.
 
-![Exact Online federated queries](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/701c33d2-1bd2-4efd-acd4-b76adea26392/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 3.png"
+  alt="Exact Online federated queries"
+/>
 
 ## Configure custom sync frequency for selected tables
 
 We've set the default sync frequency for the Exact Online connector to every 6hours due to the heavy rate limits Exact Online imposes.
 
-![Exact Online sync frequency settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b77a28fa-a024-4541-bdf5-cad78f3385fb/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 4.png"
+  alt="Exact Online sync frequency settings"
+  className="mx-auto"
+  style={{ width:"56%" }}
+/>
 
 However for many cases it is required to have a higher sync frequency for a specific set of tables: e.g. TransactionLines. With the Peliqan data activation library you con configure a more frequent sync for desired tables:
 
-![Exact Online custom sync frequency example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0c2f3d71-e7b2-42dc-83a9-2a31e352793a/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 5.png"
+  alt="Exact Online custom sync frequency example"
+/>
 
 <Accordion title="Code snippet">
   ```sql
@@ -148,15 +147,24 @@ However for many cases it is required to have a higher sync frequency for a spec
 </Accordion>
 
 <Accordion title="Where to find this function?">
-  ![Finding the run_pipeline function](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6c4b162d-baa0-4252-8485-218cc0e8714e/Untitled/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Exact Online - Getting started in Peliqan/Untitled 6.png"
+    alt="Finding the run_pipeline function"
+  />
 </Accordion>
 
 <Accordion title="Where to find my connection name?">
   The connection name is the name you see in the UI. You can verify the name by looking at a table detail:
 
-  ![Finding connection name via table detail](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0deada1f-c253-402b-9cc9-f622bbb463e8/Untitled/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Exact Online - Getting started in Peliqan/Untitled 7.png"
+    alt="Finding connection name via table detail"
+  />
 
-  ![Connection name displayed in table details](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/311e4e73-902a-46c1-9892-e9404a3a4be2/Untitled/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Exact Online - Getting started in Peliqan/Untitled 8.png"
+    alt="Connection name displayed in table details"
+  />
 </Accordion>
 
 # Troubleshooting
@@ -211,13 +219,21 @@ More information on rate limits from Exact: [https://support.exactonline.com/com
 
 With the Peliqan Excel add-in you can easily sync your Exact data or query output to Excel and use the powers of Excel to report on the data.
 
-![Exact Online Excel add-in](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ea1cd46d-8a04-4609-9492-2d5c675bc5cd/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 9.png"
+  alt="Exact Online Excel add-in"
+/>
 
 [Connectivity to a BI tool such as Microsoft Power BI](/connect-your-bi-or-db-tool) can be setup using the Postgres datasource credentials in the connection module.
 
 Data sync with google sheet can be achieved by a data app writeback script.
 
-![Exact Online Google Sheets sync](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/02cf1950-e22d-4c05-a076-68822bbb620f/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 10.png"
+  alt="Exact Online Google Sheets sync"
+  className="mx-auto"
+  style={{ width:"56%" }}
+/>
 
 ## Dealing with Documents
 
@@ -229,51 +245,81 @@ Peliqan offers Exact Online data activation functions for adding "Documents" and
 
 ### Creating a Document
 
-![Exact Online create document](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8e62b213-8e81-49ed-89c5-a4a362b622c2/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 11.png"
+  alt="Exact Online create document"
+/>
 
 ### Updating a document
 
 With document_update endpoint we can easily update the document object details and verify them using document_findone method:
 
-![Exact Online update document](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2c4f8655-7b25-4122-bfb0-524c5f795973/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 12.png"
+  alt="Exact Online update document"
+/>
 
 ### Finding a Document
 
 "FindOne Document" method allows user to find document based on **Unique Document Name( Subject )**. Name of document must always be a unique name.
 
-![Exact Online find document](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/17ff5a28-a836-4fbd-846b-717af988bcc8/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 13.png"
+  alt="Exact Online find document"
+/>
 
 ### Upserting a Document
 
 "document_upsert" method allows users to add or update an object if the document with provided unique document name is present. In the below example, we performed upsert on document with "Subject" as serachfield that represents document name, which first searches for document with name = "327_INV/2024/00003", and once it founds the object it updates the document details.
 
-![Exact Online upsert document](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f476ef12-37a5-4bf8-b6aa-ab3f17ba9c5d/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 14.png"
+  alt="Exact Online upsert document"
+/>
 
 Now, again we perform upsert with document name "327_INV/2024/00003" as the name was replaced means no document object is present with the same. In this case upsert function creates a new document object with the same name.
 
-![Exact Online upsert creates new document](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/dcd2bbe9-9e34-4439-9023-90cea030f48a/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 15.png"
+  alt="Exact Online upsert creates new document"
+/>
 
-![Exact Online upsert result](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e2d5b912-1a24-4476-9833-fdb85049f536/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 16.png"
+  alt="Exact Online upsert result"
+/>
 
 ### Finding Document Attachments
 
 With Peliqan, Document Attachments can be found in two ways, either by providing Document Attachment ID or Document Attachment Name. Make sure that you provide unique Filename.
 
-![Exact Online find document attachments](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a2deddb2-9fe0-4313-a614-fff1140b3e9b/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 17.png"
+  alt="Exact Online find document attachments"
+/>
 
 ### Adding Attachments to a Document
 
 Attachments/Files data are converted to Base64 byte Object and passed along with Document object ID & unique attachment Name
 
-![Exact Online add attachments](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7c10bea2-380d-4ec8-8bf3-23935fd14cb3/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/Untitled 18.png"
+  alt="Exact Online add attachments"
+/>
 
 ## Delete records in the DWH that were deleted in Exact Online
 
 The table `deleted` provides a list of records that were deleted in Exact Online. In order to delete those records in the Peliqan data warehouse, you can run the below script on e.g. a daily or hourly schedule. This script performs a JOIN with the table `entitytype`:
 
-![Exact Online entitytype table](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/803738ff-493f-4f9e-9570-7a2d94d901af/exact_online_table_entitytype/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/exact_online_table_entitytype.png"
+  alt="Exact Online entitytype table"
+/>
 
-![Exact Online deleted table](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/62f64e20-ee19-4cab-8d90-c2b6966fa5f2/exact_online_table_deleted/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/exact_online_table_deleted.png"
+  alt="Exact Online deleted table"
+/>
 
 ```python
 # This script will delete records in the DWH that were deleted in the source (Exact Online)
@@ -321,7 +367,10 @@ if len(rows):
 
 The standard ETL pipeline from Peliqan can sync either All Divisions or one specific Division. If you have hundreds of divisions in Exact Online, and you want to sync a selection only, you can use the below custom pipeline script. This script uses a table as input.
 
-![Exact Online division sync table](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1050ae74-b176-4cda-a845-d43258294383/table_sync_divisions_exact_online/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Exact Online - Getting started in Peliqan/table_sync_divisions_exact_online.png"
+  alt="Exact Online division sync table"
+/>
 
 ```python
 # This script will sync only selected divisions from Exact Online.

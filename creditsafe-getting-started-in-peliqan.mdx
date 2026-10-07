@@ -8,21 +8,16 @@ Creditsafe is a global company that provides credit reports and financial inform
 
 This article provides an overview to get started with the **CreditSafe** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
 
-## Content
-
-- [CreditSafe Data Pipeline](#creditsafe-data-pipeline)
-- [Data Activation](#data-activation)
-- [Fetching Companies using VAT Number](#fetching-companies-using-vat-number)
-- [Fetching People/Directors using Company ID](#fetching-peopledirectors-using-company-id)
-- [Need further help](#need-further-help)
-
 ## CreditSafe Data Pipeline
 
 ### Connect
 
 Connect CreditSafe through the Peliqan Connectivity module:
 
-![CreditSafe connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e821007a-63ae-42fb-9875-45af5476a552/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/CreditSafe - Getting started in Peliqan/image.png"
+  alt="CreditSafe connection form"
+/>
 
 Configuration options:
 
@@ -38,13 +33,19 @@ Once filled, click **Save**. For now, Peliqan only provides Writeback endpoints 
 
 _get_companies_ function in CreditSafe allows to fetch company(s) using VAT Number. If Vat No. is BE 0784.446.918, then country value passed would be **BE** and Vat No. is passed removing all '.' (dots) i.e. **0784446918**
 
-![CreditSafe get_companies](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2f97fa6a-8945-4078-8ace-fddab02b7b3f/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/CreditSafe - Getting started in Peliqan/image 1.png"
+  alt="CreditSafe get_companies"
+/>
 
 ### Fetching People/Directors using Company ID
 
 _get_peoples_ function allows to fetch all director(s) of a company by using **company_id** and **country.**
 
-![CreditSafe get_peoples](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8a07dee1-d19d-4335-8a4d-2409ac75da5b/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/CreditSafe - Getting started in Peliqan/image 2.png"
+  alt="CreditSafe get_peoples"
+/>
 
 ## Need further help
 

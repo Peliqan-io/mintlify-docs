@@ -10,44 +10,31 @@ Small and medium businesses that want to move away from using spreadsheets and/o
 
 This article details the steps to get started with BambooHR in Peliqan. Please contact support if you have any additional questions or remarks.
 
-Content:
-
-- [Before Connecting Data Pipeline](#before-connecting-data-pipeline)
-- [Get API Key](#get-api-key)
-- [BambooHR Data Pipeline](#bamboohr-data-pipeline)
-- [Connect BambooHR](#connect-bamboohr)
-- [BambooHR data sync to DataWarehouse](#bamboohr-data-sync-to-datawarehouse)
-- [BambooHR Data Activation](#bamboohr-data-activation)
-- [Get Employee Data](#get-employee-data)
-- [Add an Employee](#add-an-employee)
-- [Add TimeOff Request](#add-timeoff-request)
-- [Get Job Application Details](#get-job-application-details)
-- [Add Job Hiring Post](#add-job-hiring-post)
-
 ## Before Connecting Data Pipeline
 
 BambooHR supports two type integrations, one is personal and other is through App integration. Peliqan supports personal Integration where User creates their own API key and have control over their data.
 
 ### Get API Key
 
-1. If you do not have an Account on BambooHR, create one account using [https://www.bamboohr.com/g2/](https://www.bamboohr.com/g2/). If you have one skip to step
-2. On Extreme top right, click on "Try it free"
-3. A pop-up input form will appear and fill the form.
+1. Login to BambooHR.
+2. Once Logged-In, your sub domain is visible
 
-![BambooHR Account creation](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2d9521e5-f2ee-44af-9792-8158d8f47787/Untitled/w=1920,quality=90,fit=scale-down)
-
-4. Verify Your account and Login to BambooHR.
-5. Once Logged-In, Domain-Name is visible
-
-![BambooHR Domain name](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7f7a62b7-2430-466f-81d5-c09b4453586a/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 1.png"
+  alt="Untitled 1"
+  title="Untitled 1"
+/>
 
 6. On the extreme right, click on the profile tab. A pop-up menu will open, click on "API Keys".
 
-![BambooHR API Keys menu](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e9b0f12f-df7e-41d2-8145-62ee49cb06eb/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 2.png"
+  alt="BambooHR API Keys menu"
+  className="mx-auto"
+  style={{ width:"49%" }}
+/>
 
 7. Create API key if not available and save the API key once created.
-
-The API secret key is a 160-bit number expressed in hexadecimal form. This is an astronomically large number of unique keys, which means that guessing an API key is nearly impossible.
 
 ## BambooHR Data Pipeline
 
@@ -55,7 +42,10 @@ The API secret key is a 160-bit number expressed in hexadecimal form. This is an
 
 Connect BambooHR through the Peliqan Connectivity module:
 
-![BambooHR Peliqan Connectivity module](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6998018b-084b-4817-9313-d9e6b576cb94/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 3.png"
+  alt="BambooHR Peliqan Connectivity module"
+/>
 
 Configuration Options:
 
@@ -67,7 +57,12 @@ Click on Save to proceed with creating pipeline to BambooHR.
 
 Additionally, you can select Endpoints to Sync from _advanced_ option for customised pipeline.
 
-![BambooHR Advanced options](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/cb8973c7-2157-4d8b-80ee-ede8422f3055/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 4.png"
+  alt="BambooHR Advanced options"
+  className="mx-auto"
+  style={{ width:"40%" }}
+/>
 
 ## BambooHR data sync to DataWarehouse
 
@@ -75,23 +70,35 @@ Peliqan offers an out of the box data warehouse. Optionally the user can choose 
 
 Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration.
 
-![BambooHR Data Warehouse sync](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e03d76e9-637a-479f-b5e0-cfb6f97bae6c/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 5.png"
+  alt="BambooHR Data Warehouse sync"
+/>
 
 With the Peliqan query engine, queries on the BambooHR data can be written and data can be transformed and combined with other sources.
 
-![BambooHR Query Engine](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4fcce6a6-11bb-4b79-8b3a-9e24c30487df/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 6.png"
+  alt="BambooHR Query Engine"
+/>
 
 ## BambooHR Data Activation
 
 ### Get Employee Data
 
-![BambooHR Get Employee Data](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/cd05576c-7708-4766-a4b9-a376cccb6db2/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 7.png"
+  alt="BambooHR Get Employee Data"
+/>
 
 ### Add an Employee
 
 Peliqan allows adding a new employee data with fields from Employee Model.
 
-![BambooHR Add Employee](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/517c0298-0f95-4975-b9a8-3bd1eeb33154/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 8.png"
+  alt="BambooHR Add Employee"
+/>
 
 By default, BambooHR doesn't provides ID of the employee created. To get ID(s) of new employee added, sync "employee_last_change" with peliqan's SYNC feature.
 
@@ -101,7 +108,10 @@ Employee data can be updated using "Update Employee" function.
 
 With peliqan "Add TimeOff Request" function one can make a request for time off.
 
-![BambooHR Add TimeOff Request](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0ff3a83c-6586-4b42-9c92-ca0dbc8c6005/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 9.png"
+  alt="BambooHR Add TimeOff Request"
+/>
 
 Peliqan also provides "Update TimeOff Request Status" method which allows managers to update the status of request by denying, approving the same.
 
@@ -109,12 +119,18 @@ Peliqan also provides "Update TimeOff Request Status" method which allows manage
 
 "Get application Details" method provides details of a job application based in application_id
 
-![BambooHR Get Job Application Details](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4d218325-e170-4c28-b95b-0839013faa48/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 10.png"
+  alt="BambooHR Get Job Application Details"
+/>
 
 ### Add Job Hiring Post
 
 Using "Add Job Hiring" lets user to create a new Job Post for Hiring.
 
-![BambooHR Add Job Hiring Post](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/16cbc09d-be56-41ac-a3ba-18e2c53d4661/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/BambooHR - Getting started in Peliqan/Untitled 11.png"
+  alt="BambooHR Add Job Hiring Post"
+/>
 
 Data related to jobs will be visible in "Job_Summaries" Table under BambooHR Schema in default DataWarehouse.
