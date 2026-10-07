@@ -183,6 +183,7 @@
             "group": "Platform and APIs",
             "pages": [
               "vibe-coding-apps-peliqan-as-backend",
+              "vibe-coding-apps-peliqan-as-backend/how-to-integrate-with-the-peliqan-oauth2-server",
               "permission-layer-for-ai-agents",
               "publish-apis",
               "peliqan-api",
