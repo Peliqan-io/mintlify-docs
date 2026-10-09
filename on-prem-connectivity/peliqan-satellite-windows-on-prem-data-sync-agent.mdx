@@ -99,7 +99,10 @@ Add a DB user for Peliqan, on the DB used by your on-prem software.
 
 Use this for e.g. Expert/M, Adsolut, Plenion etc.
 
-![Source tab configured for SQL Server, single-schema scope, Windows Authentication](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/14330f2d-da56-4871-8626-09a6e77b0638/source-sqlserver/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/source-sqlserver.png"
+  alt="Source tab configured for SQL Server, single-schema scope, Windows Authentication"
+/>
 
 Source tab configured for SQL Server, single-schema scope, Windows Authentication
 
@@ -150,13 +153,19 @@ Set **Database type** to `ODBC` and enter a single **DSN** or **connection strin
 - The DSN **must** be a Computer/System DSN, not a User DSN. Note: a User DSN isn't visible to the Windows Service, so scheduled syncs would fail to find it even though manual tests from the UI work fine.
 - Username/Password are optional. If the DSN itself already stores credentials (common for e.g. Exact Venice/Actian Zen setups), leave them blank.
 
-![Source tab configured for ODBC](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d990218a-a67d-4ce0-ac02-e20d974a6a96/796427ec-6cc3-4065-adbe-2a83ee61a249/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/796427ec-6cc3-4065-adbe-2a83ee61a249.png"
+  alt="Source tab configured for ODBC"
+/>
 
 Source tab configured for ODBC
 
 ## Sync scope: one schema vs. everything
 
-![Source tab in "Sync multiple databases, schemas and tables" mode, with include-keyword fields](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/66d82634-4b4c-40fe-98d1-106091c55436/d8decc1a-39f8-49ba-9504-a4d848bd07b2/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/d8decc1a-39f8-49ba-9504-a4d848bd07b2.png"
+  alt='Source tab in "Sync multiple databases, schemas and tables" mode, with include-keyword fields'
+/>
 
 Source tab in "Sync multiple databases, schemas and tables" mode, with include-keyword fields
 
@@ -201,12 +210,15 @@ Get the connection details from your Peliqan account, under **Connections** → 
 You can copy the details of your Peliqan Postgres data warehouse from the Connection Card under Connections:
 
 <img
-  src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/eb6ebfe4-5f16-467d-a07c-51457c2c72df/screenshot_2026-07-09_at_12.59.48/w=1920,quality=90,fit=scale-down"
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/Screenshot_2026-07-09_at_12.59.48.png"
   alt="image"
   style={{ width:"38%" }}
 />
 
-![Target tab configured for Postgres](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/30f4286d-f782-4009-9138-e8967f20a824/target-postgres/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/target-postgres.png"
+  alt="Target tab configured for Postgres"
+/>
 
 Target tab configured for Postgres
 
@@ -225,12 +237,15 @@ Get the connection details from your Peliqan account, under **Connections** → 
 You can copy the details of your Peliqan Bigquery data warehouse from the Connection Card under Connections in Peliqan. Hover over the key field (which has the “key” icon), and click the copy icon, in order to copy the service account JSON key. Paste it in the Peliqan Satellite window (see below):
 
 <img
-  src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/acddf8dd-006c-4256-af8e-a3bea29995ed/screenshot_2026-09-14_at_10.40.31/w=1920,quality=90,fit=scale-down"
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/Screenshot_2026-09-14_at_10.40.31.png"
   alt="image"
   style={{ width:"36%" }}
 />
 
-![Target tab configured for BigQuery](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/cff55a86-b1cd-4e19-8d43-0abab424d70c/target-bigquery/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/target-bigquery.png"
+  alt="Target tab configured for BigQuery"
+/>
 
 Target tab configured for BigQuery
 
@@ -248,7 +263,10 @@ For an external Bigquery data warehouse (not provisioned by Peliqan), make sure 
 
 # Settings tab — schedule and options
 
-![Settings tab](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/048e5ba7-e586-482c-a224-d0215656a4ec/settings-tab/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/settings-tab.png"
+  alt="Settings tab"
+/>
 
 Settings tab
 
@@ -264,7 +282,10 @@ Settings tab
 
 # Logs tab — see what happened
 
-![Logs tab showing a completed run](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0f911a25-df82-4168-be84-51a56433ad88/logs-tab/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/logs-tab.png"
+  alt="Logs tab showing a completed run"
+/>
 
 Logs tab showing a completed run
 
@@ -272,7 +293,10 @@ Every run adds log lines as it progresses. Filter by free-text search or toggle 
 
 # Manage pipelines tab — running more than one pipeline
 
-![Manage pipelines tab with two active pipelines](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/29be46eb-1718-451d-8480-952586b3cb47/manage-pipelines-new/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/manage-pipelines-new.png"
+  alt="Manage pipelines tab with two active pipelines"
+/>
 
 Manage pipelines tab with two active pipelines
 

@@ -17,13 +17,19 @@ The entire data flow consists of 2 phases:
 1. **ELT pipeline**: Data is synced from the source into the Peliqan data warehouse
 2. **Reverse ETL**: Data from the data warehouse is written to a business application
 
-![Reverse ETL overview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/50590170-19b8-4855-913d-277508667e9d/reverse_etl_overview/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/reverse_etl_overview.png"
+  alt="Reverse ETL overview"
+/>
 
 **Phase 1** is done by adding a connection in Peliqan to the source system. This will automatically set up an ELT pipeline and sync the data into the data warehouse.
 
 **Phase 2** is done by adding a connection in Peliqan to the target system and using the Peliqan Reverse ETL app. Install the app in your Peliqan account, configure the Reverse ETL flow and set a schedule on the app for ongoing syncs. All the steps of phase 2 are described below.
 
-![Reverse ETL app flow](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e8e9fe59-0a65-4632-8ba3-bf625a21d9f6/reverse_etl_app_flow/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Reverse_ETL_app_flow.png"
+  alt="Reverse ETL app flow"
+/>
 
 <Note>
   You can also implement Custom Data Syncs (Custom Reverse ETL flows) in Peliqan using low-code Python scripts, based on one of the provided templates. For more information visit: [Custom data syncs](/low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports)
@@ -48,11 +54,19 @@ In Peliqan, go to the Build section (rocket icon in left).
 
 Find the Reverse ETL app and click on Install Template.
 
-![Install Reverse ETL template](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/da769048-47f4-484c-8e7b-3e9f83fb3032/Screenshot_2025-09-13_at_10.07.16/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Screenshot_2025-09-13_at_10.07.16.png"
+  alt="Install Reverse ETL template"
+  style={{ width:"33%" }}
+/>
 
 Pin the app to your Peliqan homepage, see menu item "Pin to home":
 
-![Pin to home menu](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ca5b465d-e63b-42d2-bfb7-31d801b9dbe8/screenshot_2026-01-23_at_10.52.21/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Screenshot_2026-01-23_at_10.52.21.png"
+  alt="Pin to home menu"
+  style={{ width:"34%" }}
+/>
 
 Open the app from your Peliqan homepage.
 
@@ -60,7 +74,10 @@ Open the app from your Peliqan homepage.
 
 In the app, in the left pane, add a sync for each object type, for example a sync for "Companies" and a sync for "Contacts".
 
-![Add syncs in Reverse ETL app](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/eeb93762-ccc0-4681-91d5-5a46cfb58845/Screenshot_2025-09-13_at_10.09.45/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Screenshot_2025-09-13_at_10.09.45.png"
+  alt="Add syncs in Reverse ETL app"
+/>
 
 You can change the ordering of Syncs under "Manage sync". Make sure to sync parent records first, before syncing child records. For example Contacts are linked to a parent Company, so Companies need to sync first.
 
@@ -78,7 +95,10 @@ Peliqan pipelines always add a timestamp `_sdc_batched_at` so this is the defaul
 
 If you use a source query (scope query), make sure to include this column in your query so that it is available for the Reverse ETL app to read.
 
-![Incremental sync configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8f9d7637-5479-47e4-a225-0c8b6a31427b/Screenshot_2025-09-13_at_10.12.35/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Screenshot_2025-09-13_at_10.12.35.png"
+  alt="Incremental sync configuration"
+/>
 
 ### Run pipeline first
 
@@ -90,7 +110,10 @@ Use this feature to write the new id (after insert in the target) back into a fi
 
 Note that this is optional, the id's of source and target are also stored in Link tables, see below.
 
-![Write back id to source](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a12e7050-0cbc-4395-b583-043bc90ebe4b/writeback_id_to_source/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Writeback_id_to_source.png"
+  alt="Write back id to source"
+/>
 
 ### Error handling
 
@@ -115,23 +138,38 @@ In the above example sync 1 and 3 are linked under the 2-ways sync configuration
 
 Select a source table. See below on how to write a "source query" in order to transform data and map it to the target model. When you have created a source query, make sure to select this as the source table.
 
-![Source tab](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4ade02cb-5193-4340-a41b-cd912d946cf3/source/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/source.png"
+  alt="Source tab"
+  style={{ width:"51%" }}
+/>
 
 ## Target tab
 
 Select a target. You have to configure a Target API Object, this will be used to perform writeback to the target (using [Peliqan's writeback functions](/low-code-python-data-apps/writeback-reverse-etl-data-sync) in the selected Connector).
 
-![Target tab](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8c01ee41-b694-4b2a-ad07-506b6cd839b9/reverse_etl_target/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Reverse_ETL_target.png"
+  alt="Target tab"
+  style={{ width:"57%" }}
+/>
 
 ### Generic Target Object
 
 If you cannot find the Target Object that you need, you can select "Object", if it is available in the target connector that you selected. Example:
 
-![Generic target object](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3b8064dc-3eb5-46d6-bbf4-619f458ad0df/reverse_etl_generic_target_object/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Reverse_ETL_generic_target_object.png"
+  alt="Generic target object"
+  style={{ width:"56%" }}
+/>
 
 This is a generic writeback, that can be used for multiple object types. When doing so, you will have to set the object name in the Field Mapping tab. To do so, click on the Pencil icon on the left, and enter the name of the object manually, for example "organizations" in the screenshot below (in order to insert/update organizations in the target Pipedrive):
 
-![Set object name in field mapping](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d26082a4-3deb-46d6-b139-ba4089acd92a/screenshot_2025-12-18_at_07.17.02/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Screenshot_2025-12-18_at_07.17.02.png"
+  alt="Set object name in field mapping"
+/>
 
 ## Field mapping tab
 
@@ -139,7 +177,10 @@ Map fields from the source to the target.
 
 Do not use "id" fields in the target (column on the right). Those fields are often FK relations in the target, use the "Relations (FK)" tab instead.
 
-![Field mapping tab](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a0cfd0d3-f7f8-47a5-a450-6adef1180144/fieldmapping/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/fieldmapping.png"
+  alt="Field mapping tab"
+/>
 
 ### Static source values
 
@@ -157,7 +198,10 @@ If you have an FK (foreign key) in the source, which is a relation to a parent o
 
 Here is an example where first sync Companies, then we sync Contacts. Each Contact (child) is linked to a Company (Parent):
 
-![Parent relations example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/917d27d8-bca3-415b-9d62-f44692d14427/reverse_etl_parent_relations/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Reverse_ETL_parent_relations.png"
+  alt="Parent relations example"
+/>
 
 In the above example, you can see that:
 
@@ -169,7 +213,10 @@ Instead the source FK (500) must be translated to the target FK (789) when the C
 
 The Reverse ETL app will perform this type of lookup when you configure the FK's for source and target under "Relations":
 
-![FK relation configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1df86476-c315-4161-bc2d-eca16343042d/FK_relation/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/FK_relation.png"
+  alt="FK relation configuration"
+/>
 
 The lookup to find the FK for the tarfget, is done in the link table of the parent object (green line in the above drawing). See below for more info on link tables.
 
@@ -179,13 +226,19 @@ The lookup to find the FK for the tarfget, is done in the link table of the pare
 
 You can test the sync under "Data" by selecting one source record and performing a manual sync. If there are errors, adjust the field mapping and test again.
 
-![Data tab test sync](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7ead42f9-86ac-4f5a-9173-10517d080864/data/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/data.png"
+  alt="Data tab test sync"
+/>
 
 ### View the status of a sync
 
 View the status of each sync under "Status". This shows the link table which contains all source ids that have been synced, the timetamps and errors if any.
 
-![Sync status view](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/948410d5-61b1-4970-a557-371a601d0e7a/status/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/status.png"
+  alt="Sync status view"
+/>
 
 ## Custom code tab
 
@@ -280,7 +333,10 @@ Possible values for "status":
 
 The Reverse ETL app assumes that the target is empty, or at least that the records that will be created from the source do not exist yet in the target. The Reverse ETL will only check the link table to decide if the target record already exists (and do an update instead of an insert), it will not check the target in real-time. This might create duplicates if the target is not empty. Example:
 
-![Existing records in target](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9a087d42-85dd-4b2f-8593-6f06e52bfe27/screenshot_2026-04-29_at_08.09.56/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/Screenshot_2026-04-29_at_08.09.56.png"
+  alt="Existing records in target"
+/>
 
 Depending on the behaviour of the target, it is also possible that the inserts will fail (no duplicates created but error on insert), e.g. Hubspot requires email addresses to be unique.
 
@@ -371,7 +427,10 @@ The Reverse ETL app will run in the background and process source records for ea
 
 You can also set a custom schedule (e.g. every 6 hours). Go to the Build section in Peliqan (rocket icon in left pane), open the app and set a schedule. Make sure to use incremental syncs and configure a daily or hourly sync.
 
-![Schedule settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/dbea0747-5f01-45e9-9828-41101542125a/schedule/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Reverse ETL/schedule.png"
+  alt="Schedule settings"
+/>
 
 ### Import/export
 

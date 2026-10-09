@@ -15,17 +15,56 @@ The Peliqan MCP (Model Context Protocol) Server lets AI assistants and other cli
 
 Use one of the following MCP URLs:
 
-|  | Peliqan MCP | Peliqan Build MCP | Custom MCP |
-| --- | --- | --- | --- |
-| **When to use** | _Use this for "conversational analytics": query your business data (CRM, ERP, Accounting) and talk to your business apps._ | _Use this to manage the Peliqan platform via MCP, e.g. managing data pipelines, vibe coding & publishing Data Apps etc._ | _Use this to implement custom Tools, Resources etc. in your MCP server._ |
-| **EU region** | `https://mcp.peliqan.io/mcp` | `https://mcp.eu.peliqan.io/mcp` | [More info](/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan) |
-| **US region** | `https://mcp.peliqan.io/mcp` | `https://mcp.us.peliqan.io/mcp` | [More info](/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan) |
-| **Private cloud & other regions** | [Contact support](mailto:support@peliqan.io) | [Contact support](mailto:support@peliqan.io) | [More info](/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan) |
+<table>
+  <colgroup>
+    <col width="191" />
+    <col width="259" />
+    <col width="258" />
+    <col width="227" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Peliqan MCP</th>
+      <th>Peliqan Build MCP</th>
+      <th>Custom MCP</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**When to use**</td>
+      <td>_Use this for "conversational analytics": query your business data (CRM, ERP, Accounting) and talk to your business apps._</td>
+      <td>_Use this to manage the Peliqan platform via MCP, e.g. managing data pipelines, vibe coding & publishing Data Apps etc._</td>
+      <td>_Use this to implement custom Tools, Resources etc. in your MCP server._</td>
+    </tr>
+    <tr>
+      <td>**EU region**</td>
+      <td>`https://mcp.peliqan.io/mcp`</td>
+      <td>`https://mcp.eu.peliqan.io/mcp`</td>
+      <td>[More info](/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan)</td>
+    </tr>
+    <tr>
+      <td>**US region**</td>
+      <td>`https://mcp.peliqan.io/mcp`</td>
+      <td>`https://mcp.us.peliqan.io/mcp`</td>
+      <td>[More info](/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan)</td>
+    </tr>
+    <tr>
+      <td>**Private cloud & other regions**</td>
+      <td>[Contact support](mailto:support@peliqan.io)</td>
+      <td>[Contact support](mailto:support@peliqan.io)</td>
+      <td>[More info](/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan)</td>
+    </tr>
+  </tbody>
+</table>
 
 <Accordion title="Setup in ChatGPT">
   In ChatGPT click on your user name (bottom left corner), in the menu go to Settings > Plugins> Browse plugins > Click "+" (plus) icon in the right top corner, and enter the Peliqan MCP URL:
 
-  ![ChatGPT plugin setup showing MCP URL input](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ab5fd743-53ed-429c-af79-76092687456d/screenshot_2026-04-26_at_12.34.56/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Screenshot_2026-04-26_at_12.34.56.png"
+    alt="ChatGPT plugin setup showing MCP URL input"
+  />
 
   Leave the authentication setting to oAuth. Login with your Peliqan user account to authenticate.
 </Accordion>
@@ -33,7 +72,10 @@ Use one of the following MCP URLs:
 <Accordion title="Setup in Claude">
   In Claude Desktop or in Claude.ai in your browser, click on Customize in the top left corner > Connectors > Click on the plus icon > Select "Add custom connector" and enter the URL of the Peliqan MCP Server:
 
-  ![Claude add custom connector screen](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4c1110a0-c9f9-4eb3-a5f7-781d07706152/claude_add_peliqan_mcp/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Claude_add_Peliqan_MCP.png"
+    alt="Claude add custom connector screen"
+  />
 
   Next, login with your Peliqan user account to authenticate.
 </Accordion>
@@ -41,11 +83,17 @@ Use one of the following MCP URLs:
 <Accordion title="Setup in Claude in an Organization account">
   In Claude Desktop or in Claude.ai in your browser, click on your username (bottom left corner), select **Organization Settings** from the menu > Connectors > Add > Custom > Web, and enter the URL of the Peliqan MCP Server:
 
-  ![Claude organization settings for MCP connector](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/647c2a29-2aae-4532-8ce7-f6c3c1998427/screenshot_2026-04-26_at_12.47.15/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Screenshot_2026-04-26_at_12.47.15.png"
+    alt="Claude organization settings for MCP connector"
+  />
 
   Instruct your team members to add a connection using their personal Peliqan account as follows: click on your username (bottom left corner), select **Settings** from the menu > Connectors > find the Peliqan MCP connection and click on the Connect button:
 
-  ![Claude team member connect button](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6d66c1bd-ac1f-4a32-803c-94a9a0ac6a40/screenshot_2026-04-26_at_12.47.35/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Screenshot_2026-04-26_at_12.47.35.png"
+    alt="Claude team member connect button"
+  />
 </Accordion>
 
 <Accordion title="Setup in Claude Code (terminal)">
@@ -78,7 +126,10 @@ Use one of the following MCP URLs:
   - Create an Agent
   - In the agent, add a Tool > MCP Server
 
-  ![Copilot Studio add MCP Server tool](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f06955fb-f5cb-40e3-9c5a-186b336cbeea/screenshot_2026-06-12_at_17.30.29/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Screenshot_2026-06-12_at_17.30.29.png"
+    alt="Copilot Studio add MCP Server tool"
+  />
 
   Enter following details for the MCP Server:
 
@@ -88,11 +139,17 @@ Use one of the following MCP URLs:
   - Authentication: oAuth 2.0
   - Type: Dynamic discovery
 
-  ![Copilot Studio MCP Server configuration form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/30c401e8-3369-4385-84e1-ef6909dfeb37/screenshot_2026-07-29_at_13.53.49/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Screenshot_2026-07-29_at_13.53.49.png"
+    alt="Copilot Studio MCP Server configuration form"
+  />
 
   Click on "Not connected" to add a connection:
 
-  ![Copilot Studio connection status showing Not connected](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9aa8f124-af30-4a5e-91cb-24f3d03f3d1a/screenshot_2026-07-29_at_13.54.48/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Screenshot_2026-07-29_at_13.54.48.png"
+    alt="Copilot Studio connection status showing Not connected"
+  />
 
   Login into Peliqan to authorize access (oAuth flow). A new connection will be added.
 
@@ -104,9 +161,15 @@ Use one of the following MCP URLs:
 
   Add a security group (to which the user belongs) in Power Automate Admin center, for the setting Manage > Tenant settings > "Copilot studio authors".
 
-  ![Power Automate Admin center tenant settings](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e173302f-30d2-4d41-877f-cc134161fd2c/screenshot_2026-06-12_at_17.35.13/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Screenshot_2026-06-12_at_17.35.13.png"
+    alt="Power Automate Admin center tenant settings"
+  />
 
-  ![Power Automate Admin center security group selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8007a6da-1343-4661-877a-0897b19db2a1/screenshot_2026-06-12_at_17.35.19/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Peliqan MCP Server/Screenshot_2026-06-12_at_17.35.19.png"
+    alt="Power Automate Admin center security group selection"
+  />
 
   If you get an error "A custom connector with display name xxx already exists", follow the below steps:
 

@@ -6,7 +6,10 @@ description: "Use Peliqan as the unified data gateway for n8n AI agents with Tex
 
 AI Agents require data to gather knowledge and answer questions, and they need connectivity to business applications in order to take actions. Peliqan is the **data foundation for AI** that provides your AI Agents in [n8n](https://n8n.io/) with data from all your business applications through a single node, as well as "tool" nodes that allow your AI Agents to take actions in your applications such as adding & updating data, creating tasks, adding a draft invoice or anything else you can imagine. Peliqan is the unified gateway for n8n to all your internal company data.
 
-![n8n AI Agents using Peliqan as data gateway](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a630ca43-3496-4c8b-b6d0-209c89a70407/n8n_AI_Agents_-_Peliqan_data_gateway/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Build AI agents with n8n and Peliqan/n8n_AI_Agents_-_Peliqan_data_gateway.png"
+  alt="n8n AI Agents using Peliqan as data gateway"
+/>
 
 ## AI Agent capabilities
 
@@ -26,7 +29,10 @@ With Peliqan, you can add following capabilities to your AI Agents in n8n:
 
 In your self-hosted n8n environment, add the [Peliqan community node](https://www.npmjs.com/package/n8n-nodes-peliqan) under Settings > Community nodes > npm Package Name "n8n-nodes-peliqan".
 
-![n8n community node installation](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/311fdc3b-123e-4b90-91fe-73ab8560ef35/Screenshot_2025-07-30_at_13.42.10/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-07-30_at_13.42.10.png"
+  alt="n8n community node installation"
+/>
 
 If you want to use Peliqan as a "Tool" under your AI Agent (e.g. for "Text to SQL" queries), set the environment variable `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE` to True, by executing this command on the CLI:
 
@@ -40,7 +46,10 @@ Download this n8n template and import it into your n8n environment.
 
 [Peliqan_AI_Agent_RAG_and_SQL_V2.61.json](https://github.com/Peliqan-io/downloads/releases/download/d/Peliqan_AI_Agent_RAG_and_SQL_V2.61.json)
 
-![Peliqan n8n AI Agent template workflow](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/99465134-7cb5-46cd-a26c-c44c11a3317e/Peliqan_n8n_AI_Agent_template_with_RAG_and_Text_to_SQL/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Build AI agents with n8n and Peliqan/Peliqan_n8n_AI_Agent_template_with_RAG_and_Text_to_SQL.png"
+  alt="Peliqan n8n AI Agent template workflow"
+/>
 
 Or checkout the [Peliqan n8n template on the n8n website](https://n8n.io/workflows/6706-query-business-data-with-openai-chatbot-using-rag-and-text-to-sql-via-peliqan/).
 
@@ -136,9 +145,15 @@ You can also retrieve your data model automatically from Peliqan by setting up a
 
   Add an API endpoint in Peliqan with path `/datamodel` and link it to the above handler script. In n8n, use the Peliqan Tool node with Resource "Endpoint" and Operation "Exec" and select the API endpoint you created in Peliqan:
 
-  ![n8n Peliqan Tool node selecting endpoint](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5ffbcaf4-4899-4884-8fc1-18ed2ab6169e/Screenshot_2025-07-30_at_13.54.12/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-07-30_at_13.54.12.png"
+    alt="n8n Peliqan Tool node selecting endpoint"
+  />
 
-  ![n8n endpoint operation configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/285c6f7e-3874-434b-b138-ac0d80bc8d26/Screenshot_2025-07-30_at_13.54.39/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-07-30_at_13.54.39.png"
+    alt="n8n endpoint operation configuration"
+  />
 </Accordion>
 
 ### Step 6: Configure RAG
@@ -158,13 +173,25 @@ You can also add multiple tables from the Peliqan data warehouse as data source 
 <Accordion title="Add multiple tables as source for RAG dynamically">
   Use the Peliqan node with resource "Table" and Operation "List" to get a list of all your tables in Peliqan. Apply a filter if needed and use the filtered list to get the data of each table.
 
-  ![n8n Peliqan node list tables operation](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e143f343-b678-4650-97ac-987533c62cb0/Screenshot_2025-07-30_at_14.16.04/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-07-30_at_14.16.04.png"
+    alt="n8n Peliqan node list tables operation"
+  />
 
-  ![n8n Peliqan node filtered table list](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b1ed1ea8-0e81-4e02-b67d-1a3c06bb73e6/Screenshot_2025-07-30_at_14.18.36/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-07-30_at_14.18.36.png"
+    alt="n8n Peliqan node filtered table list"
+  />
 
-  ![n8n Peliqan node loop through tables](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4ccc4258-7865-4b7b-ae8b-22e648665e75/Screenshot_2025-07-30_at_14.18.44/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-07-30_at_14.18.44.png"
+    alt="n8n Peliqan node loop through tables"
+  />
 
-  ![n8n workflow feeding multiple tables to vector store](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/692578eb-62b6-4019-bd28-debf4ad17a5e/Screenshot_2025-07-30_at_14.18.05/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-07-30_at_14.18.05.png"
+    alt="n8n workflow feeding multiple tables to vector store"
+  />
 </Accordion>
 
 ### Step 7: configure "writeback" actions
@@ -185,11 +212,17 @@ The above example uses Supabase as the Vector Store and creating embeddings (vec
 
 Add the tool **Postgres PGVector Store** under your AI Agent in n8n, and configure your Peliqan data warehouse DB in that node:
 
-![n8n Postgres PGVector Store configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ce9e5f32-6c25-4105-9bf3-4747cd1c6b69/Screenshot_2025-09-11_at_13.41.38/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-09-11_at_13.41.38.png"
+  alt="n8n Postgres PGVector Store configuration"
+/>
 
 You can download the an example n8n workflow and import it into your n8n environment:
 
-![n8n AI Agent RAG with Peliqan DWH as vector store workflow](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/578dfa0b-01be-4b77-8a36-f67653715ba5/n8n_AI_Agent_RAG_with_Peliqan_DWH_as_vector_store/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Build AI agents with n8n and Peliqan/n8n_AI_Agent_RAG_with_Peliqan_DWH_as_vector_store.png"
+  alt="n8n AI Agent RAG with Peliqan DWH as vector store workflow"
+/>
 
 [RAG_with_Peliqan_DWH_as_vector_store.json](https://github.com/Peliqan-io/downloads/releases/download/d/RAG_with_Peliqan_DWH_as_vector_store.json)
 
@@ -272,7 +305,10 @@ Use the below pipeline script in Peliqan to vectorize your source data.
 <Accordion title="Can my AI Agent show a link to the source data on e.g. Google Drive or Notion (using RAG) ?">
   Yes, make sure to add Metadata when feeding your data into the Supabase Vector Store, e.g. the field \_source_url that links to the original source.
 
-  ![n8n Supabase Vector Store metadata configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/042a05a6-085a-40f9-801d-b127c44164a0/Screenshot_2025-07-30_at_14.10.04/w=1920,quality=90,fit=scale-down)
+  <img
+    src="/images/Build AI agents with n8n and Peliqan/Screenshot_2025-07-30_at_14.10.04.png"
+    alt="n8n Supabase Vector Store metadata configuration"
+  />
 </Accordion>
 
 <Accordion title="Can I get help building my AI Agent ?">
