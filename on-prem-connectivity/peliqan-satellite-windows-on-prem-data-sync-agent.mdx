@@ -370,6 +370,21 @@ No — each pipeline has exactly one source and one target; there's no such thin
 
 # Releases
 
+**v1.7: Support for tables without PK + “exclude” options**
+
+- Reduced memory usage during large multi-database syncs.
+- Support for source tables without primary key (PK)
+- Ability to exclude certain DBs, schemas and tables based on name or keyword (before we only had “include” options)
+- Fixed BigQuery quota errors caused by redundant schema checks during log flushing.
+- Capped the in-memory log buffer to prevent unbounded memory growth.
+
+**v1.6: Various improvements**
+
+- Fixed out-of-memory crash for large customers by splitting table-mapping data out of one config file into per-database files.
+- Fixed a bug where an empty or corrupted config file could silently wipe out pipeline settings instead of failing safely.
+- Moved BigQuery config/log writes also to a streaming write method.
+- Improved UI settings.
+
 **v1.5: various improvements**
 
 - Warning on using same schema in 2 pipelines.
