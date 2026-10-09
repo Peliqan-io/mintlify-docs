@@ -17,7 +17,10 @@ Connect your **Twinfield** (Wolters Kluwer) administration to Peliqan to sync ac
 
 1. Sign in to the Twinfield Developer Portal → **Clients** → **New**.
 
-![Twinfield Developer Portal new client screen](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/670bb5fd-960a-4792-a9b4-b5671fcb339b/screenshot_2026-06-11_at_3.21.49_pm/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Twinfield - Getting started in Peliqan/Screenshot_2026-06-11_at_3.21.49_PM.png"
+  alt="Twinfield Developer Portal new client screen"
+/>
 
 3. Set the **Redirect URI** to exactly: No trailing slash, no extra path — it must match exactly or login will fail.
 
@@ -27,7 +30,10 @@ https://oauth.peliqan.io
 
 5. Save and copy the generated **Client ID** and **Client Secret**.
 
-![Twinfield client credentials after registration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/69baf83d-181b-4d35-b3f8-33e263015ebe/screenshot_2026-06-11_at_3.26.12_pm/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Twinfield - Getting started in Peliqan/Screenshot_2026-06-11_at_3.26.12_PM.png"
+  alt="Twinfield client credentials after registration"
+/>
 
 ## **Step 2 — Add the Twinfield connector in Peliqan**
 
@@ -40,7 +46,10 @@ https://oauth.peliqan.io
 | **Client secret** | Client Secret from Step 1 |
 | **Company code(s)** | One or more administration codes, comma-separated (e.g. NLA003256,NLA003257) |
 
-![Twinfield connection form in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e64084bf-8752-4825-9d78-fb16aba8b623/screenshot_2026-06-11_at_3.30.31_pm/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Twinfield - Getting started in Peliqan/Screenshot_2026-06-11_at_3.30.31_PM.png"
+  alt="Twinfield connection form in Peliqan"
+/>
 
 ## **Step 3 — Authorize**
 
@@ -48,14 +57,20 @@ https://oauth.peliqan.io
 2. You'll be redirected to **login.twinfield.com** — sign in and approve access.
 3. On success you're returned to Peliqan and the connection is created. The connector automatically detects the correct Twinfield **cluster** from your login — no extra config needed.
 
-![Twinfield authorization confirmation](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/cb8d437b-d712-4eca-b3fa-e0c441e107c3/screenshot_2026-06-11_at_3.31.18_pm/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Twinfield - Getting started in Peliqan/Screenshot_2026-06-11_at_3.31.18_PM.png"
+  alt="Twinfield authorization confirmation"
+/>
 
 ## **Step 4 — Select tables & sync**
 
 1. Don't know your company codes? Sync the `offices` table first — it lists every administration code available to you. Then put the right code(s) in **Company code(s)** and re-sync.
 2. Click on Advanced Button, select the tables you want and run the sync. Data lands in your Peliqan data warehouse.
 
-![Twinfield advanced table selection in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/754a4ff4-b0bd-45b6-abc2-2a19dc8fec96/screenshot_2026-06-11_at_3.33.58_pm/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Twinfield - Getting started in Peliqan/Screenshot_2026-06-11_at_3.33.58_PM.png"
+  alt="Twinfield advanced table selection in Peliqan"
+/>
 
 ## **Good to know**
 

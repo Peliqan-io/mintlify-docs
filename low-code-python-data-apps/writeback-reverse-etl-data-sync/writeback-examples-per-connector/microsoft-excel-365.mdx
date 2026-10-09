@@ -1,34 +1,19 @@
 ---
 title: "Microsoft Excel 365 - Getting started in Peliqan"
-sidebarTitle: "Excel 365"
+sidebarTitle: "Microsoft Excel 365"
 description: "Connect Microsoft Excel 365 to Peliqan, sync spreadsheet data to your warehouse, and use low-code Python to read, update, and sync tables with Sharepoint."
 ---
 
 This article provides an overview to get started with the **Microsoft Excel** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
 
-## Contents
-
-- [Connect](#connect)
-  - [How to find your Site id (Sharepoint)](#how-to-find-your-site-id-sharepoint)
-  - [Document Library Name](#document-library-name)
-  - [Relative File Path](#relative-file-path)
-- [Explore & Combine](#explore--combine)
-- [Activate](#activate)
-  - [Update rows](#update-rows)
-  - [Update rows using drive_id and drive_item_id](#update-rows-using-drive_id-and-drive_item_id)
-  - [Full example syncing a Peliqan table to Excel sheet on Sharepoint](#full-example-syncing-a-peliqan-table-to-excel-sheet-on-sharepoint)
-  - [Read the data of a sheet](#read-the-data-of-a-sheet)
-  - [Read the data of any Excel file into a dataframe](#read-the-data-of-any-excel-file-into-a-dataframe)
-  - [Upload an Excel file in Peliqan and store in a table](#upload-an-excel-file-in-peliqan-and-store-in-a-table)
-- [Tips & Trick](#tips--trick)
-
 ## Connect
 
 In peliqan, go to Connections, click on Add new. Find "**Excel 365"** in the list and select it. Click on the Connect button. This will open Microsoft Excel and allow you to authorize access for Peliqan. Once the authorization is done, you will return to Peliqan.
 
-![Excel 365 connection form](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/980ed47f-f3f3-4189-bd4a-e88f3a71ea4d/Screenshot_2024-06-12_at_11.03.04/w=1920,quality=90,fit=scale-down)
-
-![Excel 365 connection details](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d9899fe5-8326-4487-9366-8e7427d37b43/Screenshot_2025-01-09_at_12.50.32/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Microsoft Excel 365 - Getting started in Peliqan/Screenshot_2025-01-09_at_12.50.32.png"
+  alt="Excel 365 connection details"
+/>
 
 ### How to find your Site id (Sharepoint)
 
@@ -59,7 +44,10 @@ In your Sharepoint site, go to "Site contents" to see the names of your Document
 
 The default is "Documents".
 
-![Sharepoint Document Library Names](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/26d854c7-5a88-4f43-ae65-0b5ceb98351a/Sharepoint_Document_Library_Names/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Microsoft Excel 365 - Getting started in Peliqan/Sharepoint_Document_Library_Names.png"
+  alt="Sharepoint Document Library Names"
+/>
 
 ### Relative File Path
 
@@ -72,8 +60,6 @@ Or "myfolder/myfile.xlsx" for a file in a subfolder.
 Wait a few minutes for the data to start syncing. Now you can view your **Microsoft Excel** data in tables in Peliqan's built-in data warehouse (or in your own DWH if you connected e.g. SQL Server, Snowflake, Redshift or BigQuery).
 
 Select "Explore" in the left navigation pane, expand "Data warehouse" in the left tree and click on Excel. All tables from Excel will now be shown.
-
-![Excel data in Peliqan grid view](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/70ab68c5-261f-47f2-a9d1-1fc6b1af5709/gridview/w=1920,quality=90,fit=scale-down)
 
 You can explore the data in the gridview, and you can write SQL queries to transform the data and to combine the data from **Microsoft Excel** with data from other sources.
 
@@ -237,7 +223,7 @@ See:
 
 [Manual file upload & download](/low-code-python-data-apps/working-with-files/manual-file-uploads)
 
-## Tips & Trick
+## Tips & Tricks
 
 Convert a column number into the Excel column name (e.g. column 27 is AA):
 

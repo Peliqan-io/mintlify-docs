@@ -14,11 +14,17 @@ Follow the below steps to install the extension in one environment in your Busin
 
 Open search (right top corner, magnifier icon) and search for **Extension Management**. Click on the link **Extension Management**:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7def348f-fb84-4a2d-8ec6-a9367d7ece66/screenshot_2026-05-18_at_10.17.47/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-05-18_at_10.17.47.png"
+  alt="image"
+/>
 
 Click on **Manage** &gt; **Upload Extension**:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c52cf2af-ff21-4684-991d-35420a06d303/screenshot_2026-05-18_at_10.17.59/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-05-18_at_10.17.59.png"
+  alt="image"
+/>
 
 Download this zip file and unzip it to get the `.app` file:
 
@@ -31,7 +37,7 @@ Make sure to toggle the approval toggle "By deploying this extension you acknowl
 Click on **Deploy**:
 
 <img
-  src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c833a788-5ead-42dc-981b-5be4e4f03237/screenshot_2026-05-18_at_10.18.28/w=1920,quality=90,fit=scale-down"
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-05-18_at_10.18.28.png"
   alt="image"
   className="mx-auto"
   style={{ width:"66%" }}
@@ -41,11 +47,17 @@ Click on **Deploy**:
 
 In **Extension Management**, click on **Manage** &gt; **Installation status**:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/76080ab5-f064-43b2-9b1a-b347fe30676e/screenshot_2026-05-18_at_10.18.48/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-05-18_at_10.18.48.png"
+  alt="image"
+/>
 
 Find the extension "Peliqan BC Sync" in the list and check the Status. Wait a few minutes until the Status is **Completed**:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/997fe99c-e918-4026-be29-d2712dd60668/screenshot_2026-05-18_at_10.19.05/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-05-18_at_10.19.05.png"
+  alt="image"
+/>
 
 ## After installation: get all details
 
@@ -59,21 +71,33 @@ You can find these details in the extension, by following the below steps:
 
 Open search (right top corner, magnifier icon) and search for "Peliqan". Click on the link "Peliqan Sync - API endpoint" from the search results:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6b2dfae5-4c9e-4824-9947-4ff55eb1bb72/screenshot_2026-05-18_at_10.19.20/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-05-18_at_10.19.20.png"
+  alt="image"
+/>
 
 This will open the UI of the extension:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9e11a755-9ba6-407f-b029-6acbe47676c0/screenshot_2026-05-18_at_10.20.07/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-05-18_at_10.20.07.png"
+  alt="image"
+/>
 
 Scroll down to **Connection details** and copy the required settings:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/877790f3-9a6e-41a1-9106-b90ef3341ca3/screenshot_2026-05-18_at_10.20.14/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-05-18_at_10.20.14.png"
+  alt="image"
+/>
 
 ## Add a connection in Peliqan
 
 In Peliqan, add a connection of type "**MS Business Central (Peliqan extension)**". Enter the above details in the connection card:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c88175d2-363b-4b10-b197-c9cd2e278709/screenshot_2026-09-10_at_11.20.55/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/Screenshot_2026-09-10_at_11.20.55.png"
+  alt="image"
+/>
 
 Click on the "Add connection" button and authorize access (OAuth flow).
 
@@ -81,16 +105,22 @@ Once the connection is added, all data will be synced to the data warehouse.
 
 If you want to add more tables, check the table `Objects` for correct object names:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/74463c4c-9441-49e9-8d7e-79a31015a741/objects_tabel/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/objects_tabel.png"
+  alt="image"
+/>
 
 Use the object names from column `objectname` and add them in the connection card under "Object names" (comma separated list). Example:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2acabfd2-6885-42ca-934c-feca87ce1173/connection_card/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/connection_card.png"
+  alt="image"
+/>
 
 After updating this list, perform a Full Resync to make all the tables (including the newly selected objects) available.
 
 <img
-  src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6ed8d2ee-4ed2-47d6-8b25-96a8db04b81d/full_resync/w=1920,quality=90,fit=scale-down"
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Business Central extension/full_resync.png"
   alt="image"
   className="mx-auto"
   style={{ width:"46%" }}

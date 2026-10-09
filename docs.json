@@ -238,7 +238,7 @@
           "linkedin-ads-getting-started-in-peliqan",
           "lucanet-getting-started-in-peliqan",
           {
-            "group": "MS Dynamics 365 Business Central",
+            "group": "Microsoft Dynamics 365 Business Central",
             "root": "connect-to-data/microsoft-dynamics-365-business-central",
             "pages": [
               "connect-to-data/microsoft-dynamics-365-business-central/ms-business-central-extension",

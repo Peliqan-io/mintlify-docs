@@ -25,7 +25,10 @@ The steps below are ***without*** using a Private app. If you want to use a Priv
 
 In Peliqan, go to Connections, click on "Add Connection" and search for Business Central Custom API. Choose one of the connectors:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c2999f0e-0538-4506-b0d2-6d1eab55b632/Screenshot_2025-05-27_175440/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/Screenshot_2025-05-27_175440.png"
+  alt="image"
+/>
 
 ### Prerequisites
 
@@ -51,7 +54,10 @@ To find your Tenant ID:
 3. Select "Admin Center"
 4. Copy the Tenant ID from the URL (it appears as `https://businesscentral.dynamics.com/{TENANT_ID}/admin`)
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/83065012-05e3-4e02-aab0-99f679451f3f/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/image.png"
+  alt="image"
+/>
 
 **Environment Name**
 
@@ -61,7 +67,10 @@ To locate your Environment Name:
 2. Choose your environment from the list (or create one if needed)
 3. Enter the exact environment name as shown
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/bab1f8af-7eaa-40ba-ad29-dd0c3b5d662c/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/image 1.png"
+  alt="image"
+/>
 
 **Company Name**
 
@@ -114,7 +123,10 @@ Peliqan offers an out of the box data warehouse. Optionally you can choose to sy
 
 Data will be synced to the chosen data warehouse and made available through the Peliqan UI for exploration:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/09437af8-a6d4-4937-97cf-c1ccd0f13266/Screenshot_2025-05-27_182039/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/Screenshot_2025-05-27_182039.png"
+  alt="image"
+/>
 
 ## Support
 
@@ -131,7 +143,10 @@ This guide explains how to create custom API endpoints in Business Central, e.g.
 
 In Business Central click on Search (magnifier icon in top right corner), search for "Extension management" --&gt; click on "Develop in VS Code" --&gt; click on "Generate launch configurations".
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/11ad5d90-2f0e-4adf-a09f-8a0c21925ead/screenshot_2026-04-16_at_18.05.23/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/Screenshot_2026-04-16_at_18.05.23.png"
+  alt="image"
+/>
 
 This will open VS Code on your computer and create a project in AL (the extension language for Business Central).
 
@@ -139,7 +154,10 @@ In VS Code, first install the extension from Microsoft: "AL Language extension f
 
 Hit `COMMAND+SHIFT+P` --&gt; Select "AL: Download Symbols"
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f471a6e5-3b8c-412b-b869-32076f2f2c24/screenshot_2026-04-16_at_18.08.18/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/Screenshot_2026-04-16_at_18.08.18.png"
+  alt="image"
+/>
 
 Select the launch configuation "AL: Generated Download Symbols request"
 
@@ -188,21 +206,33 @@ page 50100 "Peliqan Vendors API"
 
 Hit `COMMAND+SHIFT+P` --&gt; Select "AL: Publish"
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/bfcf275d-44c7-49c5-bce0-e7e53da37386/screenshot_2026-04-16_at_18.06.34/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/Screenshot_2026-04-16_at_18.06.34.png"
+  alt="image"
+/>
 
 Check if the Extension is now published in BC, example:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f5262ed3-7ff4-4747-8352-e71ecdb996f1/custom_extension/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/custom_extension.png"
+  alt="image"
+/>
 
 ### Add a connection in Peliqan for the newly created API endpoints
 
 In Peliqan, add a connection of type "MS Business Central Custom API":
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f4474431-b9d9-4e98-8d59-723c1c3e26e8/connection_in_peliqan/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/Connection_in_Peliqan.png"
+  alt="image"
+/>
 
 - For **Environment name**: see Business Central Admin: `https://businesscentral.dynamics.com/{tenant_id}/admin`
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/12a86768-1054-41e0-a630-3c0d5d975bb9/screenshot_2026-04-16_at_17.46.02/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/Screenshot_2026-04-16_at_17.46.02.png"
+  alt="image"
+/>
 
 - For **Apicategoryroute**, use this format: `publisher/group/version`. See the above created file for details, in our example:
 
@@ -218,14 +248,23 @@ So the Apicategoryroute becomes `peliqan/peliqangroup/v1.0`
 
 User in BC has no access to Extension Management: make sure the user has Permission set `EXTEN. MGT. - ADMIN`. Example:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/073f0e8c-8b94-40d7-b10f-9da6314a61b7/user_permissions/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/user_permissions.png"
+  alt="image"
+/>
 
 Downloading Symbols fails: make sure you are logged in into VS Code with the same Azure user as your login to BC (in VS Code see bottom left corner).
 
 Make sure your user is assigned a product license for Business Central in Microsoft 365 admin center: [https://admin.cloud.microsoft](https://admin.cloud.microsoft/). Example:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/afd7c5fc-6b3e-4fdc-9a43-8afe2325e1e6/user_license_in_admin_center/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/user_license_in_admin_center.png"
+  alt="image"
+/>
 
 When error "not found" during downloading of symbols: double check the version in app.json: e.g. `"application": "27.5.46862.46929"`. This should be same version as the extension "Application", in BC go to Extension Management, find this extension and copy its version. Example:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9f27a6a1-336b-453b-b12c-c16bd09f61a2/extension_application_version_number/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/MS Dynamics 365 Business Central - Custom API/Extension_Application_version_number.png"
+  alt="image"
+/>

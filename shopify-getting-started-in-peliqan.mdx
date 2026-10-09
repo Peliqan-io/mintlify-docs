@@ -8,20 +8,30 @@ Shopify is a leading cloud-based e-commerce platform that enables businesses of 
 
 This article provides an overview to get started with the **Shopify** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
 
-## Connectnect
+## Connect
 
 1. Search for the connection in the Add connections page
 
 - For fetching data into tables, use the Shopify connector
 - For writing back data into Shopify, also add the Shopify Writeback connector
 
-![Shopify connector in Peliqan connection list](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/ca6a97e2-4e97-4150-b88f-3793eaf1261f/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image.png"
+  alt="Shopify connector in Peliqan connection list"
+  style={{ width:"34%" }}
+/>
 
-![Shopify Writeback connector in Peliqan connection list](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/965f17fa-44ed-4959-b390-5a49b4ae284b/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image 1.png"
+  alt="Shopify Writeback connector in Peliqan connection list"
+/>
 
 2. Fill in the store name and Admin API access token. Save the connection.
 
-![Shopify connection form with store name and API token fields](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8c844119-e24c-43ff-8c8e-95d880364418/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image 2.png"
+  alt="Shopify connection form with store name and API token fields"
+/>
 
 ## Explore
 
@@ -29,7 +39,10 @@ Wait a few minutes for the data to start syncing. Now you can view your **Shopif
 
 Select "Explore" in the left navigation pane, expand "Data warehouse" in the left tree and click on Shopify. All tables from Shopify will now be shown.
 
-![Grid view showing Shopify data tables in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/25789112-44cd-4aed-9172-6da758c3447a/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image 3.png"
+  alt="Grid view showing Shopify data tables in Peliqan"
+/>
 
 You can explore the data in the grid view, and you can write SQL queries to transform the data and to combine the data from Shopify with data from other sources.
 
@@ -41,15 +54,25 @@ You can use Peliqan's low-code Python scripts to interact with Shopify using the
 
 When creating the token in Shopify, ensure you add sufficient write scopes to the objects you wish to create/update with Peliqan
 
-![Shopify API token creation with write scopes](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a1614ac8-3d31-4921-9133-802f06904c39/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image 4.png"
+  alt="Shopify API token creation with write scopes"
+/>
 
 2. Create a Data App
 
-![Creating a new Data App in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7c15f684-d277-47f1-b1e2-4300e5edb03a/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image 5.png"
+  alt="Creating a new Data App in Peliqan"
+/>
 
 3. Click Add object in the right panel, after searching for Shopify
 
-![Right panel showing Shopify object options in a Data App](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c5afa09d-140e-4b9d-ade5-8c02521ba95c/Screenshot_2025-09-11_at_5.37.03_PM/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/Screenshot_2025-09-11_at_5.37.03_PM.png"
+  alt="Right panel showing Shopify object options in a Data App"
+  style={{ width:"41%" }}
+/>
 
 - Add object is a generic endpoint to add any entity (products, customers, orders etc).
 - Add product is a specific endpoint to add products.
@@ -60,7 +83,10 @@ When creating the token in Shopify, ensure you add sufficient write scopes to th
 
 The sample code is based on the rest api as per [https://shopify.dev/docs/api/admin-rest](https://shopify.dev/docs/api/admin-rest) The `resource` field in this case is `products` corresponding to `products.json` in the api request.
 
-![Sample Python code for adding a Shopify product via REST](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/25ede2dd-6051-41a4-b64c-3d68210a922b/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image 6.png"
+  alt="Sample Python code for adding a Shopify product via REST"
+/>
 
 ### Alternatively use advanced GraphQL based mutations
 
@@ -70,8 +96,14 @@ The GraphQL query comes inside the `body` just as per the [GraphQL api docs](htt
 
 This mode can be used to perform **any kind of operation** (add/update/delete) using the appropriate GraphQL mutations.
 
-![Sample Python code for GraphQL mutation in Shopify](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/adf73331-a5a6-4c29-b892-a7fb2115b36f/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image 7.png"
+  alt="Sample Python code for GraphQL mutation in Shopify"
+/>
 
 Example of `update` mutation:
 
-![Shopify GraphQL update mutation example](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c276506d-a5f0-433c-9b31-c4e97cf45e48/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Shopify - Getting started in Peliqan/image 8.png"
+  alt="Shopify GraphQL update mutation example"
+/>

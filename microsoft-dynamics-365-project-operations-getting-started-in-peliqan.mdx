@@ -1,20 +1,10 @@
 ---
 title: "MS Dynamics 365 F&O - Getting started in Peliqan"
-sidebarTitle: "Dynamics 365 F&O"
+sidebarTitle: "Microsoft Dynamics 365 F&O"
 description: "Connect Microsoft Dynamics 365 Finance & Operations to Peliqan by creating an Azure app, associating it with your environment, and syncing data with custom pipelines for bulk export."
 ---
 
 This article provides an overview to get started with the **Microsoft Dynamics 365 F&O** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
-
-## Content
-
-- [Before Connecting Dynamics 365 F&O in Peliqan](#before-connecting-dynamics-365-fo-in-peliqan)
-  - [Create an App in Azure](#create-an-app-in-azure)
-  - [Associate App User with Dynamics environment](#associate-app-user-with-dynamics-environment)
-- [Add a connection in Peliqan to Microsoft Dynamics 365 F&O](#add-a-connection-in-peliqan-to-microsoft-dynamics-365-fo)
-- [Entity explorer](#entity-explorer)
-- [Bulk export](#bulk-export)
-- [Need further help](#need-further-help)
 
 ## Before Connecting Dynamics 365 F&O in Peliqan
 
@@ -24,51 +14,90 @@ In order to connect Dynamics F&O in Peliqan, you have to create an app in Azure 
 
 1. **Login to Azure Portal Account and click on App Registrations (or search for App Registrations):**
 
-![Azure App Registrations](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/59e561e7-80a7-4a56-aeea-73983d34d02d/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/Untitled.png"
+  alt="Azure App Registrations"
+/>
 
 2. **Click on New Registration to register a single tenant application:**
 
-![Azure New Registration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9b71bd18-7bdf-42bd-bb6b-0894dd46073c/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/Untitled 1.png"
+  alt="Azure New Registration"
+/>
 
 3. **Provide details and click on Register:**
 
-![Azure Register App](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d74154cd-493f-449f-8f4f-1ede74648d0d/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/Untitled 2.png"
+  alt="Azure Register App"
+/>
 
 4. **On Overview, make sure to copy ClientId and TenantId:**
 
-![Azure App Overview](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/4ff99a66-5352-45a1-b347-965f74c66227/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/Untitled 3.png"
+  alt="Azure App Overview"
+/>
 
 5. **To enable OAuth, click on Authentication > Add Platform > Click on Web:**
 
-![Azure Authentication Platform](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/858b33ca-414e-44bc-a990-828c733db33e/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/Untitled 4.png"
+  alt="Azure Authentication Platform"
+/>
 
 6. **A configure Web window will open, add following Redirect URL: [https://oauth.peliqan.io](https://oauth.peliqan.io) To save click the button "Configure" at the bottom:**
 
-![Azure Redirect URL](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a9b55ac2-d001-4c98-906e-97611f83fe95/Screenshot_2023-10-23_at_4.13.32_PM/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/Screenshot_2023-10-23_at_4.13.32_PM.png"
+  alt="Azure Redirect URL"
+/>
 
 7. **Add Permissions: select API Permissions > Add a permission > Dynamics ERP**
 
-![Azure Dynamics ERP Permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3d0dfe83-58c5-4b64-8dc9-b2552d1b2858/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image.png"
+  alt="Azure Dynamics ERP Permissions"
+/>
 
 8. **Add Delegated permissions and Applications permissions as below:**
 
-![Azure Delegated Permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/96e1545f-42bc-4141-b186-0ca4cb4e8484/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 1.png"
+  alt="Azure Delegated Permissions"
+/>
 
-![Azure Application Permissions](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f5749c27-fdf4-421f-8d8e-88df1dda1dc0/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 2.png"
+  alt="Azure Application Permissions"
+/>
 
 9. **Grant Admin consent to the App:**
 
-![Azure Grant Admin Consent](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0497dd89-7621-4553-8539-f109568bd540/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 3.png"
+  alt="Azure Grant Admin Consent"
+/>
 
-![Azure Admin Consent Granted](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/26a25067-1913-42d1-82e6-7bf53f77cdb6/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 4.png"
+  alt="Azure Admin Consent Granted"
+/>
 
 10. **Get Client Secret: In left pane, click Certificates & Secrets > Client Secret > New Client Secret and provide details to get the client secret. Click on the Add button:**
 
 NOTE: Client secret is only visible when created, make sure to copy and save it for future use. For the Peliqan Connection, you will need to provide the **client secret.**
 
-![Azure New Client Secret](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3f0aba50-2fec-45e7-bdd8-7528e9b8f857/Screenshot_2023-10-23_at_4.36.24_PM/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/Screenshot_2023-10-23_at_4.36.24_PM.png"
+  alt="Azure New Client Secret"
+/>
 
-![Azure Client Secret Value](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1486e477-3b33-48ba-ab05-4d299a59f174/Screenshot_2023-10-23_at_4.38.34_PM/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 Business Central - Getting started/Screenshot_2023-10-23_at_4.38.34_PM.png"
+  alt="Azure Client Secret Value"
+/>
 
 ### Associate App User with Dynamics environment
 
@@ -78,11 +107,17 @@ You have to associate the App we created with the Dynamics F&O Instance.
 2. Select the environment in which the F&O instance has been created.
 3. Make sure to copy **Environment URL** as it will be used to connect to the environment in Peliqan.
 
-![Power Platform Environment URL](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/d1b56d3f-c468-4404-ba9b-27c6beb28c72/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 5.png"
+  alt="Power Platform Environment URL"
+/>
 
 4. On the right pane under _Access_, click on **S2S apps** (Server to Server apps) to see all Application Users.
 
-![Power Platform S2S Apps](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/76b24b11-c4b2-499d-9752-3a5fe9fa98e7/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 6.png"
+  alt="Power Platform S2S Apps"
+/>
 
 5. Create a New App User by clicking on **New App User > Add an app**
 
@@ -91,13 +126,19 @@ You have to associate the App we created with the Dynamics F&O Instance.
 - Provide Security Roles as **System Administrator.**
 - Click on **Create**
 
-![Power Platform New App User](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/3d406a52-e49b-4033-b72f-dba1ffac70e2/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 7.png"
+  alt="Power Platform New App User"
+/>
 
 ## Add a connection in Peliqan to Microsoft Dynamics 365 F&O
 
 In Peliqan, go to "Connections", click on "Add new" and search for Dynamics F&O:
 
-![Dynamics F&O connection in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/c0967d14-e5ce-413d-981e-62f55707e330/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 8.png"
+  alt="Dynamics F&O connection in Peliqan"
+/>
 
 Configuration options:
 
@@ -107,7 +148,10 @@ Configuration options:
 - Resource URL: Resource URL of the F&O Instance
 - (Optional) select tables to sync under 'Advanced'
 
-![Dynamics F&O connection configuration](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/8ac82de6-ac48-4c9b-83d2-58b0cb02f423/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/image 9.png"
+  alt="Dynamics F&O connection configuration"
+/>
 
 Click on the button **Connect Dynamics 365 Finance and Operations(AX)** to initiate the oAuth Flow and Authorize access. Once the connection is added, the data pipeline will automatically be created and data will start syncing to your data warehouse.
 
@@ -479,7 +523,10 @@ For large datasets, you can use a custom pipeline in Peliqan to do scheduled bul
 
 Make sure to create a DMF Export Project in Dynamics F&O first. In Dynamics F&O, go to **Data Management > Export** and create a new project:
 
-![Dynamics F&O DMF Export project](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b18c0423-5789-4b73-87eb-f0941055c7ba/Dynamics_FO_DMF_Export_project/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/Dynamics_FO_DMF_Export_project.png"
+  alt="Dynamics F&O DMF Export project"
+/>
 
 Add one or more entities for export, choose **XML-Element** as data format for each entity.
 
@@ -491,11 +538,17 @@ Make sure **Skip staging** is checked for each entity (otherwise export will be 
 
 Example:
 
-![Dynamics F&O Skip Staging check](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/1a93a4b2-597f-4239-a93f-ef5fd135a791/Screenshot_2025-11-05_at_11.37.25/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/Screenshot_2025-11-05_at_11.37.25.png"
+  alt="Dynamics F&O Skip Staging check"
+/>
 
 Note, entities can be added in bulk by using the "Add multiple" menu item. Select for example an Application Module such as "Customers" or "Accounts Payable", and next select all included entities by clicking the checkbox in the column header. Once all entities are selected, make sure target data format is set to **XML-Element** and Skip staging = Yes. Click "Add selected":
 
-![Dynamics F&O Add Multiple Entities](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b30f18d0-103d-4e26-836d-e01f8c94fe49/Screenshot_2025-11-04_at_15.32.40/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/MS Dynamics 365 F&O - Getting started in Peliqan/Screenshot_2025-11-04_at_15.32.40.png"
+  alt="Dynamics F&O Add Multiple Entities"
+/>
 
 ## Need further help
 
