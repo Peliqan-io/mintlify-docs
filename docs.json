@@ -26,7 +26,8 @@
                 "root": "connect-your-bi-or-db-tool",
                 "pages": [
                   "connect-your-bi-or-db-tool/ssl-certificates-for-the-peliqan-data-warehouse",
-                  "connect-your-bi-or-db-tool/excel-odbc"
+                  "connect-your-bi-or-db-tool/excel-odbc",
+                  "power-bi"
                 ]
               },
               "excel-add-in",
