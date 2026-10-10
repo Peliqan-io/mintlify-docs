@@ -24,7 +24,10 @@ From the Source, the data needs to be read **incrementally**.
 
 In the Target, the data needs to be written using an **upsert**.
 
-![Data sync patterns](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/7b651ec5-b620-4cae-b0a8-7de4ad308c38/data_sync_patterns/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Custom data syncs/data_sync_patterns.png"
+  alt="Data sync patterns"
+/>
 
 ### Data warehouse as central hub for data syncs
 
@@ -32,7 +35,10 @@ The patterns in Peliqan use the **data warehouse (DWH)** as a **central data hub
 
 Below is an example that syncs data from a CRM source to an Accounting target. First you add a connection to the **source** in Peliqan. This will automatically create an ETL pipeline and sync the data from the source into the **DWH**. Your **data sync scripts** read from the DWH tables and write to the target.
 
-![Data sync with DWH as central data hub](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5b5fe25b-4188-4290-b1dc-783a6d971bdf/Data_sync_with_DWH_as_central_data_hub/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Custom data syncs/Data_sync_with_DWH_as_central_data_hub.png"
+  alt="Data sync with DWH as central data hub"
+/>
 
 Note that Peliqan will also sync the data from the **target** to the DWH (in grey in the picture). This allows for verification of the data in the target, e.g. check if all additions or updates were executed correctly, if no data is missing etc.
 

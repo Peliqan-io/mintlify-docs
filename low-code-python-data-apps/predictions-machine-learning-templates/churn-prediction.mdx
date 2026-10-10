@@ -4,8 +4,6 @@ sidebarTitle: "Churn Prediction"
 description: "Predict which customers are likely to cancel (churn) in order to proactively take measures to retain them."
 ---
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b26234b5-e7c5-4094-9164-73630df20cbd/Untitled/w=1920,quality=90,fit=scale-down)
-
 Predict which customers are likely to cancel (churn) in order to proactively take measures to retain them. We will train a machine learning (ML) model based on historical customer data (including a column that indicates if the customer churned), in order to predict likelihood of churn for current customer.
 
 Churn prediction is crucial for businesses relying on **recurring revenue**. It identifies **customers likely to stop using a product** or service. The process involves analyzing a large amount of customer data to identify at-risk customers. This can be complex due to the need to **identify patterns and trends**.
@@ -53,11 +51,17 @@ st.dataframe(df.head(), use_container_width=True)
 
 This is what the output looks like:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a3ffd483-115a-4597-925f-3edda94e36e5/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Predictions, Machine Learning templates/Churn Prediction/Untitled 1.png"
+  alt="image"
+/>
 
 Here’s our code in the Peliqan low-code editor, with a preview:
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/451a1137-2a63-49ac-999c-a9d57ee7589a/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Predictions, Machine Learning templates/Churn Prediction/Untitled 2.png"
+  alt="image"
+/>
 
 ### Explore and prepare the data
 
@@ -83,7 +87,10 @@ st.dataframe(X.Churn.value_counts(), use_container_width=True)
 st.bar_chart(X.Churn.value_counts(), use_container_width=True)
 ```
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/eb657288-3d4c-43b3-b300-211fa1bdeb6f/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Predictions, Machine Learning templates/Churn Prediction/Untitled 3.png"
+  alt="image"
+/>
 
 The target variable has an **imbalanced class distribution**. The positive class (Churn=Yes) is much smaller than the negative class (churn=No). An imbalanced class distributions influence the performance of a machine learning model negatively. We will use upsampling or downsampling to overcome this issue.
 
@@ -116,7 +123,10 @@ st.bar_chart(X_upsampled.Churn.value_counts(), use_container_width=True)
 
 To learn more about upsampling click [here](https://www.analyticsvidhya.com/blog/2022/05/handling-imbalanced-data-with-imbalance-learn-in-python/).
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/2cfef878-ae00-4d5b-ac56-26371369d744/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Predictions, Machine Learning templates/Churn Prediction/Untitled 4.png"
+  alt="image"
+/>
 
 ### Model Training & Evaluation
 
@@ -224,7 +234,10 @@ dump(model, '/data_app/model_churn_prediction')
 st.success('Model saved successfully')
 ```
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/943ff278-6de0-4ca2-854c-b835ad6c8ff0/Untitled/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Predictions, Machine Learning templates/Churn Prediction/Untitled 5.png"
+  alt="image"
+/>
 
 ## Next Steps
 

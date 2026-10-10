@@ -6,7 +6,7 @@ description: "Complete reference guide for building Peliqan Data apps using the 
 
 Data apps are interactive apps, built in single-file Python scripts, to run on Peliqan. This page provides a Reference for building Data apps.
 
-## Data apps on the Peliqan platform
+# Data apps on the Peliqan platform
 
 Peliqan is an all-in-one data platform with a wide range of components, that can be controlled and used from within Data apps using Peliqan’s `pq` module:
 
@@ -17,15 +17,29 @@ Peliqan is an all-in-one data platform with a wide range of components, that can
 - Data replication
 - Python IDE and runtime to develop, test, host, schedule & publish Data apps
 
-## Peliqan pq module
+# Peliqan pq module
 
 The `pq` module exposes Peliqan’s low-code data-centric and data pipeline functions. The `pq` module is automatically available in Peliqan when you write Python code in Data apps and can be used in your local IDE by doing `pip install peliqan` and using `import peliqan as pq` in your code.
 
-## Constants
+# Constants
 
 ```python
-# Run modes
+pq.DW_NAME       # Name of default data warehouse (database) in the current account, also name of the default data warehouse connection
+pq.DW_ID         # Id of default data warehouse in the current account
+pq.INTERFACE_ID  # Current script id
+RUN_CONTEXT      # Possible values: interactive, scheduled, api_handler or not set (outside of Peliqan)
+
+# Example detect if script running inside or outside of Peliqan:
+
+if 'RUN_CONTEXT' not in globals():
+	print("Running outside of Peliqan)
+
+# Get the current logged-in user
+user = pq.__service_client__.call_backend(method="get", url=f"{pq.BACKEND_URL}/api/user/me")
+st.write(user["username"])
 ```
+
+# Run modes
 
 Data apps can run locally on a computer (external to Peliqan) or inside the Peliqan platform.
 
@@ -39,31 +53,58 @@ Streamlit functions such as `st.text()`, `st.write()`, `st.json()`, `st.table()`
 
 Print statements are written to the log file of each run, visible in Peliqan.
 
-## Data warehouse, databases and tables
+# Data warehouse, databases and tables
 
-### Connect to data warehouse or DB
-
-```python
-```
-
-### Read
+## Connect to data warehouse or DB
 
 ```python
+# Connect to e.g. a SQL Server, MySQL, Postgres DB added in Peliqan under "Connections"
+dbconn = pq.dbconnect('connection_name')
+
+# Connect to built-in default data warehouse
+dbconn = pq.dbconnect(pq.DW_NAME)
+
+# Use the connection to read data
+rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
+
+# Read data from default built-in data warehouse
+rows = dbconn.fetch(pq.DW_NAME, 'schema_name', 'table_name')
 ```
 
-### Insert
+## Read
+
+```python
+rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
+rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
+
+# Read data using custom query
+rows = dbconn.fetch('db_name', query='SELECT * FROM schema_name.table_name')
+
+# Get result as a data frame
+df = dbconn.fetch('db_name', 'schema_name', 'table_name', df=True)
+
+# Options:
+# df = True: set to True to return a Dataframe instead of a list of objects
+# fillna_with = '': replace Na (not a number) with a given value, e.g. in empty string
+# fillnat_with= '': replace NaT (not a date)
+# enable_python_types = True: use Python types in response
+# enable_datetime_as_string = True: return datetime columns as string
+# tz='UTC': timezone for datetimes
+```
+
+## Insert
 
 ```python
 dbconn.insert('db_name', 'schema_name', 'table_name', record_dict)
 ```
 
-### Update
+## Update
 
 ```python
 dbconn.update('db_name', 'schema_name', 'table_name', 'row_pk_value', record_dict)
 ```
 
-### Upsert
+## Upsert
 
 Inserts or updates based on the `row_pk_value`.
 
@@ -71,28 +112,38 @@ Inserts or updates based on the `row_pk_value`.
 dbconn.upsert('db_name', 'schema_name', 'table_name', 'row_pk_value', record_dict)
 ```
 
-### Write
+## Write
 
 Write implements full ELT pipeline logic: cast to schema (if given), upsert (insert or update based on pk value), and creates table and columns if needed.
 
 ```python
+dbconn.write('schema_name', 'table_name', [{'id': 1, 'name': 'John'}], pk='id')
+
+# Write with a schema provided
+object_schema = {
+	'properties': {
+		'id': {'type': 'integer'},
+		'name': {'type': 'string'}
+	}
+}
+dbconn.write('schema_name', 'table_name', [{'id': 1, 'name': 'John'}], object_schema, pk='id')
 ```
 
-### Execute query
+## Execute query
 
 ```python
 dbconn.execute('db_name', query='TRUNCATE TABLE schema_name.table_name')
 ```
 
-## Federated query engine Trino
+# Federated query engine Trino
 
-### Connect Trino
+## Connect Trino
 
 ```python
 trinoconn = pq.trinoconnect()
 ```
 
-### Read
+## Read
 
 ```python
 rows = trinoconn.fetch('db_or_catalog_name', 'schema_name', 'table_name')
@@ -104,49 +155,86 @@ rows = trinoconn.fetch('db_name', query='SELECT * FROM catalog.schema.table_name
 df = trinoconn.fetch('db_name', 'schema_name', 'table_name', df=True)
 ```
 
-## Writeback (SaaS APIs)
+# Writeback (SaaS APIs)
 
 Writeback functions are wrappers for the APIs of connected SaaS applications.
 
 Some SaaS connections in Peliqan are sources only (ELT pipelines), others are writeback only and some SaaS connections are both.
 
 ```python
+apiconn = pq.connect('connection_name')
+
+apiconn.add('object_type', object)   # or apiconn.add('object_type', **object)
+
+apiconn.update('object_type', object)
+
+apiconn.upsert('contact', contact, searchfield='email', searchterm='john@doe.com')
+
+apiconn.delete('object_type', id=1)
+
+apiconn.get('object_type', id=1)
+
+apiconn.findone('object_type', searchfield='email', searchterm='john@doe.com')
+
+apiconn.list('object_type')
+
+apiconn.copy('object_type', id=1)
+
+apiconn.rename('object_type', id=1, name='new name')
+
+apiconn.apicall('path', method='get', body={})
 ```
 
 Writeback examples:
 
 ```python
+# Send message to a Slack channel
+slack_api = pq.connect('Slack')
+message = {
+    'text': "Data quality alert",
+    'channel': "Alerts",
+    'username': "The Peliqan bot",
+}
+result = slack_api.add('message', message)
+
+# Odoo add partner
+odoo_api = pq.connect('Odoo')
+partner = {
+    'name': "ACME",
+    'email': "info@acme.com",
+}
+result = odoo_api.add('partner', partner)
 ```
 
 More info:
 
-[Writeback to SaaS APIs](/low-code-python-data-apps/writeback-reverse-etl-data-sync)
+[Writeback to SaaS APIs](https://app.notion.com/p/Writeback-to-SaaS-APIs-a98ea6cebc7f429d909d846544295c6b?pvs=21)
 
-## SFTP
+# SFTP
 
-### Connect SFTP
+## Connect SFTP
 
 ```python
 sftpconn = pq.sftpconnect('connection_name')
 ```
 
-### List files
+## List files
 
 ```python
 result = sftpconn.dir('.')
 ```
 
-### Read file
+## Read file
 
 ```python
 result = sftpconn.read_file('./file.json')
 ```
 
-## State
+# State
 
 State is stored and maintained across app runs. For session-state (within the scope of a single run), use Streamlit’s session state: `st.session_state()`.
 
-### Get state
+## Get state
 
 ```python
 state = pq.get_state()
@@ -157,7 +245,7 @@ if not state:
 settings = state.get("settings", {})
 ```
 
-### Set state
+## Set state
 
 ```python
 new_state = {
@@ -167,39 +255,70 @@ new_state = {
 pq.set_state(new_state)
 ```
 
-### Sharing state between apps
+## Sharing state between apps
 
 Sharing state between two or more Data Apps running on Peliqan (e.g. in an orchestration pipeline):
 
 ```python
+def get_state_from_app(app_id): 
+    url = f"{pq.BACKEND_URL}/api/interfaces/{app_id}/state/"
+    result = pq.__service_client__.call_backend(method="get", url=url, expected_status_code=200)
+    state = result["state"]
+    return state
+
+def set_state_for_app(app_id, state):
+    url = f"{pq.BACKEND_URL}/api/interfaces/{app_id}/state/"
+    payload = {"state": state}
+    result = pq.__service_client__.call_backend(method="post", url=url, json=payload, expected_status_code=200)
+
+state = get_state_from_app(1234)
+state["new_key"] = 555
+set_state_for_app(5678, state)
 ```
 
 Sharing state between a Data App running locally on your computer, and a Data App on Peliqan:
 
 ```python
+def get_state():
+    if RUN_ENV == 'local': # Running outside of Peliqan
+        url = f"{pq.BACKEND_URL}/api/interfaces/{interface_id}/state/"
+        result = pq.__service_client__.call_backend(method="get", url=url, expected_status_code=200)
+        state = result["state"]
+        return state
+    else:
+        return pq.get_state()
+
+def set_state(state):
+    if RUN_ENV == 'local': # Running outside of Peliqan
+        url = f"{pq.BACKEND_URL}/api/interfaces/{interface_id}/state/"
+        payload = {"state": state}
+        result = pq.__service_client__.call_backend(method="post", url=url, json=payload, expected_status_code=200)
+        return result
+    else:
+        return pq.set_state(state)
+
+state = get_state()
 ```
 
-<Note>
-  Note: when running a Data App outside of Peliqan, by default `pq.get_state()` and `pq.set_state(state)`will read and write the state locally in a temporary file. The above code however, shares the state with a Data App running on Peliqan. Make sure that `PELIQAN_INTERFACE_ID` is set as a local environment variable, with the id of the Data App on Peliqan.
-</Note>
+Note: when running a Data App outside of Peliqan, by default `pq.get_state()` and `pq.set_state(state)`will read and write the state locally in a temporary file. The above code however, shares the state with a Data App running on Peliqan. Make sure that `PELIQAN_INTERFACE_ID` is set as a local environment variable, with the id of the Data App on Peliqan.
 
-## Metadata
+# Metadata
 
-### List databases
+## List databases
 
 ```python
 databases = pq.list_databases()
 st.json(databases)
 ```
 
-### List schemas
+## List schemas
 
 ```python
 schemas = pq.list_schemas(db_name)
 st.json(schemas)
 ```
 
-### List tables
+## List tables
 
 ```python
 databases = pq.list_databases()
@@ -208,56 +327,56 @@ for db in databases:
 		st.text(table['name'])
 ```
 
-### List scripts (data apps)
+## List scripts (data apps)
 
 ```python
 scripts = pq.list_scripts()
 st.json(scripts)
 ```
 
-### Get database
+## Get database
 
 ```python
 db_meta_data = pq.get_database(database_id=37734)
 st.json(db_meta_data)
 ```
 
-### Get schema
+## Get schema
 
 ```python
 schema_meta_data = pq.get_schema(schema_id=37734)
 st.json(db_meta_data)
 ```
 
-### Get table
+## Get table
 
 ```python
 table_meta_data = pq.get_table(table_id=37734)
 st.json(table_meta_data)
 ```
 
-### Get script
+## Get script
 
 ```python
 script_meta_data = pq.get_script(script_id=745)
 st.json(script_meta_data)
 ```
 
-### Update database
+## Update database
 
 ```python
 db_meta_data = pq.update_database(database_id=1603, description="This is a database description.")
 st.json(db_meta_data)
 ```
 
-### Update schema
+## Update schema
 
 ```python
 schema_meta_data = pq.update_schema(schema_id=1603, name="my_schema")
 st.json(schema_meta_data)
 ```
 
-### Add table
+## Add table
 
 ```python
 dbconn = pq.dbconnect(pq.DW_NAME)
@@ -271,26 +390,40 @@ fields = {
 result = dbconn.create_table(db_name=pq.DW_NAME, schema_name='my_data', table_name='my_new_table', fields=fields, pk='id')
 ```
 
-### Update table
+## Update table
 
 ```python
 table_meta_data = pq.update_table(table_id=37734, description="This is a table description.")
 st.json(table_meta_data)
 ```
 
-### Update field
+## Update field
 
 ```python
 field_meta_data = pq.update_field(field_id=829137, description="This is a field description.")
 st.json(field_meta_data)
 ```
 
-### Update script
+## Update script
 
 ```python
+script_meta_data = pq.update_script(script_id=745, name="Create and hydrate subaccount")
+st.json(script_meta_data)
+
+# Set a schedule
+settings = {
+    "schedule_settings": {
+        "schedule": True,
+        "weekdays": [0, 1, 2, 3, 4, 5, 6],
+        "task_name": f"run_python_app_{script_id}",
+        "start_time": start_time,
+        "run_interval": 60*60*24, # once every day
+    }
+}
+script_meta_data = pq.update_script(script_id=script_id, settings=settings)["settings"]["schedule_settings"]
 ```
 
-### Add script
+## Add script
 
 ```python
 pq.add_script(group_id=123, name='my_new_script', raw_script='...')
@@ -300,28 +433,91 @@ pq.add_script(group_name='Production data', name='my_new_script', raw_script='..
 
 run_mode supported values are STREAMLIT, API, SHELL.
 
-### Add or update a query
+## Add or update a query
 
 ```python
 pq.add_query(name='My query', query='SELECT * from odoo.accounts', as_view=False)
 pq.upsert_query(name='My query', query='SELECT * from odoo.accounts', schema_id=123)
 ```
 
-### Replicate a table or materialize a query
+## Replicate a table or materialize a query
 
 ```python
+# Example one-time replicate to built-in DWH
+dbconn = pq.dbconnect(pq.DW_NAME) # e.g. dw_123 (connection name & DWH name)
+result = dbconn.replicate(db_name=pq.DW_NAME, table_source_list=[ (source_table_id, target_table_name), (source_table_id, target_table_name) ], target_schema='my_target_schema')
+st.write(result)
+
+# Example one-time replicate to external target
+dbconn = pq.dbconnect('MS SQL Server')
+result = dbconn.replicate(db_name='my_target_db', table_source_list=[ (source_table_id, target_table_name), (source_table_id, target_table_name) ], target_schema='my_target_schema')
+st.write(result)
+
+# Example scheduled replicate to built-in DWH
+replicate_settings = {
+  "schedule": {
+    "interval": 3600,                                    # 3600 (hourly), 21600 (every 6 hours), 86400 (daily)
+    "weekdays": [0,1,2,3,4,5,6],                         # 0 = Monday
+    "start_time": "03:30:00"                             # Only used when interval = 86400 (24 hour interval)
+  }
+  "source_incremental_field": "timestamp_last_update",   # optional field, value should be an ISO 8601 timestamp
+  "target_table_name":        "replicated_report",       # required field
+  "target_schema_name":       "my_replicated_data",      # required field
+  "target_database_id":       pq.DW_ID,                  # required field
+  "target_connection_name":   pq.DW_NAME,                # required field
+}
+result = pq.replicate(table_id=source_table_id, enabled=True, settings=replicate_settings)
+st.write(result)
+
+# Example scheduled replicate to external target
+replicate_settings = {
+  "schedule": {
+    "interval": 3600,                                   # 3600 (hourly), 21600 (every 6 hours), 86400 (daily)
+    "weekdays": [0,1,2,3,4,5,6],                        # 0 = Monday
+    "start_time": "03:30:00"                            # Only used when interval = 86400 (24 hour interval)
+  }
+  "source_incremental_field": "timestamp_last_update",  # optional field, value should be an ISO 8601 timestamp
+  "target_table_name":        "replicated_report",      # required field
+  "target_schema_name":       "my_replicated_data",     # required field
+  "target_database_id":       123,                      # required field
+  "target_connection_name":   "SQL Server",             # required field
+}
+result = pq.replicate(table_id=source_table_id, enabled=True, settings=replicate_settings)
+st.write(result)
+
+# Replicate/materialize to a subaccount
+result = pq.subaccount_materialize(connection_name = 'Hubspot', subaccount_id = 123, table_source_list = ['contacts'], target_schema = 'materialized_queries')
+st.write(result)
 ```
 
-### Manage Data App templates
+## Manage Data App templates
 
 Templates are managed in a parent account (partner account) and used in sub accounts to create Data Apps (instances, copies of the template).
 
-```python
+```text
+# list templates
+url = f"{pq.BACKEND_URL}/api/partner/interface-templates/"
+result = pq.__service_client__.call_backend(method='get', url=url, expected_status_code=200)
+st.write(result)
+
+# get template
+template_id = 123
+url = f"{pq.BACKEND_URL}/api/partner/interface-templates/{template_id}/"
+result = pq.__service_client__.call_backend(method='get', url=url, expected_status_code=200)
+st.write(result)
+
+# update template
+template_id = 123
+raw_script = "st.write('first line')\nst.write('second line')"
+url = f"{pq.BACKEND_URL}/api/partner/interface-templates/{template_id}/"
+json = {"raw_script": raw_script}
+result = pq.__service_client__.call_backend(method='patch', url=url, expected_status_code=200, json=json)
+st.write(result)
 ```
 
-## Pipelines
+# Pipelines
 
-### Run pipeline
+## Run pipeline
 
 Run pipeline for all active tables in the connection:
 
@@ -347,21 +543,21 @@ Run pipeline with a specific parameter (overrides connection form):
 pq.run_pipeline(connection_name = 'Hubspot', tables = ["deals"], param1 = 100)
 ```
 
-Example where param1 is the "pagesize" in the connection form.
+Example where param1 is the “pagesize” in the connection form.
 
-### Get pipeline runs
+## Get pipeline runs
 
 ```python
 pq.get_pipeline_runs(source_connection_id)
 ```
 
-### Get pipeline logs
+## Get pipeline logs
 
 ```python
 pq.get_pipeline_logs(pipeline_run_id)
 ```
 
-## Secret store
+# Secret store
 
 Store credential and other secrets securely (in Peliqan > Connections > Add connection > Secret Store).
 
@@ -369,73 +565,85 @@ Store credential and other secrets securely (in Peliqan > Connections > Add conn
 pq.get_secret(secret_name_or_id)
 ```
 
-## Refresh
+# Refresh
 
 A refresh updates the metadata in Peliqan for a connected database, meaning getting an up to date list of e.g. tables in a database.
 
-### Refresh database
+## Refresh database
 
 ```python
 pq.refresh_database(database_name = 'dw_12345', is_async = False)
 ```
 
-### Refresh schema
+## Refresh schema
 
 ```python
 pq.refresh_schema(database_name = 'dw_12345', schema_name = 'CRM', is_async = False)
 ```
 
-### Refresh table
+## Refresh table
 
 ```python
 pq.refresh_table(database_name = 'dw_12345', schema_name = 'CRM', table_name = 'customers', is_async = False)
 ```
 
-## Sub accounts
+# Sub accounts
 
 Manage sub accounts from a parent (partner) account.
 
-### List sub accounts
+## List sub accounts
 
 ```python
 result = pq.list_subaccounts()
 ```
 
-### Get sub account
+## Get sub account
 
 ```python
 result = pq.get_subaccount(account_id=1234)
 result = pq.get_subaccount(external_id='1234124-134412')
 ```
 
-### Add sub account
+## Add sub account
 
 ```python
+account_owner_details={
+  'first_name': 'first_name',
+  'last_name': 'last_name',
+  'email': 'email@company.com',
+  'password': 'password'
+}
+company_details={
+  'company_name': 'company_name',
+  'country': 'country',
+  'company_size': ''
+}
+pq.add_subaccount(account_owner_details, company_details)
 ```
 
-### Get sub account pq instance
+## Get sub account pq instance
 
 ```python
 pq_sub_account = pq.get_subaccount_instance(account_id=1234)
 connections_in_sub_account = pq_sub_account.list_connections() # Example: get the connections in the sub account
 ```
 
-### Get sub account API token
+## Get sub account API token
 
 ```python
 result = pq.get_subaccount_token(account_id=1234)
 result = pq.get_subaccount_token(external_id='1234124-134412')
 ```
 
-### Get sub account info
+## Get sub account info
 
 ```python
 result = pq.get_subaccount_info(account_id=1234)
 ```
 
-## General
+# General
 
-### Generic API call to Peliqan backend
+## Generic API call to Peliqan backend
 
 Example update field (column) in table:
 
@@ -452,7 +660,7 @@ kwargs={
 pq.__service_client__.call_backend(method=method, url=url, expected_status_code=200, **kwargs)
 ```
 
-## Useful code snippets
+# Useful code snippets
 
 Code to run data apps locally (outside of Peliqan) as well as on Peliqan, without any required code changes:
 
@@ -514,15 +722,15 @@ def get_table_columns_and_pk(table_id):
     return text_columns, pk
 ```
 
-Apply Peliqan's look & feel in Streamlit interactive Data apps:
+Apply Peliqan’s look & feel in Streamlit interactive Data apps:
 
 ```python
 def apply_styling():
     st.markdown("""
-	    <link rel="preconnect" href="https://fonts.googleapis.com">
-	    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	    <link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-	    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+	    <link rel="preconnect" href="<https://fonts.googleapis.com>">
+	    <link rel="preconnect" href="<https://fonts.gstatic.com>" crossorigin>
+	    <link href="<https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap>" rel="stylesheet">
+	    <link href="<https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined>" rel="stylesheet"/>
 	    
 	    <style>
 	        html, body, h4, [class*="st-"]:not([data-testid="stIconMaterial"]), .main, .stApp {
@@ -585,7 +793,7 @@ def print_log(msg: str, level: int = 1) -> None:
     if level < LOG_LEVEL:
         caller_frame = inspect.currentframe().f_back
         line_no = caller_frame.f_lineno
-        print(f"{line_no} \u2192 {msg}")
+        print(f"{line_no} → {msg}")
 ```
 
 API handler Data app example:
@@ -617,231 +825,4 @@ def handler(request):
 	
 	# Send the API response (e.g. return the table contents)
 	return table_rows
-```
-
-```python
-pq.DW_NAME       # Name of default data warehouse (database) in the current account, also name of the default data warehouse connection
-pq.DW_ID         # Id of default data warehouse in the current account
-pq.INTERFACE_ID  # Current script id
-RUN_CONTEXT      # Possible values: interactive, scheduled, api_handler or not set (outside of Peliqan)
-
-# Example detect if script running inside or outside of Peliqan:
-
-if 'RUN_CONTEXT' not in globals():
-	print("Running outside of Peliqan)
-
-# Get the current logged-in user
-user = pq.__service_client__.call_backend(method="get", url=f"{pq.BACKEND_URL}/api/user/me")
-st.write(user["username"])
-```
-
-```python
-# Connect to e.g. a SQL Server, MySQL, Postgres DB added in Peliqan under "Connections"
-dbconn = pq.dbconnect('connection_name')
-
-# Connect to built-in default data warehouse
-dbconn = pq.dbconnect(pq.DW_NAME)
-
-# Use the connection to read data
-rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
-
-# Read data from default built-in data warehouse
-rows = dbconn.fetch(pq.DW_NAME, 'schema_name', 'table_name')
-```
-
-```python
-rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
-rows = dbconn.fetch('db_name', 'schema_name', 'table_name')
-
-# Read data using custom query
-rows = dbconn.fetch('db_name', query='SELECT * FROM schema_name.table_name')
-
-# Get result as a data frame
-df = dbconn.fetch('db_name', 'schema_name', 'table_name', df=True)
-
-# Options:
-# df = True: set to True to return a Dataframe instead of a list of objects
-# fillna_with = '': replace Na (not a number) with a given value, e.g. in empty string
-# fillnat_with= '': replace NaT (not a date)
-# enable_python_types = True: use Python types in response
-# enable_datetime_as_string = True: return datetime columns as string
-# tz='UTC': timezone for datetimes
-```
-
-```python
-dbconn.write('schema_name', 'table_name', [{'id': 1, 'name': 'John'}], pk='id')
-
-# Write with a schema provided
-object_schema = {
-	'properties': {
-		'id': {'type': 'integer'},
-		'name': {'type': 'string'}
-	}
-}
-dbconn.write('schema_name', 'table_name', [{'id': 1, 'name': 'John'}], object_schema, pk='id')
-```
-
-```python
-apiconn = pq.connect('connection_name')
-
-apiconn.add('object_type', object)   # or apiconn.add('object_type', **object)
-
-apiconn.update('object_type', object)
-
-apiconn.upsert('contact', contact, searchfield='email', searchterm='john@doe.com')
-
-apiconn.delete('object_type', id=1)
-
-apiconn.get('object_type', id=1)
-
-apiconn.findone('object_type', searchfield='email', searchterm='john@doe.com')
-
-apiconn.list('object_type')
-
-apiconn.copy('object_type', id=1)
-
-apiconn.rename('object_type', id=1, name='new name')
-
-apiconn.apicall('path', method='get', body={})
-```
-
-```python
-# Send message to a Slack channel
-slack_api = pq.connect('Slack')
-message = {
-    'text': "Data quality alert",
-    'channel': "Alerts",
-    'username': "The Peliqan bot",
-}
-result = slack_api.add('message', message)
-
-# Odoo add partner
-odoo_api = pq.connect('Odoo')
-partner = {
-    'name': "ACME",
-    'email': "info@acme.com",
-}
-result = odoo_api.add('partner', partner)
-```
-
-```python
-def get_state_from_app(app_id): 
-    url = f"{pq.BACKEND_URL}/api/interfaces/{app_id}/state/"
-    result = pq.__service_client__.call_backend(method="get", url=url, expected_status_code=200)
-    state = result["state"]
-    return state
-
-def set_state_for_app(app_id, state):
-    url = f"{pq.BACKEND_URL}/api/interfaces/{app_id}/state/"
-    payload = {"state": state}
-    result = pq.__service_client__.call_backend(method="post", url=url, json=payload, expected_status_code=200)
-
-state = get_state_from_app(1234)
-state["new_key"] = 555
-set_state_for_app(5678, state)
-```
-
-```python
-script_meta_data = pq.update_script(script_id=745, name="Create and hydrate subaccount")
-st.json(script_meta_data)
-
-# Set a schedule
-settings = {
-    "schedule_settings": {
-        "schedule": True,
-        "weekdays": [0, 1, 2, 3, 4, 5, 6],
-        "task_name": f"run_python_app_{script_id}",
-        "start_time": start_time,
-        "run_interval": 60*60*24, # once every day
-    }
-}
-script_meta_data = pq.update_script(script_id=script_id, settings=settings)["settings"]["schedule_settings"]
-```
-
-```python
-# Example one-time replicate to built-in DWH
-dbconn = pq.dbconnect(pq.DW_NAME) # e.g. dw_123 (connection name & DWH name)
-result = dbconn.replicate(db_name=pq.DW_NAME, table_source_list=[ (source_table_id, target_table_name), (source_table_id, target_table_name) ], target_schema='my_target_schema')
-st.write(result)
-
-
-# Example one-time replicate to external target
-dbconn = pq.dbconnect('MS SQL Server')
-result = dbconn.replicate(db_name='my_target_db', table_source_list=[ (source_table_id, target_table_name), (source_table_id, target_table_name) ], target_schema='my_target_schema')
-st.write(result)
-
-
-# Example scheduled replicate to built-in DWH
-replicate_settings = {
-  "schedule": {
-    "interval": 3600,                                    # 3600 (hourly), 21600 (every 6 hours), 86400 (daily)
-    "weekdays": [0,1,2,3,4,5,6],                         # 0 = Monday
-    "start_time": "03:30:00"                             # Only used when interval = 86400 (24 hour interval)
-  }
-  "source_incremental_field": "timestamp_last_update",   # optional field, value should be an ISO 8601 timestamp
-  "target_table_name":        "replicated_report",       # required field
-  "target_schema_name":       "my_replicated_data",      # required field
-  "target_database_id":       pq.DW_ID,                  # required field
-  "target_connection_name":   pq.DW_NAME,                # required field
-}
-result = pq.replicate(table_id=source_table_id, enabled=True, settings=replicate_settings)
-st.write(result)
-
-
-# Example scheduled replicate to external target
-replicate_settings = {
-  "schedule": {
-    "interval": 3600,                                   # 3600 (hourly), 21600 (every 6 hours), 86400 (daily)
-    "weekdays": [0,1,2,3,4,5,6],                        # 0 = Monday
-    "start_time": "03:30:00"                            # Only used when interval = 86400 (24 hour interval)
-  }
-  "source_incremental_field": "timestamp_last_update",  # optional field, value should be an ISO 8601 timestamp
-  "target_table_name":        "replicated_report",      # required field
-  "target_schema_name":       "my_replicated_data",     # required field
-  "target_database_id":       123,                      # required field
-  "target_connection_name":   "SQL Server",             # required field
-}
-result = pq.replicate(table_id=source_table_id, enabled=True, settings=replicate_settings)
-st.write(result)
-
-
-# Replicate/materialize to a subaccount
-result = pq.subaccount_materialize(connection_name = 'Hubspot', subaccount_id = 123, table_source_list = ['contacts'], target_schema = 'materialized_queries')
-st.write(result)
-```
-
-```none
-# list templates
-url = f"{pq.BACKEND_URL}/api/partner/interface-templates/"
-result = pq.__service_client__.call_backend(method='get', url=url, expected_status_code=200)
-st.write(result)
-
-# get template
-template_id = 123
-url = f"{pq.BACKEND_URL}/api/partner/interface-templates/{template_id}/"
-result = pq.__service_client__.call_backend(method='get', url=url, expected_status_code=200)
-st.write(result)
-
-# update template
-template_id = 123
-raw_script = "st.write('first line')\nst.write('second line')"
-url = f"{pq.BACKEND_URL}/api/partner/interface-templates/{template_id}/"
-json = {"raw_script": raw_script}
-result = pq.__service_client__.call_backend(method='patch', url=url, expected_status_code=200, json=json)
-st.write(result)
-```
-
-```python
-account_owner_details={
-  'first_name': 'first_name',
-  'last_name': 'last_name',
-  'email': 'email@company.com',
-  'password': 'password'
-}
-company_details={
-  'company_name': 'company_name',
-  'country': 'country',
-  'company_size': ''
-}
-pq.add_subaccount(account_owner_details, company_details)
 ```

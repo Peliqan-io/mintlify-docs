@@ -13,14 +13,17 @@ Note that these API endpoints can also be used to capture incoming webhook event
 In Peliqan, go to the Build section, and click the "+" icon when hovering over "API endpoints":
 
 <img
-  src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/a3b2b4f9-c4c5-4aa1-8ed0-6bdb08fe3710/Screenshot_2023-10-19_at_10.35.43/w=1920,quality=90,fit=scale-down"
+  src="/images/Publish APIs/Screenshot_2023-10-19_at_10.35.43.png"
   alt="Add new API endpoint button in Build section"
   style={{ width:"46%" }}
 />
 
 Add a new endpoint and link it to a Python script of type "API handler". See below on how to write a low-code Python script to handle the API requests.
 
-![API endpoint configuration dialog](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/33211214-086b-4f24-bc24-fcfd8b1df408/Screenshot_2023-10-19_at_10.39.12/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Publish APIs/Screenshot_2023-10-19_at_10.39.12.png"
+  alt="API endpoint configuration dialog"
+/>
 
 Choose the Authorization:
 
@@ -33,7 +36,10 @@ The full URL of your API endpoint is shown on the API endpoint detail screen, as
 
 In Peliqan, go to the Build section, and click the "+" icon when hovering over "Apps". Add a script (app) of type "API endpoint handler":
 
-![Add API endpoint handler script](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/60a7f862-3dc3-492d-b2ba-c6361faae4c3/Screenshot_2023-10-19_at_10.41.16/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Publish APIs/Screenshot_2023-10-19_at_10.41.16.png"
+  alt="Add API endpoint handler script"
+/>
 
 The new script will have some boilerplate example code, that shows how you can get the details of the incoming request (such as the body, headers, querystring etc.) and how you can send a response:
 
@@ -80,7 +86,10 @@ In the below example we add a new Secret Store for each consumer of the API. For
 
 **Step 1:** Create an API key and save it in a Secret Store. In Peliqan, go to "Connections", click on "Add new connection" and select "Secret Store". Give it a name, e.g. the name of your consumer and enter a key. Note down the API key first and communicate it to the consumer.
 
-![Add Secret Store connection in Peliqan](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/6ff75d9b-9e5f-446f-aa3e-0b5e8555d36d/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Publish APIs/image.png"
+  alt="Add Secret Store connection in Peliqan"
+/>
 
 **Step 2**: Use `pq.get_secret('<connection_name>')` to retrieve and verify the API key used in the API request, e.g. from the `X-Api-Key` header.
 
@@ -106,7 +115,7 @@ def handler(request):
 Note that the API endpoint you'll assign to this script will require to have **Authorization** set to **Public**, as the API key validation is done in the the script:
 
 <img
-  src="https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/18cd7261-c89b-4af7-9ab9-4aa8b0553186/image/w=1920,quality=90,fit=scale-down"
+  src="/images/Publish APIs/image 1.png"
   alt="API endpoint set to Public authorization"
   style={{ width:"37%" }}
 />
