@@ -95,6 +95,7 @@
               "build-ai-agents-in-peliqan",
               "build-ai-agents-with-n8n-and-peliqan",
               "low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan",
+              "custom-mcp-with-o-auth",
               "build-ai-agents-in-peliqan/rag"
             ]
           }
