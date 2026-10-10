@@ -14,7 +14,10 @@ Go to Connections, and add a connection to one of the currency exchange rates co
 
 This will sync a table into your account with exchange rates:
 
-![1_exchange_rates.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/3d4515a3-6032-4acc-8734-09596e64c900/1_exchange_rates.png)
+<img
+  src="/images/Data transformations/Currency conversions/1_exchange_rates.png"
+  alt="Exchange rates table"
+/>
 
 # Step 2: join your transactions with the exchange rates
 
@@ -35,12 +38,18 @@ LEFT JOIN currencies
 ON transactions.currencycode = rate_currency AND transactions.date = rate_date
 ```
 
-![2_query.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/beaed65f-c13c-40e2-90d7-94b370c87720/2_query.png)
+<img
+  src="/images/Data transformations/Currency conversions/2_query.png"
+  alt="Query joining transactions with exchange rates"
+/>
 
 # Step 3: check the result
 
 Double check if any converted amounts are missing:
 
-![3_converted_amounts.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d25070ee-3406-47be-ab21-8b65705a4565/3_converted_amounts.png)
+<img
+  src="/images/Data transformations/Currency conversions/3_converted_amounts.png"
+  alt="Result with converted amounts"
+/>
 
 If OK, use this table going forward in your aggregations, charts etc.
