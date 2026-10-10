@@ -68,6 +68,8 @@
                 ]
               },
               "metadata-data-model-semantic-model",
+              "star-schema",
+              "medallion-architecture",
               "materialize",
               "data-lineage",
               "reverse-etl",
