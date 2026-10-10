@@ -1,0 +1,29 @@
+---
+title: "DBeaver"
+---
+
+You can connect with DBeaver to your Peliqan data warehouse.
+
+In Peliqan, go to Connections, find the Data Warehouse tile and copy/paste all connection details:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/DBeaver/Data_warehouse_details.png"
+  alt="Data warehouse details.png"
+  style={{ width:"37%" }}
+/>
+
+Use these settings in DBeaver to connect:
+
+- **Connection type**: Postgres (default data warehouse type in Peliqan)
+- **Host**: `db.eu.peliqan.io` (for EU instance)
+- **Port**: 5432 (for Postgres)
+- **User name & password**: copy / paste from the **Data Warehouse** Connection tile (see above)
+- **Database name**: same as the user name
+- **SSL mode**: set to “require”
+
+Make sure to set SSL Mode to “require”:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/DBeaver/Screenshot_2023-04-12_at_10.10.26.png"
+  alt="Screenshot 2023-04-12 at 10.10.26.png"
+/>

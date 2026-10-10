@@ -27,7 +27,19 @@
                 "pages": [
                   "connect-your-bi-or-db-tool/ssl-certificates-for-the-peliqan-data-warehouse",
                   "connect-your-bi-or-db-tool/excel-odbc",
-                  "power-bi"
+                  "power-bi",
+                  "looker-studio",
+                  "tableau",
+                  "grafana",
+                  "aws-quick-sight",
+                  "apache-superset",
+                  "excel-odbc",
+                  "salesforce-crm-analytics",
+                  "d-beaver",
+                  "beekeeper-studio",
+                  "peliqan-and-n8n",
+                  "peliqan-and-make",
+                  "peliqan-and-power-automate"
                 ]
               },
               "excel-add-in",

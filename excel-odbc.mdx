@@ -1,0 +1,79 @@
+---
+title: "Excel (ODBC)"
+---
+
+You can use MS Query or Power Query in Excel to connect to the Peliqan data warehouse.
+
+Note: MS Query and Power Query (with DB connection) are only available in Excel on Windows, not Mac.
+
+<Note>
+  As an alternative, you can also use the Peliqan[Excel add-in](/excel-add-in)
+</Note>
+
+# Enable ODBC in Excel (Legacy)
+
+In Excel > File > Options > Data: enable legacy data import wizards, see screenshot below:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Excel (ODBC)/excel_options_legacy_data.png"
+  alt="excel options legacy data.png"
+/>
+
+# Install Postgres ODBC driver on Windows
+
+Download the Postgres ODBC driver:
+
+[https://odbc.postgresql.org/](https://odbc.postgresql.org/)
+
+Choose the [64 bit version (X64)](https://ftp.postgresql.org/pub/odbc/releases/REL-17_00_0006/psqlodbc_x64.msi) for recent computers.
+
+# Add a DSN
+
+Open ODBC Database Administrator on Windows (64 bit version if you are using a recent computer). Add a User DSN, choose PostgreSQL Unicode:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Excel (ODBC)/dsn_postgres.png"
+  alt="dsn postgres.png"
+/>
+
+Add the connection details of your Peliqan data warehouse:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Excel (ODBC)/dsn.png"
+  alt="dsn.png"
+/>
+
+Use “allow” for SSL Mode.
+
+# Add a connection in Excel
+
+In Excel, go to Data > Get Data > From Other Sources > ODBC > Select your DSN.
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Excel (ODBC)/Schermafbeelding_2025-10-01_111834.png"
+  alt="Schermafbeelding 2025-10-01 111834.png"
+/>
+
+Next, select tables and/or queries from Peliqan to load in Excel.
+
+\<aside><br />💡
+
+If you want to work with queries written in Peliqan, make sure to set the option “Create as view” in Peliqan for that query, so that it is visible in the data warehouse and hence in Excel.
+
+\</aside>
+
+The selected tables will be loaded in Excel and can be refreshed at any time:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Excel (ODBC)/data_in_excel.png"
+  alt="data in excel.png"
+/>
+
+You can also use Power Query in Excel.
+
+In Excel go to Power Query > New Source > Other Sources > ODBC > Select your DSN.
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Excel (ODBC)/power_query.png"
+  alt="power query.png"
+/>

@@ -1,0 +1,97 @@
+---
+title: "Looker Studio"
+---
+
+In Peliqan, go to Connections, find the Data Warehouse tile and copy/paste your connection details:
+
+<img
+  src="/images/Data warehouse/Data_warehouse_details.png"
+  alt="Data warehouse details.png"
+  style={{ width:"37%" }}
+/>
+
+Use these settings in Looker Studio to connect:
+
+- **Connection type**: Postgres (default data warehouse type in Peliqan)
+- **Server:**
+  - [db.eu.peliqan.io](http://db.eu.peliqan.io)
+  - [db.mydatacloud.com](http://db.mydatacloud.com)
+  - [db.us.peliqan.io](http://db.us.peliqan.io)
+  - … (check in your account under Connections > Data warehouse connection)
+- **User name & password**: copy / paste from the **Data Warehouse** Connection tile (see above)
+- **Database name**: same as the user name
+- **SSL**: enabled
+
+# Step by step
+
+In Looker Studio, click on “Create” and choose “Data source”.
+
+<img
+  src="/images/Data warehouse/Data_warehouse_details.png"
+  alt="Data warehouse details.png"
+  style={{ width:"45%" }}
+/>
+
+Use these settings in Looker Studio to connect:
+
+- **Connection type**: Postgres (default data warehouse type in Peliqan)
+- **Server:**
+  - [db.eu.peliqan.io](http://db.eu.peliqan.io)
+  - [db.mydatacloud.com](http://db.mydatacloud.com)
+  - [db.us.peliqan.io](http://db.us.peliqan.io)
+  - … (check in your account under Connections > Data warehouse connection)
+- **User name & password**: copy / paste from the **Data Warehouse** Connection tile (see above)
+- **Database name**: same as the user name
+- **SSL**: enabled
+
+# Step by step
+
+In Looker Studio, click on “Create” and choose “Data source”.
+
+Select PostgreSQL from the list:Select PostgreSQL from the list:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Looker Studio/Screenshot_2024-08-07_at_10.42.43.png"
+  alt="Screenshot 2024-08-07 at 10.42.43.png"
+/>
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Looker Studio/Screenshot_2024-08-07_at_10.42.43.png"
+  alt="Screenshot 2024-08-07 at 10.42.43.png"
+/>
+
+Paste the host name from the Peliqan data warehouse, e.g. `db.eu.peliqan.io` , the database name, username and password and check the checkbox “Enable SSL”:Paste the host name from the Peliqan data warehouse, e.g. `db.eu.peliqan.io` , the database name, username and password and check the checkbox “Enable SSL”:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Looker Studio/Looker_Studio_connect_Postgres_DWH.png"
+  alt="Looker Studio connect Postgres DWH.png"
+/>
+
+Click the below link to download the SSL certficate from your instance of the Peliqan data warehouseClick the below link to download the SSL certficate from your instance of the Peliqan data warehouse:
+
+[SSL certificates for the Peliqan data warehouseSSL certificates for the Peliqan data warehouse](https://app.notion.com/p/SSL-certificates-for-the-Peliqan-data-warehouse-2ca1aa9b3879807b915add65f043059c?pvs=21)
+
+Upload the Peliqan Server Certificate (public key) and click on Authenticate.
+
+Upload the Peliqan Server Certificate (public key) and click on Authenticate.
+
+Select the table to include in Looker StudioSelect the table to include in Looker Studio:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Looker Studio/looker_public_schema.png"
+  alt="looker public schema.png"
+/>
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Looker Studio/looker_public_schema.png"
+  alt="looker public schema.png"
+/>
+
+If the table you need is not visible, use a custom query using the correct schema name and table name, for example to get data from Odoo:If the table you need is not visible, use a custom query using the correct schema name and table name, for example to get data from Odoo:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Looker Studio/looker_custom_query.png"
+  alt="looker custom query.png"
+/>
+
+You can now build charts and reports in Looker Studio.

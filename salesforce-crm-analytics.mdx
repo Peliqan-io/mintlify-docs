@@ -1,0 +1,69 @@
+---
+title: "Salesforce CRM Analytics"
+---
+
+Salesforce CRM Analytics is a BI tool that allows you to work with data from Peliqan:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Salesforce CRM Analytics/image.png"
+  alt="image.png"
+/>
+
+Make sure to use a **Bigquery** data warehouse in Peliqan, if you want to use Salesforce CRM Analytics as a BI tool.
+
+Activate the Bigquery data warehouse under Connections. Click on “Add data warehouse”:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Salesforce CRM Analytics/Screenshot_2026-07-03_at_15.47.49.png"
+  alt="Screenshot 2026-07-03 at 15.47.49.png"
+  style={{ width:"41%" }}
+/>
+
+Click on “Provision now”, in the card “Peliqan Bigquery data warehouse”:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Salesforce CRM Analytics/Screenshot_2026-07-03_at_15.49.45.png"
+  alt="Screenshot 2026-07-03 at 15.49.45.png"
+/>
+
+Once the Bigquery data warehouse is ready, make sure to add new source Connections and select Bigquery as the target, so that your data resides in Bigquery.
+
+Next, go to your Bigquery connection card:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Salesforce CRM Analytics/Screenshot_2026-07-03_at_15.48.03.png"
+  alt="Screenshot 2026-07-03 at 15.48.03.png"
+  style={{ width:"47%" }}
+/>
+
+Copy the password:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Salesforce CRM Analytics/Screenshot_2026-07-03_at_15.48.10.png"
+  alt="Screenshot 2026-07-03 at 15.48.10.png"
+  style={{ width:"41%" }}
+/>
+
+The copied password will contain JSON, example:
+
+```python
+{
+  "type": "service_account",
+  "project_id": "peliqan-bq-acme-1234",
+  "private_key_id": "811cbb22c3c07fe01f9b98e658d3ef2990a84638",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvg ... P7IqS4R1YS\n-----END PRIVATE KEY-----\n",
+  "client_email": "peliqan-bigquery-peliqan--1234@peliqan-bq-acme.iam.gserviceaccount.com",
+  "client_id": "114477637555534185679",
+  "auth_uri": "<https://accounts.google.com/o/oauth2/auth>",
+  "token_uri": "<https://oauth2.googleapis.com/token>",
+  "auth_provider_x509_cert_url": "<https://www.googleapis.com/oauth2/v1/certs>",
+  "client_x509_cert_url": "<https://www.googleapis.com/robot/v1/metadata/x509/peliqan-bigquery-peliqan--1234%40peliqan-bq-acme-1234.iam.gserviceaccount.com>",
+  "universe_domain": "googleapis.com"
+}
+```
+
+Follow the steps in Salesforce CRM Analytics, to add Bigquery:
+
+[https://help.salesforce.com/s/articleView?id=analytics.bi_integrate_connectors_googlebigquery_standard_sql.htm](https://help.salesforce.com/s/articleView?id=analytics.bi_integrate_connectors_googlebigquery_standard_sql.htm)
+
+Use the values from the above JSON, each time “JSON file” is referenced in the above help article.
