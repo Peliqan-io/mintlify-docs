@@ -1,0 +1,46 @@
+---
+title: "Currency conversions"
+---
+
+When you have transactions, invoices or bookings in multiple currencies, it’s important to convert these into a single currency before doing aggregations. For example you might want to calculate total revenue per month, with sales being done in multiple currencies.
+
+<Warning>
+  The challenge is to convert currencies with the **_exchange rate of the day of the transaction_**.
+</Warning>
+
+# Step 1: import exchange rates
+
+Go to Connections, and add a connection to one of the currency exchange rates connectors, for example Norway Bank (Norges bank).
+
+This will sync a table into your account with exchange rates:
+
+![1_exchange_rates.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/3d4515a3-6032-4acc-8734-09596e64c900/1_exchange_rates.png)
+
+# Step 2: join your transactions with the exchange rates
+
+Write a query that joins your transactions on the currency exchange rates.
+
+- Make sure to perform a LEFT join and **_not_** an INNER JOIN, to make sure that no transactions would be left out because of a missing matching record in the currency exchange table.
+- Make sure to join on both the currency **_and_** the date of the transaction.
+- Add a column with the converted amount: `transaction amount x rate` from the currencies table
+
+Example query:
+
+```sql
+SELECT 
+	transactions.*,
+  transactions.amount * rate AS converted_amount 
+FROM transactions
+LEFT JOIN currencies
+ON transactions.currencycode = rate_currency AND transactions.date = rate_date
+```
+
+![2_query.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/beaed65f-c13c-40e2-90d7-94b370c87720/2_query.png)
+
+# Step 3: check the result
+
+Double check if any converted amounts are missing:
+
+![3_converted_amounts.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d25070ee-3406-47be-ab21-8b65705a4565/3_converted_amounts.png)
+
+If OK, use this table going forward in your aggregations, charts etc.

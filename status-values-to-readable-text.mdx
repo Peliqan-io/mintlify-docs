@@ -1,0 +1,43 @@
+---
+title: "Status values to readable text"
+---
+
+A common problem is that status fields, category fields and similar have a numeric value, and it’s unclear to the user what those value mean.
+
+The below transformation adds a column with a text label.
+
+An alternative is to add a table in Peliqan and use a SQL JOIN between both tables.
+
+Example table Orders:
+
+| id | title | status |
+| :-- | :-- | :-- |
+| 1 | Order from ACME | 0 |
+| 2 | Return from Company X | 1 |
+| 3 | Order from Company Y | 1 |
+| 4 | Order from Company Z | 2 |
+
+Following query will add a text column with a readable representation for the status:
+
+```sql
+SELECT
+  *,
+  CASE status
+    WHEN 0
+    THEN 'New order'
+    WHEN 1
+    THEN 'Processed'
+    WHEN 2
+    ELSE 'Paid'
+  END AS status_name
+FROM orders
+```
+
+The resulting table will be:
+
+| id | title | status | status_name |
+| :-- | :-- | :-- | :-- |
+| 1 | Order from ACME | 0 | New order |
+| 2 | Return from Company X | 1 | Processed |
+| 3 | Order from Company Y | 1 | Processed |
+| 4 | Order from Company Z | 2 | Paid |

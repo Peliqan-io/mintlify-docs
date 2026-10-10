@@ -1,0 +1,40 @@
+---
+title: "Mapping charts of accounts"
+---
+
+When you have accounting data such as bookings, one challenge is to map those bookings to your specific Charts of Accounts. This is a typical example of unifying your data, especially when you connect to more than one accounting software instance.
+
+# Step 1: import your mapping
+
+You can use for example the Google Sheet connector to link to a Google Sheet file in which you have a mapping of Accounts.
+
+Example table “mappings”:
+
+| account_code_source | account_code_destination | description |
+| :-- | :-- | :-- |
+| 6001 | 6050 | Exceptional costs |
+| 7001 | 7050 | Revenue from point of sale A |
+| Etc. |  |  |
+
+The “source” account code is the account code used in your accounting software, the “destination” account code is the one that you want to see in your reports.
+
+## Step 2: join your data
+
+Next, you can use the Peliqan JOIN wizard, or you can write your own JOIN query, to merge the accounting transactions with your mapping file.
+
+Example query:
+
+```sql
+SELECT 
+   transactions.*,
+   mappings.account_code_destination as my_account_code,
+   mappings.description as my_account_code_description
+FROM transactions LEFT JOIN mappings ON
+transactions.code = mapings.account_code_source
+```
+
+<Tip>
+  Make sure to perform a LEFT join and **_not_** an INNER JOIN, to make sure that no transactions would be left out because of a missing matching record in the mapping table.
+</Tip>
+
+Save the above query as a new table. From now on, reference this table to build up accounting reports.

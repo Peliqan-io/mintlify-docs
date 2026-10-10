@@ -57,7 +57,16 @@
             "pages": [
               "sql-on-anything",
               "joining-data",
-              "data-transformations",
+              {
+                "group": "Data transformations",
+                "pages": [
+                  "data-transformations",
+                  "status-values-to-readable-text",
+                  "merge-similar-sources",
+                  "currency-conversions",
+                  "map-charts-of-accounts"
+                ]
+              },
               "metadata-data-model-semantic-model",
               "materialize",
               "data-lineage",
