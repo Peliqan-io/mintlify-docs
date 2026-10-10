@@ -1,0 +1,64 @@
+---
+title: "Link tables"
+description: "Use \"link\" tables to track sync state including the link between source ids and target ids"
+---
+
+It’s useful to keep track of the link between a **Source** record and a **Target** record in a so called “Link table”.
+
+Benefits of a link table:
+
+- It’s a log of all records that have been successfully synced to the target
+- It can be used to lookup the id in the target of a [parent record, when adding a child](https://app.notion.com/p/Parent-child-relations-113eb4c691b54a83b71ec161bf3f649b?pvs=21)
+- It can be used for rollback (delete records in target)
+
+This table can be created manually in Peliqan for each object type in the sync, and the table contains at minimum 2 columns:
+
+- source_id
+- target_id
+
+Example link table for “Task” objects:
+
+Table name: **link_table_tasks**
+
+| **source_id** | **target_id** |
+| :-- | :-- |
+| 1 | abc456 |
+| 6 | def789 |
+| 8 | ghi432 |
+
+Pseudo-code:
+
+```text
+GET SOURCE ROWS
+
+FOR EACH SOURCE ROW:
+
+		CHECK IF RECORD ALREADY IN TARGET (LOOKUP IN LINK TABLE) ? IF NOT:
+					
+			1. DO FIELD MAPPING
+			
+			2. ADD TO TARGET
+			
+			3. ADD ROW IN "LINK TABLE"
+```
+
+Here’s the pseudo code in a bit more detail for records of type “Task”:
+
+```python
+source_rows = dw.fetch(table)    	               # e.g. list of "Tasks"
+
+for row in source_rows:
+
+		source_id = row["task_id"]
+		if source_id not in link_table_tasks:       # Task is not in target yet
+		  
+				# Field mapping
+				target_row = {
+					target_field = source_field,
+					target_field = source_field,
+					target_field = source_field
+				}
+				
+				target_id = target.add(target_row)
+				dw.insert("link_table_tasks", source_id, target_id)
+```

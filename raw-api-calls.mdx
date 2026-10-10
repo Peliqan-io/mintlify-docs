@@ -1,0 +1,118 @@
+---
+title: "Raw API calls"
+---
+
+Below you will find examples on how to make “raw” API calls from your Python scripts in Peliqan.
+
+<Note>
+  Peliqan provides SaaS API wrapper functions for a wide range of SaaS applications (CRM, ERP, accounting, messaging etc). For these connectors, you do not need to make “raw” API calls. More info: [Writeback to SaaS APIs](/low-code-python-data-apps/writeback-reverse-etl-data-sync)<br /><br />Comparison between both methods:
+
+  <table>
+    <colgroup>
+      <col width="293" />
+      <col width="307" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Peliqan SaaS API wrapper functions</th>
+        <th>Raw API calls</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Authentication is automatically handled</td>
+        <td>You have to handle authentication in your script</td>
+      </tr>
+      <tr>
+        <td>Headers, body, querystring etc. are automatically built</td>
+        <td>You have to build up the API request: method (GET, POST…), URL, querystring, headers, body</td>
+      </tr>
+    </tbody>
+  </table>
+</Note>
+
+# REST API call
+
+Example on making API calls to a REST API:
+
+```python
+import requests
+
+# Get data
+
+url = "<https://domain.com/api/companies>"
+result = requests.get(url)
+st.write(results) # show result
+
+# Post data
+
+headers = {
+	"Authorization": "Bearer " + token 
+}
+
+data = {
+	"key": "value"
+}
+
+result = requests.post(url, json = data, headers = headers)
+st.write(results) # show result
+```
+
+# SOAP Webservice API call
+
+Example on making an API call to a SOAP Webservice:
+
+```python
+import requests, base64, xmltodict, json
+
+url = "<https://domain.com/api/SomeWebService.asmx>"
+
+# See the SOAP Webservice documentation for the correct SOAP envelope to use
+xml = """<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="<http://www.w3.org/2001/XMLSchema-instance>" xmlns:xsd="<http://www.w3.org/2001/XMLSchema>" xmlns:soap="<http://schemas.xmlsoap.org/soap/envelope/>">
+  <soap:Body>
+    <GetData xmlns="http://...">
+      <param>xxx</param>
+    </GetData>
+  </soap:Body>
+</soap:Envelope>
+"""
+
+headers = {
+    "Content-Type": "text/xml; charset=utf-8",
+    "SOAPAction": "<https://domain.com/api/SomeAction>",
+    "Authorization": "Basic " + basic_auth # see below
+}
+
+result_xml = requests.post(url, data = xml, headers = headers).text
+result_dict = xmltodict.parse(result_xml)
+rows = result_dict["soap:Envelope"]["soap:Body"]["GetDataResponse"]["Result"]["Rows"]
+st.write(rows)
+```
+
+# Authentication
+
+Example of using Basic Authentication:
+
+```python
+login = 'xxx'
+pw = 'xxx'
+  
+basic_auth = base64.b64encode((login + ":" + pw).encode("ascii")) .decode("ascii") 
+
+headers = {
+	"Authorization": "Basic " + basic_auth 
+}
+
+result = requests.get(url, headers = headers)
+```
+
+Example of using a JWT or token:
+
+```python
+headers = {
+	"Authorization": "Bearer " + token 
+}
+
+result = requests.get(url, headers = headers)
+```

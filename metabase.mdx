@@ -1,0 +1,24 @@
+---
+title: "Metabase"
+---
+
+In Peliqan, go to Connections, find the Data Warehouse tile and copy/paste all connection details:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Grafana/Data_warehouse_details.png"
+  alt="Data warehouse details.png"
+  style={{ width:"28%" }}
+/>
+
+Use these settings in Metabase to connect:
+
+- **Connection type**: Postgres (default data warehouse type in Peliqan)
+- **Host**:
+  - [db.eu.peliqan.io](http://db.eu.peliqan.io)
+  - [db.mydatacloud.com](http://db.mydatacloud.com)
+  - [db.us.peliqan.io](http://db.us.peliqan.io)
+  - … (check in your account under Connections > Data warehouse connection)
+- **Port**: 5432 (for Postgres)
+- **User name & password**: copy / paste from the **Data Warehouse** Connection tile (see above)
+- **Database name**: same as the user name
+- **SSL**: enabled

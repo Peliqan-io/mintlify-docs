@@ -6,7 +6,7 @@ description: "Build robust custom data syncs and Reverse ETL pipelines in Peliqa
 
 Data sync are patterns to sync data between a **source** and a **target**. In many cases the source and target are both SaaS applications, for example keeping Customer records in sync between a CRM and an accounting system.
 
-Data syncs are implemented in Peliqan by [writing low-code Python scripts](/low-code-python-data-apps) ("Data apps") that are scheduled to run for example every 5 minutes (near real-time), every hour or every day. These scripts are also referred to as "Custom data pipelines" and they use the [Peliqan SaaS API wrapper functions](/low-code-python-data-apps/writeback-reverse-etl-data-sync) to do so called writebacks to a target.
+Data syncs are implemented in Peliqan by [writing low-code Python scripts](/low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/aws-s3) ("Data apps") that are scheduled to run for example every 5 minutes (near real-time), every hour or every day. These scripts are also referred to as "Custom data pipelines" and they use the [Peliqan SaaS API wrapper functions](/low-code-python-data-apps/writeback-reverse-etl-data-sync) to do so called writebacks to a target.
 
 <Note>
   You can also use the Peliqan Reverse ETL app, which allows setting up Reverse ETL flows with field mapping, using a no-code UI. For more information visit:
@@ -49,21 +49,21 @@ Note that Peliqan will also sync the data from the **target** to the DWH (in gre
 ## More info
 
 <CardGroup cols={2}>
-  <Card title="Incremental processing from source" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/incremental-processing">
+  <Card title="Incremental processing from source" href="/incremental-processing">
     Read data incrementally from the source
   </Card>
 
-  <Card title="Avoiding duplicates (upsert in target)" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/matching-records-avoiding-duplicates">
+  <Card title="Avoiding duplicates (upsert in target)" href="/upserts">
     Prevent duplicates when writing to targets
   </Card>
 </CardGroup>
 
 <CardGroup cols={2}>
-  <Card title="Keeping track with link tables" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports/data-sync-pattern-with-link-table">
+  <Card title="Keeping track with link tables" href="/link-tables">
     Use link tables to track sync state
   </Card>
 
-  <Card title="Parent child relations" href="/low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports/parent-child-relations">
+  <Card title="Parent child relations" href="/parent-child-relations">
     Handle parent-child relationships in syncs
   </Card>
 </CardGroup>

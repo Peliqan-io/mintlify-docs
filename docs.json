@@ -31,6 +31,7 @@
                   "looker-studio",
                   "tableau",
                   "grafana",
+                  "metabase",
                   "aws-quick-sight",
                   "apache-superset",
                   "excel-odbc",
@@ -135,8 +136,12 @@
                 "group": "Writeback and Data Sync",
                 "root": "low-code-python-data-apps/writeback-reverse-etl-data-sync",
                 "pages": [
+                  "raw-api-calls",
                   "low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports",
-                  "low-code-python-data-apps/writeback-reverse-etl-data-sync/incremental-processing"
+                  "incremental-processing",
+                  "upserts",
+                  "link-tables",
+                  "parent-child-relations"
                 ]
               },
               "low-code-python-data-apps/alerting-messaging",
@@ -241,7 +246,7 @@
           "google-cloud-document-ai-getting-started-in-peliqan",
           "google-docs-getting-started-in-peliqan",
           "google-drive-getting-started-in-peliqan",
-          "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/google-sheets",
+          "google-sheets",
           "connect-to-data/hubspot",
           "ibm-db2-as400-getting-started-in-peliqan",
           "instagram-getting-started-in-peliqan",
