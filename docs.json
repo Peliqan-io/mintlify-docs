@@ -7,7 +7,10 @@
     "light": "#F69C63",
     "dark": "#FF7F2F"
   },
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/images/peliqan-icon-gradient.png",
+    "dark": "/images/peliqan-icon-gradient.png"
+  },
   "navigation": {
     "tabs": [
       {
@@ -334,7 +337,7 @@
   "logo": {
     "light": "/images/peliqan-logo-gradient.png",
     "dark": "/images/peliqan-logo-gradient.png",
-    "href": "https://docs.peliqan.io"
+    "href": "https://help.peliqan.io"
   },
   "navbar": {
     "links": [
