@@ -1,0 +1,136 @@
+---
+title: "Power BI"
+---
+
+In Peliqan, go to Connections, find the Data Warehouse tile and copy/paste your connection details:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/Data_warehouse_details.png"
+  alt="Data warehouse details.png"
+  style={{ width:"61%" }}
+/>
+
+Use these settings in Microsoft Power BI to connect:
+
+- **Connection type**: Postgres (default data warehouse type in Peliqan)
+- **Server**:
+  - [db.eu.peliqan.io](http://db.eu.peliqan.io)
+  - [db.mydatacloud.com](http://db.mydatacloud.com)
+  - [db.us.peliqan.io](http://db.us.peliqan.io)
+  - … (check in your account under Connections > Data warehouse connection)
+- **User name & password**: copy / paste from the **Data Warehouse** Connection tile (see above)
+- **Database name**: same as the user name
+- **SSL**: enabled
+
+# Step by step
+
+In Power BI, click on “Get Data” and then “More” or “Get data from another source”.
+
+Select PostgreSQL from the list:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/1_-_MS_Power_BI_select_Postgres_data_warehouse.png"
+  alt="1 - MS Power BI select Postgres data warehouse.png"
+  style={{ width:"97%" }}
+/>
+
+Paste the host name from the Peliqan data warehouse, e.g. `db.eu.peliqan.io` , the database name and click OK:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/MS_Power_BI_set_server_and_database.png"
+  alt="MS Power BI set server and database.png"
+/>
+
+On the next screen, enter the database name from Peliqan and select “DirectQuery”. Note that the database name is the same as the user name (login). On the next screen, enter the login and password from Peliqan:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/MS_Power_BI_set_login_and_password.png"
+  alt="MS Power BI set login and password.png"
+/>
+
+\<aside><br />☝ When Power BI does **not** ask for a login and password, go to the Home menu ribbon, click on Transform Data and select “Data source settings” from the drop-down menu. Select the existing datasource and change its credentials, or remove it completely.<br />[Click here for more info](https://community.fabric.microsoft.com/t5/Desktop/postgresql-no-password-has-been-provided-but-the-backend/td-p/2114169).
+
+\</aside>
+
+Select the tables to include in Power BI:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/Power_BI_select_tables.png"
+  alt="Power BI select tables.png"
+/>
+
+You can now build charts in Power BI:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/MS_Power_BI_build_charts.png"
+  alt="MS Power BI build charts.png"
+/>
+
+# Troubleshooting
+
+### Error “Please install Npgsql version 4.0.10.0 or earlier”
+
+A recent Windows update (August/September 2024) might cause issues for Power BI to connect to Postgres. The Peliqan built-in data warehouse runs on Postgres.
+
+You might get the error “Please install Npgsql version 4.0.10.0 or earlier” when doing a Refresh in Power BI Desktop:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/power_bi_postgres_error.png"
+  alt="power bi postgres error.png"
+/>
+
+In that case, please make sure to install the correct version of **Npgsql** on your Windows computer. **Npgsql** is the Postgres driver used by Power BI.
+
+Download the MSI installer from this URL:
+
+[https://github.com/npgsql/npgsql/releases/tag/v4.0.10](https://github.com/npgsql/npgsql/releases/tag/v4.0.10)
+
+During install, make sure to install in GAC (Windows Global Assembly Cache):
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/Npgsql_install_GAC.png"
+  alt="Npgsql install GAC.png"
+/>
+
+After install, reboot your computer !
+
+Once you have rebooted, the Refresh in Power BI Desktop should work again.
+
+### Error on SSL certificate (encryption)
+
+Make sure to set the data source to “Encrypt connections”.
+
+Settings > Data sources > Edit permissions > Check the checkbox “Encrypt connections”.
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/Power_BI_encrypt_connection.png"
+  alt="Power BI encrypt connection.png"
+/>
+
+### Error “The remote certificate is invalid according to the validation procedure”
+
+If you receive the error “The remote certificate is invalid according to the validation procedure”, this is because the root certificate used by the Peliqan data warehouse is not installed on your computer. You can verify this under Root Certificates in Certificate Manager `certmgr`.
+
+Following certificate must be present: `Go Daddy Root Certificate Authority - G2`
+
+Windows will automatically install the certificate when needed, however MDM solutions (Mobile Device Management) might have blocked automatic install of root certificates.
+
+This can be checked in the Windows Registry under: `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\SystemCertificates\AuthRoot`.
+
+Check if there is a DWORD `DisableRootAutoUpdate`. If the value is 1, auto updates are disabled. Change the value to 0 or manually install the certificate.
+
+Download the root certificate for the Peliqan data warehouse:
+
+peliqan_dwh_root_certificate_godaddy_g2.pem
+
+Or download `gdroot-g2.crt` from Godaddy: [https://aboutssl.org/go-daddy-root-certificates/](https://aboutssl.org/go-daddy-root-certificates/)
+
+Make sure the “Intended Purpose” for the roort certificate is set to \<All> (Enable all purposes for this certificate), or that **Server Authentication** is checked. Double click the certificate in Certificate manager > tab Details > button “Edit Properties” > Certificate purposes:
+
+<img
+  src="/images/Connect your BI, DB tool or iPaaS/Microsoft Power BI/Root_cert_purposes.png"
+  alt="Root cert purposes.png"
+  style={{ width:"52%" }}
+/>
+
+If you don’t have sufficient permissions, contact your IT administrator and ask for the above root certificate to be installed.

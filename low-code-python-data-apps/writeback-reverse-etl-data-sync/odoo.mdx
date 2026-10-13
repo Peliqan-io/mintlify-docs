@@ -44,15 +44,24 @@ Or you can reach out to Peliqan Support ([support@peliqan.io](mailto:support@pel
 
 You can include additional modules in the ETL pipeline, by adding a comma-separated list with the names of your standard and/or custom models, in the field "Additional models". These models will now also be synced to the data warehouse as tables.
 
-![Odoo additional models field](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f69fdac4-f083-4614-a9a5-f85c572811bc/additional_models/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Odoo - Getting started in Peliqan/additional_models.png"
+  alt="Odoo additional models field"
+/>
 
 You can find the model names by doing an initial sync of table "models" (under Advanced in the connect form):
 
-![Odoo models table selection](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9ec12aca-e842-4379-9883-542d8e552a58/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Odoo - Getting started in Peliqan/image.png"
+  alt="Odoo models table selection"
+/>
 
 The models table contains a list of all your Odoo models:
 
-![Odoo models table data](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/5f0eaf49-0ee6-48aa-b9cf-60199f754f98/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Odoo - Getting started in Peliqan/image 1.png"
+  alt="Odoo models table data"
+/>
 
 ## Odoo model explorer
 
@@ -295,7 +304,10 @@ Use the below custom pipeline script, to sync the **fields** of a selected model
 
 The below script will compare the number of records (count) in the data warehouse with the actual count in Odoo.
 
-![Odoo data completeness check output](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/b1b31bae-7947-4fb9-9aa3-031b3c5d8de1/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Odoo - Getting started in Peliqan/image 2.png"
+  alt="Odoo data completeness check output"
+/>
 
 <Accordion title="Click here to expand script">
   ```python
@@ -1185,4 +1197,7 @@ product_variant1_id = result["ptav_product_variant_ids_0"]
 
 Odoo data model:
 
-![Odoo product templates and attributes data model](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/73f541cc-b01d-4aed-a73e-6a121b03be89/Odoo_data_model_product_templates_and_attributes/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Odoo - Getting started in Peliqan/Odoo_data_model_product_templates_and_attributes.png"
+  alt="Odoo product templates and attributes data model"
+/>

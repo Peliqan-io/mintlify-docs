@@ -1,0 +1,56 @@
+---
+title: "Parent child relations"
+description: "Handle parent-child relationships in syncs"
+---
+
+When you sync with multiple objects that have a relation, e.g. parent-child relationship, make sure to sync the parent records first. When syncing the child objects, you will need to know the id of their parent _in the target_.
+
+This can be done by doing a lookup in the [link table](https://app.notion.com/p/Keeping-track-with-link-tables-0610af5695fc459393073160860a3136?pvs=21) of the parent record.
+
+Example link tables for Projects (parents) and Tasks (children):
+
+Table **link_table_projects**
+
+| **source_id** | **target_id** |
+| :-- | :-- |
+| 100 | p1 |
+| 105 | p2 |
+| 109 | p3 |
+
+Table **link_table_tasks**
+
+| **source_id** | **target_id** |
+| :-- | :-- |
+| 1 | abc456 |
+| 6 | def789 |
+| 8 | ghi432 |
+
+Pseudo-code to sync child objects, linked to a parent:
+
+```text
+GET SOURCE ROWS
+
+FOR EACH SOURCE ROW:
+
+		CHECK IF RECORD ALREADY IN TARGET (LOOKUP IN LINK TABLE OF **CHILD**) ? IF NOT:
+		
+			1. FIND PARENT ID IN TARGET (LOOKUP IN LINK TABLE OF **PARENT**)
+			
+			2. ADD TO TARGET
+```
+
+Here’s the pseudo code in a bit more detail for records of type “**Task**” that are linked to a parent “**Project**”:
+
+```python
+source_rows = dw.fetch(table)    	                      # e.g. list of "Tasks"
+
+for row in source_rows:
+
+	source_id = row["task_id"]
+	if source_id not in **link_table_tasks**:                 # Task is not in target yet
+		  
+		parent_source_id = row["project_id"]
+		parent_target_id = find_target_id(parent_source_id) # Lookup in **link_table_projects**
+		
+		target_id = target.add(target_row)
+```

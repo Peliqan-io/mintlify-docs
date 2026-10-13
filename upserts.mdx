@@ -1,0 +1,50 @@
+---
+title: "Upserts"
+description: "Avoiding duplicates in the target"
+---
+
+When writing records to a destination, you want to avoid creating duplicates. Duplicates can arise in two situations:
+
+1. Your writeback script runs multiple times and inserts the same record more than once
+2. The record already existed in the destination
+
+Situation (1) can be solved by keeping track of what was processed, so that even when your script runs multiple times, it will not do the insert more than once. For example you could [process data incrementally](https://app.notion.com/p/Incremental-processing-from-source-7711836856cf4c1fb0ce153bdee81914?pvs=21).
+
+Both situation (1) and (2) can also be solved by doing a “lookup” to check if the record exists in the destination, this is a more robust solution to avoid duplicates.
+
+# Doing a real-time lookup
+
+You can do a realtime lookup in the destination using the `findone()` function, example:
+
+```python
+hubspot = pq.connect("Hubspot")
+existing_contact = hubspot.findone( "contact", searchterm = 'john@acme.com')
+```
+
+Based on the result of the lookup, you can decide to add (insert) or update a contact:
+
+```python
+hs = pq.connect("Hubspot")
+existing_contact = hs.findone( "contact", searchterm = 'john@acme.com')
+
+if 'id' in existing_contact:
+  hs.update("contact", id = existing_contact['id'], name = "New name", city = "NY")
+else:
+  hs.add("contact", name = "New name", city = "NY")
+```
+
+# Upsert
+
+The above pattern is called an upsert, and is available as one function for some connectors. The upsert will try to find an existing record first, if it finds it, it will update and otherwise it will add a new record:
+
+```python
+hs.upsert("contact", searchterm = "john@acme.com", name = "New name", city = "NY")
+```
+
+# Doing a lookup in a synced table in the data warehouse
+
+The realtime lookup in the destination can be costly, it makes an API call for each record and some APIs have strict usage limits (e.g. maximum number of calls per day).
+
+Therefore it’s also possible to do this lookup in a table in Peliqan, which contains the synced data from the destination (for example Hubspot).
+
+Of course make sure to run the pipeline in Peliqan first so that this table is up to date, before using it for lookups.

@@ -1,0 +1,51 @@
+---
+title: "Merge similar sources"
+---
+
+Companies sometimes use the same software in different departments or countries, each with their own account. For example a hotel chain might use the same accounting software in each of its hotels.
+
+In Peliqan, a separate connection will be made to each of the sources. This will result in multiple databases, each with the same tables. Below we describe how this data can be merged into one set of tables that contains the records from all connected instances.
+
+Simplified Example for a company with 3 Salesforce instances:
+
+**Salesforce USA**
+
+- Contacts
+- Companies
+
+**Salesforce APAC**
+
+- Contacts
+- Companies
+
+**Salesforce EMEA**
+
+- Contacts
+- Companies
+
+This data can now be merged together in one set of tables, using a UNION query.
+
+Example for Contacts:
+
+```sql
+SELECT "USA" as Region, * FROM Salesforce_USA.contacts
+UNION
+SELECT "APAC" as Region, * FROM Salesforce_APAC.contacts
+UNION
+SELECT "EMEA" as Region, * FROM Salesforce_EMEA.contacts
+```
+
+The result is one table with e.g. the Contacts from all instances:
+
+| Region | Name | Email | Phone |
+| :-- | :-- | :-- | :-- |
+| USA | Bill | [bill@acme.com](mailto:bill@acme.com) |  |
+| USA | Bob | [bob@acme.com](mailto:bob@acme.com) |  |
+| APAC | Anne | [anne@comp.com](mailto:anne@comp.com) |  |
+| EMEA | Jef | [jef@comp.com](mailto:jef@comp.com) |  |
+
+The resulting UNION query contains one extra column “Region” which indicates the source of each record.
+
+See also the Peliqan template to generate UNION queries automatically:
+
+[Generating UNION queries](/low-code-python-data-apps/generating-union-queries) 

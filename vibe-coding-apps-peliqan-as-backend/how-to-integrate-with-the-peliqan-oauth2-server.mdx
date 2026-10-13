@@ -1,0 +1,562 @@
+---
+title: "How to integrate with the Peliqan OAuth2 server"
+sidebarTitle: "Peliqan OAuth2 Server"
+description: "Add login and authorization to your own apps with the Peliqan OAuth2 server: authorization code with PKCE, token refresh, client credentials, and more."
+---
+
+This article applies to implementing authorization and authentication in your own apps (e.g. [vibe coded apps](/vibe-coding-apps-peliqan-as-backend)) using Peliqan as the backend and using Peliqan OAuth2 for authorization and authentication of your app users.
+
+## Before you start
+
+- Contact [Peliqan support](mailto:support@peliqan.io) and request activation of **OAuth Apps** in your Peliqan account
+- Register an OAuth2 app in your Peliqan account: **Settings → OAuth2 Apps**, and select **at least one scope**
+- **Public** app (no client secret) — browser/mobile apps. Use `authorization_code`; it also gets a rotating `refresh_token` (no secret needed, PKCE plus rotation cover that).
+- **Confidential** app (has a client secret). Can additionally use `client_credentials` (server-to-server, no user), and must also send `client_secret` when refreshing a token.
+- PKCE (`code_challenge` / `code_verifier`, **S256 only**) is mandatory for `authorization_code`, there is no way to opt out (RFC 9700).
+- Always pass an explicit `scope`. An authorize request with no `scope` and no `default_scopes` configured on the app is rejected with `invalid_scope`.
+
+## Base URLs
+
+| Deployment | Base URL |
+| --- | --- |
+| EU (Peliqan-hosted) | `https://app.eu.peliqan.io` |
+| US (Peliqan-hosted) | `https://app.us.peliqan.io` |
+| On-prem / white-label | your own domain |
+
+All examples below use a `BASE_URL` constant — set it to whichever of these applies to you.
+
+## Endpoint reference
+
+| Purpose | Method + path | Notes |
+| --- | --- | --- |
+| Authorize page (browser) | `GET /oauth2/authorize` | Send the user's browser here. Nuxt-hosted consent screen. |
+| Token | `POST /api/oauth2/token/` | All 3 grant types. Rate-limited to 20 req/min per IP. |
+| Revoke | `POST /api/oauth2/revoke/` | RFC 7009. Idempotent — always succeeds. |
+| Introspect | `POST /api/oauth2/introspect/` | RFC 7662 — check if a token is still active. |
+| UserInfo | `GET /api/oauth2/userinfo/` | Requires a `profile:read`-scoped access token, sent as `Authorization: Bearer`. |
+| List scopes | `GET /api/oauth2/scopes/` | Every scope the server recognizes, grouped by category. |
+| Discovery | `GET /.well-known/oauth-authorization-server` | RFC 8414 metadata document. |
+| JWKS | `GET /api/oauth2/jwks/` | Public keys for verifying access token signatures. |
+| Dynamic Client Registration | `POST /api/oauth2/register/` | RFC 7591 — programmatic app registration (advanced, most devs use the Settings UI instead). |
+
+## 1. Authorization code flow (user login)
+
+This is "Login with Peliqan" — the user's browser visits Peliqan, logs in, approves your app, and gets redirected back to you with a `code`. PKCE requires a `code_verifier` you generate and keep secret, and a `code_challenge` (its SHA-256 hash) you send up front.
+
+<Tabs>
+  <Tab title="TypeScript">
+    Works in Node.js 18+, browsers, Bun, and Deno — uses only `fetch` and the global Web Crypto API (`crypto.subtle`), no packages.
+
+    ```typescript
+    const BASE_URL = "https://app.eu.peliqan.io" // or your on-prem domain
+    const CLIENT_ID = "YOUR_CLIENT_ID"
+    const REDIRECT_URI = "https://yourapp.com/auth/callback"
+
+    // --- PKCE + state helpers (RFC 7636) ---
+    function base64UrlEncode(bytes: Uint8Array): string {
+      let binary = ""
+      for (const byte of bytes) binary += String.fromCharCode(byte)
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
+    }
+
+    function generateCodeVerifier(): string {
+      return base64UrlEncode(crypto.getRandomValues(new Uint8Array(32)))
+    }
+
+    async function generateCodeChallenge(verifier: string): Promise<string> {
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))
+      return base64UrlEncode(new Uint8Array(digest))
+    }
+
+    function generateState(): string {
+      return base64UrlEncode(crypto.getRandomValues(new Uint8Array(16)))
+    }
+    ```
+
+    ```typescript
+    // 1. Build the authorize URL. Persist `state` + `codeVerifier` server-side
+    //    (session/cookie, keyed by a per-flow id) — you need both in the callback.
+    const state = generateState()
+    const codeVerifier = generateCodeVerifier()
+    const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+    const authorizeUrl = `${BASE_URL}/oauth2/authorize?` + new URLSearchParams({
+      response_type: "code",
+      client_id: CLIENT_ID,
+      redirect_uri: REDIRECT_URI,
+      scope: "profile:read",
+      state,
+      code_challenge: codeChallenge,
+      code_challenge_method: "S256",
+    })
+    // redirect the user's browser to `authorizeUrl`
+    ```
+
+    ```typescript
+    // 2. On your callback route (GET /auth/callback?code=...&state=...):
+    //    verify `state` matches what you persisted, then exchange the code.
+    //    Confidential apps must also pass their clientSecret here.
+    async function exchangeCode(code: string, codeVerifier: string, clientSecret?: string) {
+      const response = await fetch(`${BASE_URL}/api/oauth2/token/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          grant_type: "authorization_code",
+          code,
+          client_id: CLIENT_ID,
+          redirect_uri: REDIRECT_URI,
+          code_verifier: codeVerifier,
+          ...(clientSecret ? { client_secret: clientSecret } : {}),
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(`${data.error}: ${data.detail ?? ""}`)
+      return data // { access_token, refresh_token, expires_in, scope, token_type }
+    }
+    ```
+  </Tab>
+  <Tab title="Python">
+    Standard library only — `urllib`, `hashlib`, `secrets`, `base64`. No packages.
+
+    ```python
+    import base64
+    import hashlib
+    import json
+    import secrets
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    BASE_URL = "https://app.eu.peliqan.io"  # or your on-prem domain
+    CLIENT_ID = "YOUR_CLIENT_ID"
+    REDIRECT_URI = "https://yourapp.com/auth/callback"
+
+
+    # --- PKCE + state helpers (RFC 7636) ---
+    def _b64url(data: bytes) -> str:
+        return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
+
+
+    def generate_code_verifier() -> str:
+        return _b64url(secrets.token_bytes(32))
+
+
+    def generate_code_challenge(verifier: str) -> str:
+        return _b64url(hashlib.sha256(verifier.encode("ascii")).digest())
+
+
+    def generate_state() -> str:
+        return _b64url(secrets.token_bytes(16))
+    ```
+
+    ```python
+    # 1. Build the authorize URL. Persist `state` + `code_verifier` server-side
+    #    (session/cookie, keyed by a per-flow id) — you need both in the callback.
+    state = generate_state()
+    code_verifier = generate_code_verifier()
+    code_challenge = generate_code_challenge(code_verifier)
+
+    params = {
+        "response_type": "code",
+        "client_id": CLIENT_ID,
+        "redirect_uri": REDIRECT_URI,
+        "scope": "profile:read",
+        "state": state,
+        "code_challenge": code_challenge,
+        "code_challenge_method": "S256",
+    }
+    authorize_url = f"{BASE_URL}/oauth2/authorize?{urllib.parse.urlencode(params)}"
+    # redirect the user's browser to authorize_url
+    ```
+
+    ```python
+    def _post_json(path: str, body: dict) -> dict:
+        req = urllib.request.Request(
+            f"{BASE_URL}{path}",
+            data=json.dumps(body).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            error_body = json.loads(e.read())
+            raise RuntimeError(f"{error_body.get('error')}: {error_body.get('detail', '')}") from e
+
+
+    # 2. On your callback route (GET /auth/callback?code=...&state=...):
+    #    verify `state` matches what you persisted, then exchange the code.
+    #    Confidential apps must also pass their client_secret here.
+    def exchange_code(code: str, code_verifier: str, client_secret: str = None) -> dict:
+        body = {
+            "grant_type": "authorization_code",
+            "code": code,
+            "client_id": CLIENT_ID,
+            "redirect_uri": REDIRECT_URI,
+            "code_verifier": code_verifier,
+        }
+        if client_secret:
+            body["client_secret"] = client_secret
+        return _post_json("/api/oauth2/token/", body)
+        # -> {"access_token", "refresh_token", "expires_in", "scope", "token_type"}
+    ```
+  </Tab>
+  <Tab title="Curl">
+    PKCE has to be generated before you build the URL. Peliqan only accepts **S256** (`base64url(SHA-256(verifier))`, no padding):
+
+    ```bash
+    CLIENT_ID="YOUR_CLIENT_ID"
+    REDIRECT_URI="https://yourapp.com/auth/callback"
+    BASE_URL="https://app.eu.peliqan.io"
+
+    CODE_VERIFIER=$(openssl rand -base64 96 | tr -d '=+/\n' | cut -c1-64)
+    CODE_CHALLENGE=$(printf '%s' "$CODE_VERIFIER" | openssl dgst -sha256 -binary | openssl base64 | tr -d '=' | tr '+/' '-_')
+    STATE=$(openssl rand -hex 16)
+    ```
+
+    Send the user's browser to the authorize URL (this step can't be scripted — it needs a real login):
+
+    ```bash
+    open "$BASE_URL/oauth2/authorize?response_type=code&client_id=$CLIENT_ID&redirect_uri=$REDIRECT_URI&scope=profile%3Aread&state=$STATE&code_challenge=$CODE_CHALLENGE&code_challenge_method=S256"
+    ```
+
+    After the user approves, Peliqan redirects to `redirect_uri?code=...&state=...`. Confirm `state` matches what you generated, then exchange the code:
+
+    ```bash
+    curl -s -X POST "$BASE_URL/api/oauth2/token/" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "grant_type": "authorization_code",
+        "code": "PASTE_CODE_FROM_REDIRECT",
+        "client_id": "'"$CLIENT_ID"'",
+        "redirect_uri": "'"$REDIRECT_URI"'",
+        "code_verifier": "'"$CODE_VERIFIER"'"
+      }'
+    ```
+
+    Response:
+
+    ```json
+    {
+      "access_token": "...",
+      "token_type": "Bearer",
+      "expires_in": 3600,
+      "refresh_token": "...",
+      "scope": "profile:read"
+    }
+    ```
+
+    Confidential apps also send `"client_secret"` in the same JSON body.
+  </Tab>
+</Tabs>
+
+## 2. Refreshing a token
+
+Peliqan **rotates** refresh tokens on every use — the old one is revoked, so always persist the new `refresh_token` from the response, not just the new access token. Both public and confidential apps get a refresh token; confidential apps must additionally authenticate with `client_secret` on every refresh — public apps don't send one.
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    async function refreshAccessToken(refreshToken: string, clientSecret?: string) {
+      const response = await fetch(`${BASE_URL}/api/oauth2/token/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          grant_type: "refresh_token",
+          refresh_token: refreshToken,
+          client_id: CLIENT_ID,
+          ...(clientSecret ? { client_secret: clientSecret } : {}), // required for confidential apps only
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(`${data.error}: ${data.detail ?? ""}`)
+      return data // new access_token + rotated refresh_token
+    }
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python
+    def refresh_access_token(refresh_token: str, client_secret: str = None) -> dict:
+        body = {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": CLIENT_ID,
+        }
+        if client_secret:  # required for confidential apps only
+            body["client_secret"] = client_secret
+        return _post_json("/api/oauth2/token/", body)
+        # -> new access_token + rotated refresh_token
+    ```
+  </Tab>
+  <Tab title="Curl">
+    ```bash
+    curl -s -X POST "$BASE_URL/api/oauth2/token/" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "grant_type": "refresh_token",
+        "refresh_token": "STORED_REFRESH_TOKEN",
+        "client_id": "'"$CLIENT_ID"'"
+      }'
+    ```
+
+    Confidential apps add `"client_secret"` to the same JSON body — public apps omit it.
+  </Tab>
+</Tabs>
+
+## 3. Client credentials (server-to-server, no user)
+
+Requires a **confidential** app (has a client secret) — this grant is not available to public apps. Fully scriptable, no browser needed.
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    const CLIENT_SECRET = "YOUR_CLIENT_SECRET" // never ship this to a browser
+
+    async function getClientCredentialsToken(scopes: string[]) {
+      const response = await fetch(`${BASE_URL}/api/oauth2/token/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          grant_type: "client_credentials",
+          client_id: CLIENT_ID,
+          client_secret: CLIENT_SECRET,
+          scope: scopes.join(" "),
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(`${data.error}: ${data.detail ?? ""}`)
+      return data
+    }
+
+    const tokens = await getClientCredentialsToken(["data:read"])
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python
+    CLIENT_SECRET = "YOUR_CLIENT_SECRET"  # never ship this to a browser
+
+
+    def get_client_credentials_token(scopes: list) -> dict:
+        return _post_json("/api/oauth2/token/", {
+            "grant_type": "client_credentials",
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "scope": " ".join(scopes),
+        })
+
+
+    tokens = get_client_credentials_token(["data:read"])
+    ```
+  </Tab>
+  <Tab title="Curl">
+    ```bash
+    curl -s -X POST "$BASE_URL/api/oauth2/token/" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "grant_type": "client_credentials",
+        "client_id": "YOUR_CLIENT_ID",
+        "client_secret": "YOUR_CLIENT_SECRET",
+        "scope": "data:read"
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+## 4. Other endpoints
+
+Revoke, introspect, get the logged-in user's identity, list available scopes, and fetch the RFC 8414 discovery document.
+
+<Tabs>
+  <Tab title="TypeScript">
+    ```typescript
+    async function revokeToken(token: string) {
+      await fetch(`${BASE_URL}/api/oauth2/revoke/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, client_id: CLIENT_ID }),
+      })
+    }
+
+    async function introspectToken(token: string) {
+      const response = await fetch(`${BASE_URL}/api/oauth2/introspect/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, client_id: CLIENT_ID }),
+      })
+      return response.json() // { active, sub, client_id, scope, exp, iat, ... }
+    }
+
+    async function getUserInfo(accessToken: string) {
+      const response = await fetch(`${BASE_URL}/api/oauth2/userinfo/`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      return response.json() // { sub, name, email }
+    }
+
+    async function listScopes() {
+      const response = await fetch(`${BASE_URL}/api/oauth2/scopes/`)
+      return response.json() // { scopes: {...by category}, sensitive_scopes: [...] }
+    }
+
+    async function discover() {
+      const response = await fetch(`${BASE_URL}/.well-known/oauth-authorization-server`)
+      return response.json()
+    }
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python
+    def revoke_token(token: str) -> None:
+        _post_json("/api/oauth2/revoke/", {"token": token, "client_id": CLIENT_ID})
+
+
+    def introspect_token(token: str) -> dict:
+        return _post_json("/api/oauth2/introspect/", {"token": token, "client_id": CLIENT_ID})
+        # -> {"active", "sub", "client_id", "scope", "exp", "iat", ...}
+
+
+    def get_user_info(access_token: str) -> dict:
+        req = urllib.request.Request(
+            f"{BASE_URL}/api/oauth2/userinfo/",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        with urllib.request.urlopen(req) as resp:
+            return json.loads(resp.read())  # {"sub", "name", "email"}
+
+
+    def list_scopes() -> dict:
+        with urllib.request.urlopen(f"{BASE_URL}/api/oauth2/scopes/") as resp:
+            return json.loads(resp.read())  # {"scopes": {...by category}, "sensitive_scopes": [...]}
+
+
+    def discover() -> dict:
+        with urllib.request.urlopen(f"{BASE_URL}/.well-known/oauth-authorization-server") as resp:
+            return json.loads(resp.read())
+    ```
+  </Tab>
+  <Tab title="Curl">
+    ```bash
+    # Revoke
+    curl -s -X POST "$BASE_URL/api/oauth2/revoke/" \
+      -H "Content-Type: application/json" \
+      -d '{"token": "TOKEN_TO_REVOKE", "client_id": "'"$CLIENT_ID"'"}'
+
+    # Introspect
+    curl -s -X POST "$BASE_URL/api/oauth2/introspect/" \
+      -H "Content-Type: application/json" \
+      -d '{"token": "ACCESS_TOKEN", "client_id": "'"$CLIENT_ID"'"}'
+
+    # UserInfo — note: Bearer auth header, not a JSON body
+    curl -s "$BASE_URL/api/oauth2/userinfo/" \
+      -H "Authorization: Bearer ACCESS_TOKEN"
+
+    # List available scopes
+    curl -s "$BASE_URL/api/oauth2/scopes/"
+
+    # Discovery document
+    curl -s "$BASE_URL/.well-known/oauth-authorization-server"
+    ```
+  </Tab>
+</Tabs>
+
+## Error handling
+
+Every non-2xx response returns a machine-readable OAuth2 `error` code — branch on that field, not the message string.
+
+| `error` | Meaning |
+| --- | --- |
+| `invalid_request` | Missing/malformed parameter. |
+| `invalid_client` | Unknown `client_id`, bad `client_secret`, or `client_credentials` requested on a public app. |
+| `invalid_redirect_uri` | `redirect_uri` doesn't match any URI registered on the app. |
+| `invalid_grant` | Code/refresh token expired, already used, or PKCE `code_verifier` mismatch — restart the flow. |
+| `invalid_scope` | No scope requested and the app has no `default_scopes`. |
+| `unsupported_grant_type` | `grant_type` isn't one of the three supported values. |
+| `access_denied` | User declined the consent screen. |
+| `permission_denied` | App-management endpoints only (not the token endpoint) — e.g. OAuth2 app management isn't enabled for the account. |
+| `server_error` | Unexpected server-side failure. |
+
+<Tabs>
+  <Tab title="TypeScript">
+    Wrap the raw `fetch` call once and throw a typed error carrying the `error` code, so every caller can branch on `err.code` instead of string-matching:
+
+    ```typescript
+    class OAuthError extends Error {
+      constructor(public code: string, public detail?: string) {
+        super(detail ? `${code}: ${detail}` : code)
+      }
+    }
+
+    async function postJson(path: string, body: Record<string, unknown>) {
+      const response = await fetch(`${BASE_URL}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new OAuthError(data.error ?? "server_error", data.detail)
+      return data
+    }
+
+    try {
+      const tokens = await exchangeCode(code, codeVerifier)
+    } catch (err) {
+      if (err instanceof OAuthError && err.code === "invalid_grant") {
+        // code expired, already used, or PKCE mismatch — restart the flow
+      }
+      throw err
+    }
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python
+    class OAuthError(Exception):
+        def __init__(self, code: str, detail: str = None):
+            super().__init__(f"{code}: {detail}" if detail else code)
+            self.code = code
+            self.detail = detail
+
+
+    def _post_json(path: str, body: dict) -> dict:
+        req = urllib.request.Request(
+            f"{BASE_URL}{path}",
+            data=json.dumps(body).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            error_body = json.loads(e.read())
+            raise OAuthError(error_body.get("error", "server_error"), error_body.get("detail")) from e
+
+
+    try:
+        tokens = exchange_code(code, code_verifier)
+    except OAuthError as e:
+        if e.code == "invalid_grant":
+            pass  # code expired, already used, or PKCE mismatch — restart the flow
+        raise
+    ```
+  </Tab>
+  <Tab title="Curl">
+    ```json
+    {
+      "error": "invalid_grant",
+      "detail": "Authorization code has expired or already been used."
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Gotchas
+
+<Tip>
+  - **PKCE is not optional.** Every `authorization_code` request needs `code_challenge` (S256) or the authorize call is rejected — there's no legacy non-PKCE path.
+  - **No scope is added automatically.** You get exactly what's registered on the app plus whatever you explicitly request — nothing (including `profile:read`) is silently injected.
+  - **Refresh tokens rotate, for every client type.** The old one is revoked the instant you use it — always persist the *new* `refresh_token` from the response, or the next refresh will fail with `invalid_grant`. Public apps get refresh tokens too (PKCE + rotation stand in for a client secret); only confidential apps additionally need to send `client_secret` on refresh.
+  - **Token endpoint is rate-limited** to 20 requests/minute per IP.
+  - `state` verification is on you. The server doesn't store or check it — you must compare the `state` you generated against the one that comes back on the redirect, or you're open to CSRF.
+  - **On-prem/white-label**: just point `BASE_URL` at your own domain — the flow is otherwise identical.
+</Tip>

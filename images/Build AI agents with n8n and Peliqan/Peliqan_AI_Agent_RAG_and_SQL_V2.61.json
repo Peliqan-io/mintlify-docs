@@ -1,0 +1,484 @@
+{
+  "name": "Peliqan AI Agent RAG and SQL V2.6 - simplified",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "id": "29b52c26-8c96-4825-8877-23416909c7c5",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        96
+      ],
+      "webhookId": "739010cb-04ab-4265-8ae8-639c6ed3c1a7"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an assistant answering questions on internal business data.\n\nYou can use the Vector Store to find info, which contains all pages of Notion (intranet) with internal knowledge.\n\nYou can also run SQL queries for quantitive questions on tables. To execute an SQL query: send the query to Peliqan tool \"Execute SQL\" in a key SQL_Query__View_. Get the results from key \"detail\".\n\nThis is the data model of tables & columns that can be used in SQL queries:\n\nColumns in table chargebee.credit_notes:\n\ncredit_note_id\ncredit_note_customer_id\ncredit_note_subscription_id\ncredit_note_reference_invoice_id\ncredit_note_type\ncredit_note_reason_code\ncredit_note_status\ncredit_note_date\ncredit_note_price_type\ncredit_note_exchange_rate\ncredit_note_total\ncredit_note_amount_allocated\ncredit_note_amount_refunded\ncredit_note_amount_available\ncredit_note_refunded_at\ncredit_note_generated_at\ncredit_note_updated_at\ncredit_note_channel\ncredit_note_resource_version\ncredit_note_deleted\ncredit_note_object\ncredit_note_create_reason_code\ncredit_note_currency_code\ncredit_note_round_off_amount\ncredit_note_fractional_correction\ncredit_note_base_currency_code\ncredit_note_sub_total\ncredit_note_line_items_0_id\ncredit_note_line_items_0_date_from\ncredit_note_line_items_0_date_to\ncredit_note_line_items_0_unit_amount\ncredit_note_line_items_0_quantity\ncredit_note_line_items_0_amount\ncredit_note_line_items_0_pricing_model\ncredit_note_line_items_0_is_taxed\ncredit_note_line_items_0_tax_amount\ncredit_note_line_items_0_object\ncredit_note_line_items_0_subscription_id\ncredit_note_line_items_0_customer_id\ncredit_note_line_items_0_description\ncredit_note_line_items_0_entity_type\ncredit_note_line_items_0_entity_id\ncredit_note_line_items_0_entity_description\ncredit_note_line_items_0_reference_line_item_id\ncredit_note_line_items_0_tax_exempt_reason\ncredit_note_line_items_0_discount_amount\ncredit_note_line_items_0_item_level_discount_amount\ncredit_note_line_items_1_id\ncredit_note_line_items_1_date_from\ncredit_note_line_items_1_date_to\ncredit_note_line_items_1_unit_amount\ncredit_note_line_items_1_quantity\ncredit_note_line_items_1_amount\ncredit_note_line_items_1_pricing_model\ncredit_note_line_items_1_is_taxed\ncredit_note_line_items_1_tax_amount\ncredit_note_line_items_1_object\ncredit_note_line_items_1_subscription_id\ncredit_note_line_items_1_customer_id\ncredit_note_line_items_1_description\ncredit_note_line_items_1_entity_type\ncredit_note_line_items_1_entity_id\ncredit_note_line_items_1_reference_line_item_id\ncredit_note_line_items_1_tax_exempt_reason\ncredit_note_line_items_1_discount_amount\ncredit_note_line_items_1_item_level_discount_amount\ncredit_note_allocations_0_allocated_amount\ncredit_note_allocations_0_allocated_at\ncredit_note_allocations_0_invoice_id\ncredit_note_allocations_0_invoice_date\ncredit_note_allocations_0_invoice_status\ncredit_note_billing_address_first_name\ncredit_note_billing_address_last_name\ncredit_note_billing_address_company\ncredit_note_billing_address_validation_status\ncredit_note_billing_address_object\ncredit_note_customer_notes\ncredit_note_site_details_at_creation_timezone\ncredit_note_billing_address_country\ncredit_note_site_details_at_creation_organization_address_organ\ncredit_note_site_details_at_creation_organization_address_line1\ncredit_note_site_details_at_creation_organization_address_city\ncredit_note_site_details_at_creation_organization_address_state\ncredit_note_site_details_at_creation_organization_address_count\ncredit_note_site_details_at_creation_organization_address_zip\ncredit_note_site_details_at_creation_organization_address_phone\ncredit_note_tax_origin_country\ncredit_note_voided_at\n\nColumns in table chargebee.customers:\n\ncustomer_id\ncustomer_first_name\ncustomer_last_name\ncustomer_email\ncustomer_phone\ncustomer_company\ncustomer_auto_collection\ncustomer_net_term_days\ncustomer_allow_direct_debit\ncustomer_created_at\ncustomer_taxability\ncustomer_updated_at\ncustomer_pii_cleared\ncustomer_channel\ncustomer_resource_version\ncustomer_deleted\ncustomer_object\ncustomer_card_status\ncustomer_promotional_credits\ncustomer_refundable_credits\ncustomer_excess_payments\ncustomer_unbilled_charges\ncustomer_preferred_currency_code\ncustomer_mrr\ncustomer_primary_payment_source_id\ncustomer_payment_method_object\ncustomer_payment_method_type\ncustomer_payment_method_reference_id\ncustomer_payment_method_gateway\ncustomer_payment_method_gateway_account_id\ncustomer_payment_method_status\ncard_status\ncard_gateway\ncard_gateway_account_id\ncard_first_name\ncard_last_name\ncard_iin\ncard_last4\ncard_card_type\ncard_funding_type\ncard_expiry_month\ncard_expiry_year\ncard_created_at\ncard_updated_at\ncard_resource_version\ncard_object\ncard_masked_number\ncard_customer_id\ncard_payment_source_id\ncustomer_created_from_ip\ncustomer_locale\ncustomer_billing_address_first_name\ncustomer_billing_address_company\ncustomer_billing_address_line1\ncustomer_billing_address_country\ncustomer_billing_address_validation_status\ncustomer_billing_address_object\ncard_ip_address\ncustomer_billing_address_last_name\ntags\n\nColumns in table chargebee.invoices:\n\ninvoice_id\ninvoice_customer_id\ninvoice_subscription_id\ninvoice_recurring\ninvoice_status\ninvoice_price_type\ninvoice_date\ninvoice_due_date\ninvoice_net_term_days\ninvoice_exchange_rate\ninvoice_total\ninvoice_amount_paid\ninvoice_amount_adjusted\ninvoice_write_off_amount\ninvoice_credits_applied\ninvoice_amount_due\ninvoice_paid_at\ninvoice_updated_at\ninvoice_resource_version\ninvoice_deleted\ninvoice_object\ninvoice_first_invoice\ninvoice_amount_to_collect\ninvoice_round_off_amount\ninvoice_has_advance_charges\ninvoice_currency_code\ninvoice_base_currency_code\ninvoice_generated_at\ninvoice_is_gifted\ninvoice_term_finalized\ninvoice_channel\ninvoice_tax\ninvoice_line_items_0_id\ninvoice_line_items_0_date_from\ninvoice_line_items_0_date_to\ninvoice_line_items_0_unit_amount\ninvoice_line_items_0_quantity\ninvoice_line_items_0_amount\ninvoice_line_items_0_pricing_model\ninvoice_line_items_0_is_taxed\ninvoice_line_items_0_tax_amount\ninvoice_line_items_0_object\ninvoice_line_items_0_subscription_id\ninvoice_line_items_0_customer_id\ninvoice_line_items_0_description\ninvoice_line_items_0_entity_type\ninvoice_line_items_0_entity_id\ninvoice_line_items_0_entity_description\ninvoice_line_items_0_tax_exempt_reason\ninvoice_line_items_0_discount_amount\ninvoice_line_items_0_item_level_discount_amount\ninvoice_line_items_1_id\ninvoice_line_items_1_date_from\ninvoice_line_items_1_date_to\ninvoice_line_items_1_unit_amount\ninvoice_line_items_1_quantity\ninvoice_line_items_1_amount\ninvoice_line_items_1_pricing_model\ninvoice_line_items_1_is_taxed\ninvoice_line_items_1_tax_amount\ninvoice_line_items_1_object\ninvoice_line_items_1_subscription_id\ninvoice_line_items_1_customer_id\ninvoice_line_items_1_description\ninvoice_line_items_1_entity_type\ninvoice_line_items_1_entity_id\ninvoice_line_items_1_tax_exempt_reason\ninvoice_line_items_1_discount_amount\ninvoice_line_items_1_item_level_discount_amount\ninvoice_sub_total\ninvoice_linked_payments_0_txn_id\ninvoice_linked_payments_0_applied_amount\ninvoice_linked_payments_0_applied_at\ninvoice_linked_payments_0_txn_status\ninvoice_linked_payments_0_txn_date\ninvoice_linked_payments_0_txn_amount\ninvoice_billing_address_first_name\ninvoice_billing_address_last_name\ninvoice_billing_address_company\ninvoice_billing_address_validation_status\ninvoice_billing_address_object\ninvoice_notes_0_note\ninvoice_site_details_at_creation_timezone\ninvoice_site_details_at_creation_organization_address_organizat\ninvoice_site_details_at_creation_organization_address_line1\ninvoice_site_details_at_creation_organization_address_city\ninvoice_site_details_at_creation_organization_address_state\ninvoice_site_details_at_creation_organization_address_country_c\ninvoice_site_details_at_creation_organization_address_zip\ninvoice_site_details_at_creation_organization_address_phone\ninvoice_tax_origin_country\ninvoice_po_number\ninvoice_is_digital\ninvoice_line_items_0_tax_rate\ninvoice_taxes_0_object\ninvoice_taxes_0_name\ninvoice_taxes_0_description\ninvoice_taxes_0_amount\ninvoice_line_item_taxes_0_tax_name\ninvoice_line_item_taxes_0_tax_rate\ninvoice_line_item_taxes_0_tax_juris_type\ninvoice_line_item_taxes_0_tax_juris_name\ninvoice_line_item_taxes_0_tax_juris_code\ninvoice_line_item_taxes_0_object\ninvoice_line_item_taxes_0_line_item_id\ninvoice_line_item_taxes_0_tax_amount\ninvoice_line_item_taxes_0_is_partial_tax_applied\ninvoice_line_item_taxes_0_taxable_amount\ninvoice_line_item_taxes_0_is_non_compliance_tax\ninvoice_billing_address_line1\ninvoice_billing_address_country\ninvoice_shipping_address_first_name\ninvoice_shipping_address_company\ninvoice_shipping_address_line1\ninvoice_shipping_address_country\ninvoice_shipping_address_validation_status\ninvoice_shipping_address_object\n\nColumns in table chargebee.item_families:\n\nitem_family_id\nitem_family_name\nitem_family_description\nitem_family_status\nitem_family_resource_version\nitem_family_updated_at\nitem_family_object\n\nColumns in table chargebee.items:\n\nitem_id\nitem_name\nitem_external_name\nitem_description\nitem_status\nitem_resource_version\nitem_updated_at\nitem_item_family_id\nitem_type\nitem_is_shippable\nitem_is_giftable\nitem_enabled_for_checkout\nitem_enabled_in_portal\nitem_metered\nitem_channel\nitem_object\nitem_item_applicability\n\nColumns in table chargebee.transactions:\n\ntransaction_id\ntransaction_customer_id\ntransaction_subscription_id\ntransaction_gateway_account_id\ntransaction_payment_source_id\ntransaction_payment_method\ntransaction_gateway\ntransaction_type\ntransaction_date\ntransaction_exchange_rate\ntransaction_amount\ntransaction_id_at_gateway\ntransaction_status\ntransaction_updated_at\ntransaction_resource_version\ntransaction_deleted\ntransaction_object\ntransaction_masked_card_number\ntransaction_currency_code\ntransaction_base_currency_code\ntransaction_amount_unused\ntransaction_linked_invoices_0_invoice_id\ntransaction_linked_invoices_0_applied_amount\ntransaction_linked_invoices_0_applied_at\ntransaction_linked_invoices_0_invoice_date\ntransaction_linked_invoices_0_invoice_total\ntransaction_linked_invoices_0_invoice_status\ntransaction_initiator_type\ntransaction_three_d_secure\ntransaction_payment_method_details\n\nColumns in table chargebee.vip_customers:\n\ninvoice_id\ninvoice_customer_id\ninvoice_amount_due\ncustomer_first_name\ncustomer_last_name\n\"Tags\"\n\nColumns in table chargebee.search:\n\nid\nname\ntable_name"
+        }
+      },
+      "id": "d5266b0e-785a-4c32-a2b3-8e1bcab02ff6",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        672,
+        96
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "56c2bf42-318c-48b6-8961-38bbee29a372",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        528,
+        384
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "LqJFRkYjgKQumtJx",
+          "name": "OpenAi account dev@peliqan.io"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ef4871f0-3347-441e-8fec-239c829487f3",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        368
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "LqJFRkYjgKQumtJx",
+          "name": "OpenAi account dev@peliqan.io"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "=# {{ $json.title + '\\n' + $json.content }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "source_url",
+                "value": "={{ $json._source_url }}"
+              },
+              {
+                "name": "title",
+                "value": "={{ $json.title }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c16417fd-73ae-4432-ad35-1ef5596f2fff",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "id": "873318e0-0f5d-4efa-938f-e994b0a951f5",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        1072
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ℹ️ Introduction\n\nEnd-to-end demo of a chatbot using business data from multiple sources (e.g. Notion, Chargebee, Hubspot etc.) with RAG + SQL.\n\nPeliqan.io is used as a \"cache\" of all business data. Peliqan uses one-click ELT to sync all your business data to its built-in data warehouse, allowing for fast & accurate RAG and \"Text to SQL\" queries.\n\n## ⚙️ Setup\n\n* Sign up for a free trial on peliqan.io.\n* Add one or more sources in Peliqan (e.g. Hubspot, Pipedrive...)\n* Copy your Peliqan API key under settings and use it here to add a Peliqan connection\n* Run the \"RAG\" workflow to feed Supabase, change the name of the table in the Peliqan node \"Get table data\".\n* Update the list of tables & columns that can be used for SQL in the System Message of the AI Agent.\n\nVisit peliqan.io/n8n for more information.",
+        "height": 548,
+        "width": 466,
+        "color": 4
+      },
+      "id": "c30e7473-b6d8-4a48-a290-39d8959cd9cd",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "⚠️ To use the Peliqan as tool with Operation \"Execute SQL query\":\nset the below env variable. Run on command line:\n`export N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=True`",
+        "height": 80,
+        "width": 471,
+        "color": 2
+      },
+      "id": "0d1f6e2a-62ae-4793-8ec5-f6fc00c5f93d",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "Data",
+        "toolDescription": "Vector store with all Notion pages (intranet) containing internal knowledge",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": 5,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.2,
+      "position": [
+        1184,
+        240
+      ],
+      "id": "81f4e5af-a7e9-4e27-99a7-5ec84d1877f3",
+      "name": "Supabase Vector Store2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "jDgkXgu9rxrRmjAz",
+          "name": "Supabase account dev@peliqan.io"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        384
+      ],
+      "id": "a19073e6-e710-4558-823d-515643284470",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        512,
+        704
+      ],
+      "id": "f727212f-01f3-49e6-85d2-b7d88de1eadc",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "id": "67b25879-c5ab-4297-b69e-ab79771e5e66",
+      "name": "Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1,
+      "position": [
+        912,
+        704
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "jDgkXgu9rxrRmjAz",
+          "name": "Supabase account dev@peliqan.io"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "200653"
+      },
+      "type": "n8n-nodes-peliqan.peliqan",
+      "typeVersion": 1,
+      "position": [
+        704,
+        704
+      ],
+      "id": "9ba47b91-4a03-414b-82c5-62f8a03987f4",
+      "name": "Get table data",
+      "credentials": {
+        "peliqanApi": {
+          "id": "d7QTqJXKU5v3t5zN",
+          "name": "Peliqan account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "52ab65b7-b2a4-4911-8284-889823360784",
+      "name": "Embeddings OpenAI2",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1,
+      "position": [
+        960,
+        912
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "LqJFRkYjgKQumtJx",
+          "name": "OpenAi account dev@peliqan.io"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "query",
+        "operation": "exec",
+        "connection": "1163",
+        "querySql": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('SQL_Query', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-peliqan.peliqanTool",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        240
+      ],
+      "id": "3747e66f-ec49-446c-af87-77c86cfb9dce",
+      "name": "Execute a sql query via peliqan in Peliqan",
+      "credentials": {
+        "peliqanApi": {
+          "id": "d7QTqJXKU5v3t5zN",
+          "name": "Peliqan account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Tools for AI Agent: SQL & RAG",
+        "height": 576,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        32
+      ],
+      "id": "1c2f73de-c845-4115-9424-7299fd0e5865",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## AI Chatbot",
+        "height": 576,
+        "width": 608,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        352,
+        32
+      ],
+      "id": "3d5e8c12-ffec-4fa8-ad84-18876579bf9d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Brain",
+        "height": 224,
+        "width": 384,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        304
+      ],
+      "id": "4cab8049-66bb-4c0d-b8d8-60ef0fd7bb76",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Feed data into Vector Store (for RAG)",
+        "height": 624,
+        "width": 1152,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        352,
+        640
+      ],
+      "id": "c5d6dd34-7357-4b31-b60b-43e1f0ed37cd",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get table data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get table data": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a sql query via peliqan in Peliqan": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5a6260e2-4816-4721-a0bb-e959daca9b8c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cbd8796a3029a9f181c009fb761c940559eea31ad59a753266d15d4a76041a7c"
+  },
+  "id": "1mTxhYywdjsjEZRT",
+  "tags": []
+}

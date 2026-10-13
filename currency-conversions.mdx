@@ -1,0 +1,55 @@
+---
+title: "Currency conversions"
+---
+
+When you have transactions, invoices or bookings in multiple currencies, it’s important to convert these into a single currency before doing aggregations. For example you might want to calculate total revenue per month, with sales being done in multiple currencies.
+
+<Warning>
+  The challenge is to convert currencies with the **_exchange rate of the day of the transaction_**.
+</Warning>
+
+# Step 1: import exchange rates
+
+Go to Connections, and add a connection to one of the currency exchange rates connectors, for example Norway Bank (Norges bank).
+
+This will sync a table into your account with exchange rates:
+
+<img
+  src="/images/Data transformations/Currency conversions/1_exchange_rates.png"
+  alt="Exchange rates table"
+/>
+
+# Step 2: join your transactions with the exchange rates
+
+Write a query that joins your transactions on the currency exchange rates.
+
+- Make sure to perform a LEFT join and **_not_** an INNER JOIN, to make sure that no transactions would be left out because of a missing matching record in the currency exchange table.
+- Make sure to join on both the currency **_and_** the date of the transaction.
+- Add a column with the converted amount: `transaction amount x rate` from the currencies table
+
+Example query:
+
+```sql
+SELECT 
+	transactions.*,
+  transactions.amount * rate AS converted_amount 
+FROM transactions
+LEFT JOIN currencies
+ON transactions.currencycode = rate_currency AND transactions.date = rate_date
+```
+
+<img
+  src="/images/Data transformations/Currency conversions/2_query.png"
+  alt="Query joining transactions with exchange rates"
+/>
+
+# Step 3: check the result
+
+Double check if any converted amounts are missing:
+
+<img
+  src="/images/Data transformations/Currency conversions/3_converted_amounts.png"
+  alt="Result with converted amounts"
+/>
+
+If OK, use this table going forward in your aggregations, charts etc.

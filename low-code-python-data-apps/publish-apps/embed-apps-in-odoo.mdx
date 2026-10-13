@@ -1,14 +1,14 @@
 ---
-title: Embed apps in Odoo
-sidebarTitle: Odoo
-description: Embed public Peliqan apps inside Odoo detail pages using the Peliqan iframe embed module and pass context via query parameters.
+title: "Embed apps in Odoo"
+sidebarTitle: "Odoo embedding"
+description: "Embed public Peliqan apps inside Odoo detail pages using the Peliqan iframe embed module and pass context via query parameters."
 ---
 
 Public Peliqan apps can be embedded in Odoo using the **Peliqan embed module for Odoo**. This module uses an iframe to render a Peliqan app on the detail page of a selected model in Odoo (e.g. Partners, Products...).
 
 You can download the module for Odoo V18 here:
 
-[peliqan_iframe_embed_odoo.zip](https://assets.super.so/35b4fd12-9269-4553-8b56-b54daf78bd41/files/2907727d-ae53-42f7-8d4f-bda060d0fad8/peliqan_iframe_embed_odoo.zip)
+[peliqan_iframe_embed_odoo.zip](https://github.com/Peliqan-io/downloads/releases/download/d/peliqan_iframe_embed_odoo.zip)
 
 ## Install the module in Odoo
 
@@ -24,7 +24,10 @@ Go to Settings &gt; Technical &gt; iframe Embed (General Settings block).
 
 Set the base URL and select the model whose form view should show the iframe.
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/f296ee53-9747-4172-b801-b0b9e7f4183b/Screenshot_2025-11-24_at_14.19.03/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Publish & Embed apps/Embed apps in Odoo/Screenshot_2025-11-24_at_14.19.03.png"
+  alt="image"
+/>
 
 ## Example Peliqan app for embedding in Odoo
 
@@ -57,4 +60,7 @@ st.text(f"User id: {user_id}, Email: {user_email}, Object id: {object_id}, Model
 
 Example result in Odoo on the detail page of e.g. a Partner (Customer):
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/9efb04a2-f482-4b00-8bac-bec81a9a41ee/Odoo_embedded_Peliqan_app/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Data Apps - low code Python/Publish & Embed apps/Embed apps in Odoo/Odoo_embedded_Peliqan_app.png"
+  alt="image"
+/>

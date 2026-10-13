@@ -26,7 +26,21 @@
                 "root": "connect-your-bi-or-db-tool",
                 "pages": [
                   "connect-your-bi-or-db-tool/ssl-certificates-for-the-peliqan-data-warehouse",
-                  "connect-your-bi-or-db-tool/excel-odbc"
+                  "connect-your-bi-or-db-tool/excel-odbc",
+                  "power-bi",
+                  "looker-studio",
+                  "tableau",
+                  "grafana",
+                  "metabase",
+                  "aws-quick-sight",
+                  "apache-superset",
+                  "excel-odbc",
+                  "salesforce-crm-analytics",
+                  "d-beaver",
+                  "beekeeper-studio",
+                  "peliqan-and-n8n",
+                  "peliqan-and-make",
+                  "peliqan-and-power-automate"
                 ]
               },
               "excel-add-in",
@@ -43,8 +57,19 @@
             "pages": [
               "sql-on-anything",
               "joining-data",
-              "data-transformations",
+              {
+                "group": "Data transformations",
+                "pages": [
+                  "data-transformations",
+                  "status-values-to-readable-text",
+                  "merge-similar-sources",
+                  "currency-conversions",
+                  "map-charts-of-accounts"
+                ]
+              },
               "metadata-data-model-semantic-model",
+              "star-schema",
+              "medallion-architecture",
               "materialize",
               "data-lineage",
               "reverse-etl",
@@ -81,6 +106,7 @@
               "build-ai-agents-in-peliqan",
               "build-ai-agents-with-n8n-and-peliqan",
               "low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan",
+              "custom-mcp-with-o-auth",
               "build-ai-agents-in-peliqan/rag"
             ]
           }
@@ -122,8 +148,12 @@
                 "group": "Writeback and Data Sync",
                 "root": "low-code-python-data-apps/writeback-reverse-etl-data-sync",
                 "pages": [
+                  "raw-api-calls",
                   "low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports",
-                  "low-code-python-data-apps/writeback-reverse-etl-data-sync/incremental-processing"
+                  "incremental-processing",
+                  "upserts",
+                  "link-tables",
+                  "parent-child-relations"
                 ]
               },
               "low-code-python-data-apps/alerting-messaging",
@@ -183,6 +213,7 @@
             "group": "Platform and APIs",
             "pages": [
               "vibe-coding-apps-peliqan-as-backend",
+              "vibe-coding-apps-peliqan-as-backend/how-to-integrate-with-the-peliqan-oauth2-server",
               "permission-layer-for-ai-agents",
               "publish-apis",
               "peliqan-api",
@@ -227,7 +258,7 @@
           "google-cloud-document-ai-getting-started-in-peliqan",
           "google-docs-getting-started-in-peliqan",
           "google-drive-getting-started-in-peliqan",
-          "low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/google-sheets",
+          "google-sheets",
           "connect-to-data/hubspot",
           "ibm-db2-as400-getting-started-in-peliqan",
           "instagram-getting-started-in-peliqan",
@@ -237,7 +268,7 @@
           "linkedin-ads-getting-started-in-peliqan",
           "lucanet-getting-started-in-peliqan",
           {
-            "group": "MS Dynamics 365 Business Central",
+            "group": "Microsoft Dynamics 365 Business Central",
             "root": "connect-to-data/microsoft-dynamics-365-business-central",
             "pages": [
               "connect-to-data/microsoft-dynamics-365-business-central/ms-business-central-extension",

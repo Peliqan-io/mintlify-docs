@@ -1,0 +1,62 @@
+---
+title: "Star schema"
+---
+
+In Peliqan you can model your data as you like, for example by using the [Star schema data model](https://en.wikipedia.org/wiki/Star_schema).
+
+Below is a simple example where we build one fact table and a few dimension tables, based on tables from a CRM called “Teamleader”.
+
+The below queries can be created as **Views** in the data warehouse, to make them visible by your BI tool. See Query Settings > Create as view.
+
+Or you can “**Materialize**” these queries into a physical table in the data warehouse, using Query Settings > Replicate. More info: [Materialize & Replicate](/materialize)
+
+<img
+  src="/images/Metadata, Data models & Semantic models/Building a Star schema/Screenshot_2025-12-05_at_17.17.15.png"
+  alt="Star schema diagram: fact table fct_deals linked to dimension tables dim_customer and dim_status"
+/>
+
+### Dimension table “customer”: dim_customer
+
+The source table is the table “companies”, created by the ELT pipeline:
+
+```sql
+SELECT
+  id AS customer_id,
+  name,
+  address
+FROM teamleader.companies
+```
+
+### Dimension table “status”: dim_status
+
+The source is column “status” from the table “deals”, created by the ELT pipeline:
+
+```sql
+SELECT
+  ROW_NUMBER() OVER () AS status_id,  -- Create an ID for each status
+  status
+FROM (
+  SELECT DISTINCT
+    status
+  FROM teamleader.deals
+  ORDER BY
+    status
+) AS t
+```
+
+### Fact table “deals”: fct_deals
+
+The fact table is created based on the source table “deals” from the ELT pipeline, combined with the id’s from the dimension tables, which are added as FK:
+
+```sql
+SELECT
+  d.id AS deal_id,
+  d.title AS deal_title,
+  d.estimated_value_amount,
+  d.weighted_value_amount,
+  d.company_id AS customer_id,       -- FK to dimension Customer
+  s.status_id                        -- FK to dimension Status
+FROM teamleader.deals AS d
+LEFT JOIN dim_status AS s
+  ON d.status = s.status
+```

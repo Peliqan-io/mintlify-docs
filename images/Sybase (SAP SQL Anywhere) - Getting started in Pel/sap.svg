@@ -1,0 +1,15 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 456 455" width="456" height="455">
+	<title>SAP-svg</title>
+	<defs>
+		<linearGradient id="g1" x2="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,225,-455,0,1,114)">
+			<stop offset="0" stop-color="#00aaee"/>
+			<stop offset="1" stop-color="#0055aa"/>
+		</linearGradient>
+	</defs>
+	<style>
+		.s0 { fill: url(#g1) } 
+		.s1 { fill: #ffffff } 
+	</style>
+	<path class="s0" d="m456 114h-455v225h230"/>
+	<path fill-rule="evenodd" class="s1" d="m271 159c43 0 63 14 63 48 0 30-21 47-56 47h-14v40h-68l-5-17c-15 5-32 4-47 0l-7 17h-38l2-9c-11 10-31 14-44 14-19 0-35-4-50-13l14-27c15 9 25 11 37 10 7 0 17-2 18-11 0-7-10-11-23-15-10-3-21-7-30-13-11-8-16-18-16-32 1-10 4-19 11-26 10-10 26-16 45-16 16 0 36 4 51 12l-16 27c-16-8-24-8-33-9-13-1-20 4-20 9 0 7 13 12 25 16 18 6 41 14 45 36l33-88h39l39 106v-106zm-89 88l-14-45h-1l-14 45c9 3 19 3 29 0zm92-23c13 0 23-5 23-19 0-13-10-17-23-17h-10v36z"/>
+</svg>

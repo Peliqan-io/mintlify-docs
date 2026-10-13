@@ -14,7 +14,10 @@ The start of your alert flow is defining what data you want to alert on. In the 
 
 We advise to limit the amount of columns to include to not overcomplicate your alert message:
 
-![Example query that can be used for an alerting flow.](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/e1fa4191-a9ac-4503-9296-ee894a8a30a9/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Microsoft Teams - Getting started in Peliqan/Send alert to MS Teams/image.png"
+  alt="Example query that can be used for an alerting flow."
+/>
 
 Example query that can be used for an alerting flow.
 
@@ -24,14 +27,20 @@ Example query that can be used for an alerting flow.
 
 ## Data App Flow
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/71fb2b30-ff04-4dad-b93c-b60828194204/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Microsoft Teams - Getting started in Peliqan/Send alert to MS Teams/image 1.png"
+  alt="image"
+/>
 
 We have the following main steps in this data app:
 
 - **Start**: containing some context variables and state handler. State is used if a date is provided.
 - **Configuration:** add here your alert configuration, the query to look at and if we need to take a data into account. Also the MS Teams connection name and channel name is required.
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/70d52224-1517-4e1e-8230-b8f65cea4d75/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Microsoft Teams - Getting started in Peliqan/Send alert to MS Teams/image 2.png"
+  alt="image"
+/>
 
 - **Validate Connection :** We will verify in this block if the provided MSTeams channel can be found and used.
 - **Fetch Data:** In this block we fetch the data based on the configuration
@@ -40,8 +49,14 @@ We have the following main steps in this data app:
 - **Format Message**: In this block the message is constructed. This can be altered based on your requirements.
 - **Send Alert To MS Teams:** This block will send the MS Teams message
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/07c9df0f-707c-45c9-a005-814c944fb047/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Microsoft Teams - Getting started in Peliqan/Send alert to MS Teams/image 3.png"
+  alt="image"
+/>
 
 The result of this template will look like this (dummy data):
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/0f3abfd8-622a-47f0-aa71-0edf79841805/image/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Microsoft Teams - Getting started in Peliqan/Send alert to MS Teams/image 4.png"
+  alt="image"
+/>

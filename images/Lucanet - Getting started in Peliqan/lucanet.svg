@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+     viewBox="0 0 180 180" preserveAspectRatio="xMinYMin meet"
+     style="width:100%; height:auto;">
+  <g>
+    <path id="svg_11" fill="#002A42"
+      d="m13.95001,136.20001c0,14.2 3.2,20.5 8.4,25.7c5.2,5.2 11.5,8.5 25,8.5l60.5,0l0,-43.3l-50.6,0l0,-97.5l-43.3,0l0,106.6z"/>
+    <path id="svg_12" fill="#9728FF"
+      d="m165.55001,63.80001c0,-14.2 -3.2,-20.5 -8.4,-25.7c-5.2,-5.2 -11.5,-8.5 -25,-8.5l-60.5,0l0,43.3l50.6,0l0,97.5l43.3,0l0,-106.6z"/>
+  </g>
+</svg>

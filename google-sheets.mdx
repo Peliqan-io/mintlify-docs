@@ -6,36 +6,19 @@ description: "Learn how to connect Google Sheets to Peliqan, sync data to your w
 
 This article provides an overview to get started with the **Google Sheets** connector in **Peliqan**. Please [contact support](https://peliqan.io/contact) if you have any additional questions or remarks.
 
-## Contents
-
-- [Connect](#connect)
-- [Explore & Combine](#explore--combine)
-- [Troubleshooting](#troubleshooting)
-  - [Rate limits](#rate-limits)
-  - [Missing tables](#missing-tables)
-- [Activate](#activate)
-  - [Write data: update rows](#write-data-update-rows)
-  - [Write data to a sheet: add rows](#write-data-to-a-sheet-add-rows)
-  - [Insert empty rows](#insert-empty-rows)
-  - [Write data from a table into a sheet](#write-data-from-a-table-into-a-sheet)
-  - [Write data from a table into a sheet, with a header row](#write-data-from-a-table-into-a-sheet-with-a-header-row)
-  - [Write data from a table into a sheet (no data frame)](#write-data-from-a-table-into-a-sheet-no-data-frame)
-  - [Update one cell](#update-one-cell)
-  - [Clear cells](#clear-cells)
-  - [Read the values of a sheet](#read-the-values-of-a-sheet)
-  - [Write data in batch](#write-data-in-batch)
-  - [Create a new Google Sheet file (spreadsheet)](#create-a-new-google-sheet-file-spreadsheet)
-  - [Get details of a spreadsheet](#get-details-of-a-spreadsheet)
-- [Tips & Trick](#tips--trick)
-- [Build reports in Google Sheets](#build-reports-in-google-sheets)
-
 ## Connect
 
 In peliqan, go to Connections, click on Add new. Find **Google Sheets** in the list and select it. Click on the Connect button. This will open Google Sheets and allow you to authorize access for Peliqan. Copy the id of the Google Sheet file from the URL and paste it in the connect form.
 
 Once the authorization is done, you will return to Peliqan.
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/980ed47f-f3f3-4189-bd4a-e88f3a71ea4d/Screenshot_2024-06-12_at_11.03.04/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/add-new-connection.avif"
+  alt="Add New Connection"
+  title="Add New Connection"
+  className="mx-auto"
+  style={{ width:"38%" }}
+/>
 
 ## Explore & Combine
 
@@ -43,7 +26,11 @@ Wait a few minutes for the data to start syncing. Now you can view your **Google
 
 Select "Explore" in the left navigation pane, expand "Data warehouse" in the left tree and click on Google Sheets. All tables from Google Sheets will now be shown.
 
-![image](https://images.spr.so/cdn-cgi/imagedelivery/j42No7y-dcokJuNgXeA0ig/70ab68c5-261f-47f2-a9d1-1fc6b1af5709/gridview/w=1920,quality=90,fit=scale-down)
+<img
+  src="/images/Google Sheets - Getting started in Peliqan/gridview.png"
+  alt="gridview"
+  title="gridview"
+/>
 
 You can explore the data in the gridview, and you can write SQL queries to transform the data and to combine the data from **Google Sheets** with data from other sources.
 

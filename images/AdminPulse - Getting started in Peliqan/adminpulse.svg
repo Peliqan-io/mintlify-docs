@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="AdminPulse" xmlns="http://www.w3.org/2000/svg"
+     width="100%" height="100%" viewBox="0 0 124 96" preserveAspectRatio="xMidYMid meet">
+  <path d="m1.35,89.04c-.34,0-.61-.27-.61-.61V7.58c0-.34.27-.61.61-.61h81.45v82.07H1.35Z" fill="#201747" stroke-width="0"/>
+  <circle cx="82.81" cy="48" r="41.06" fill="#3ce6be" stroke-width="0"/>
+  <path d="m100.63,48c0,9.84-7.98,17.82-17.82,17.82s-17.83-7.98-17.83-17.82,7.98-17.83,17.83-17.83,17.82,7.98,17.82,17.83Z" fill="#201747" stroke-width="0"/>
+</svg>
