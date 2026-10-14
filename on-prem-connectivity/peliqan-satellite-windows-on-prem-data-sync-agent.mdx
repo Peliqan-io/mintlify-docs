@@ -394,6 +394,16 @@ No — each pipeline has exactly one source and one target; there's no such thin
 
 # Releases
 
+**v1.8 Release Notes**
+
+- Added beta support for syncing multiple WinBooks/DBF dossier folders in a single pipeline, including parent and subfolder details in the source columns.
+- Resolved issue when syncing tables with the same name across different source DBs.
+- Improved BigQuery NUMERIC handling for values with more than 9 decimal places.
+- Improved recovery from BigQuery server restarts and connection errors.
+- Improved BigQuery error messages and recovery from failed write streams.
+- Resolved issue involving mixed primary keys and non-ASCII column names.
+- Improved table-mapping performance for large datasets.
+
 **v1.7: Support for tables without PK + “exclude” options**
 
 - Reduced memory usage during large multi-database syncs.
