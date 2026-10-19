@@ -715,18 +715,368 @@ The project scoping depends on the type of data sync that is being implemented. 
 | Bug fixing | Fix edge cases etc. | 2 - 4 days |
 | Monitoring & maintenance | Check for errors in scheduled runs | Ongoing E.g. 1 day per week |
 
-| **MEDIUM SIZE PROJECT** |  |
-| --- | --- |
-| E.g. Automated CRM data sync (one-way), **types 1 - 3** |  |
-| **Total effort** | **15 - 30 days** |
-| **Total project lead time** | **4 - 8 weeks** |
+<table>
+  <colgroup>
+    <col width="652" />
+    <col width="116" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>**MEDIUM SIZE PROJECT**</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>E.g. Automated CRM data sync (one-way), **types 1 - 3**</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>**Total effort**</td>
+      <td>**15 - 30 days**</td>
+    </tr>
+    <tr>
+      <td>**Total project lead time**</td>
+      <td>**4 - 8 weeks**</td>
+    </tr>
+  </tbody>
+</table>
 
-| **FULL SCALE PROJECT** |  |
-| --- | --- |
-| E.g. ERP data sync with business process impact, **type 4** |  |
-| **Total effort** | **30 - 90+ days** |
-| **Total project lead time** | **2 - 6 months** |
+<table>
+  <colgroup>
+    <col width="648" />
+    <col width="131" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>**FULL SCALE PROJECT**</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>E.g. ERP data sync with business process impact, **type 4**</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>**Total effort**</td>
+      <td>**30 - 90+ days**</td>
+    </tr>
+    <tr>
+      <td>**Total project lead time**</td>
+      <td>**2 - 6 months**</td>
+    </tr>
+  </tbody>
+</table>
 
-### Preperation
+### Preparation
 
-[Reverse ETL business intake survey](https://help.peliqan.io/reverse-etl/reverse-etl-preparation-checklist)
+<Accordion title="Preparation intake document (click to expand)">
+  # Template intake document
+
+  <table>
+    <colgroup>
+      <col width="510" />
+      <col width="100" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>General</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Describe the business case</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Describe the process step by step. Per step:</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>• Manual or automated step ? Human in the loop ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>• Which fields are updated ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Process edge case ? Examples:</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>• We rely on a status field, status can be reverted</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>• We rely on specific human input, mistakes are posible</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Technical contact at customer</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Technical contact has knowledge on relational data models, SQL, Python ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Technical contact had Reverse ETL onboarding from Peliqan (2 hours)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Project start</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Project deadline</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>_Please allow for 4-8 weeks, depending on complexity_</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  Please fill the below tables **for each object type** that you want to sync from a source to a target, for example “Customers”, “Invoices” and “Projects” are 3 Object types.
+
+  <table>
+    <colgroup>
+      <col width="344" />
+      <col width="147" />
+      <col width="151" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Overall sync</th>
+        <th>Source</th>
+        <th>Target</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Platform name</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Object type name</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Primary key (unique key)</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Connection added in Peliqan ?</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Tables visible in Peliqan ?</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>How many rows to process ? Row count > 100K ?</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table>
+    <colgroup>
+      <col width="485" />
+      <col width="100" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Target details</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Do inserts in target ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Do updates in target ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Do deletes in target ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Is the target empty ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>If not, should checks be done in target to avoid duplicates ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>What field can be used to match between source and target when checking for existing target records ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Is the object linked to a parent ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Is the parent already in the target or should it also be synced using Peliqan’s Reverse ETL app ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>How many records have to be synced in total ?</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Do you want to write the ID of the target back into a custom field in the source ?</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  # Example filled out intake document
+
+  | General |  |
+  | :-- | :-- |
+  | Describe the business case | We want to keep CRM data in sync from Hubspot to Odoo because sales data is entered in Hubspot but our services team uses Odoo |
+  | Technical contact at customer | [john@acme.com](mailto:john@acme.com) |
+  | Technical contact has knowledge on relational data models, SQL, Python ? | Yes |
+  | Technical contact had Reverse ETL onboarding from Peliqan (2 hours) | Yes |
+  | Project start | Jan 1st 2027 |
+  | Project deadline |  |
+  | _Please allow for 4-8 weeks_ | March 1st 2027 |
+
+  <table>
+    <colgroup>
+      <col width="393" />
+      <col width="100" />
+      <col width="100" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Overall sync</th>
+        <th>Source</th>
+        <th>Target</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Platform name</td>
+        <td>Hubspot</td>
+        <td>Odoo</td>
+      </tr>
+      <tr>
+        <td>Object type name</td>
+        <td>Contacts</td>
+        <td>Partners</td>
+      </tr>
+      <tr>
+        <td>Primary key (unique key)</td>
+        <td>id</td>
+        <td>id</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Connection added in Peliqan ?</td>
+        <td>Yes</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>Tables visible in Peliqan ?</td>
+        <td>Yes</td>
+        <td>Yes</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table>
+    <colgroup>
+      <col width="333" />
+      <col width="325" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Target details</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Do inserts in target ?</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>Do updates in target ?</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>Do deletes in target ?</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Is the target empty ?</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>If not, should checks be done in target to avoid duplicates ?</td>
+        <td>No, the companies present in Odoo are unrelated, the Reverse ETL app can safely add all companies from Hubspot as new entries in Odoo.</td>
+      </tr>
+      <tr>
+        <td>What field can be used to match between source and target when checking for existing target records ?</td>
+        <td>VAT number, but not needed</td>
+      </tr>
+      <tr>
+        <td>Is the object linked to a parent ?</td>
+        <td>Yes: Company</td>
+      </tr>
+      <tr>
+        <td>Is the parent already in the target or should it also be synced using Peliqan’s Reverse ETL app ?</td>
+        <td>Also synced by Reverse ETL app</td>
+      </tr>
+      <tr>
+        <td>How many records have to be synced in total ?</td>
+        <td>Around 100K</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Do you want to write the ID of the target back into a custom field in the source ?</td>
+        <td>Yes to a custom field “Odoo_id” which we added in Hubspot for Contacts.</td>
+      </tr>
+    </tbody>
+  </table>
+</Accordion>
