@@ -105,7 +105,7 @@
           {
             "group": "For AI Creators",
             "pages": [
-              "low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/peliqan-mcp-server",
+              "mcp-server",
               "build-ai-agents-in-peliqan",
               "build-ai-agents-with-n8n-and-peliqan",
               "low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan",
