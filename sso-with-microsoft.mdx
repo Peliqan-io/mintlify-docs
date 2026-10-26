@@ -12,7 +12,7 @@ Partners with sub accounts in Peliqan can restrict access to sub accounts based 
 - **A Peliqan Account owner or Account admin:** steps 5-9 (Setup in Peliqan)
 - **Everyone on your team:** step 10 (Sign in to Peliqan with Microsoft)
 
-# Setup In Azure
+# Setup in Azure
 
 _This needs to be performed by your Azure administrator._
 
@@ -72,7 +72,7 @@ If people aren't being added to a group in Peliqan, the usual reason is that the
 # Good to know
 
 - **Only assigned groups work.** Peliqan only sees groups assigned to Peliqan SSO in Azure.
-- **Changes apply at the next sign-in.** If someone leaves a group in Azure, they lose access the next time they sign in. When someone leaves your company, also deactivate them in Peliqan.
+- **Changes apply at the next sign-in.** If someone leaves a group in Azure, they lose access to the mapped Peliqan group the next time they sign in to Peliqan. When someone leaves your company, also deactivate the user in Peliqan so that it takes effect immediately.
 - **API scripts:** a script runs as the user who owns its API token. If that user is a member, the script can only reach customers in their groups.
 
 # Peliqan API - automate provisioning of users with Microsoft SSO
