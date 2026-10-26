@@ -1,0 +1,169 @@
+---
+title: "SSO with Microsoft"
+---
+
+This article describes how to enable SSO (single sign on) in Peliqan using Microsoft Azure. You can optionally map Azure groups to Peliqan groups to inherit permissions in Peliqan from group membership in Azure Entra ID.
+
+Partners with sub accounts in Peliqan can restrict access to sub accounts based on groups.
+
+**Who does what:**
+
+- **Your Azure administrator:** steps 1–4 (Setup in Azure)
+- **A Peliqan Account owner or Account admin:** steps 5-9 (Setup in Peliqan)
+- **Everyone on your team:** step 10 (Sign in to Peliqan with Microsoft)
+
+# Setup In Azure
+
+_This needs to be performed by your Azure administrator._
+
+**Step 1.** Sign in to Peliqan **with Microsoft** once. If you see **"Need admin approval"**, approve **Peliqan SSO** for your organisation in Azure. This step will add Peliqan SSO as an Enterprise Application in Azure.
+
+**Step 2.** in Azure, go to **Enterprise applications → Peliqan SSO → Users and groups**.
+
+**Step 3.** Click **Add user/group**, choose a group, and click **Assign**. Do this for each group you want to allow access to Peliqan.
+
+![Azure Sso App Groups](/images/azure_sso_app_groups.webp "Azure Sso App Groups")
+
+**Step 4.** Optional, for group mapping: open each group and copy its **Object ID**. You will need these in Peliqan to map Azure groups to Peliqan groups. See below.
+
+# Setup in Peliqan
+
+_This can only be performed by a Peliqan Account owner or Account admin._
+
+### Create users
+
+**Step 5.** Create each user in Peliqan with the exact same username as the UPN (username) in Azure.
+
+<Info>
+  **How to find the UPN**<br />In Azure, go to **Microsoft Entra ID → Users → All users** and check the **User principal name** column. You can also click a user and find it on their **Overview** page. The UPN is often the same as the email address, but not always (for example _name@company.onmicrosoft.com_).
+</Info>
+
+### Group mapping
+
+**Step 6.** Go to **Settings → Groups** and create a group.
+
+![Peliqan Groups](/images/peliqan_groups.png "Peliqan Groups")
+
+**Step 7.** Open the group → **Group mappings** → **Add mapping**, and paste the Object ID (group object ID from Azure, see above step 4).
+
+![Peliqan Group Mapping](/images/peliqan_group_mapping.png "Peliqan Group Mapping")
+
+### Limit access to sub accounts based on groups
+
+**Step 8.** Go to **Settings → Customers → Access** and choose **Access based on groups**.
+
+If you want to restrict access to customer sub accounts based on groups, you need to enable this feature. The account owner or an Account admin needs to turn on “**Access based on groups”** on the **Customers** page.
+
+**Step 9.** Go to **Settings → Customers**, open each customer, and choose its group.
+
+Members and viewers of groups in Peliqan can now only login to customer sub accounts in their groups. For other sub accounts, the “Login” button is disabled. Account owners and Account admins still login to all customer sub accounts.
+
+# Peliqan login with Microsoft Azure
+
+**Step 10.** _(Everyone on your team)_ Sign in to Peliqan **with Microsoft**. The user is added to the mapped Peliqan groups on login, based on its Azure groups.
+
+# Adding a new group later
+
+1. _Your Azure admin:_ Assign the new group to **Peliqan SSO** (step 3 above).
+2. _A Peliqan Account owner or Account admin:_ Add a mapping with its Object ID (step 6 above).
+
+If people aren't being added to a group in Peliqan, the usual reason is that the group isn't assigned to the “Peliqan SSO” Enterprise Application in Azure.
+
+# Good to know
+
+- **Only assigned groups work.** Peliqan only sees groups assigned to Peliqan SSO in Azure.
+- **Changes apply at the next sign-in.** If someone leaves a group in Azure, they lose access the next time they sign in. When someone leaves your company, also deactivate them in Peliqan.
+- **API scripts:** a script runs as the user who owns its API token. If that user is a member, the script can only reach customers in their groups.
+
+# Peliqan API - automate provisioning of users with Microsoft SSO
+
+_Provisioning of Peliqan users with Microsoft SSO can be automated with the Peliqan API, for example from a script. Use the API token of a Peliqan Account owner or Account admin._
+
+Every request needs this header:
+
+```http
+Authorization: JWT {YOUR_API_TOKEN}
+```
+
+In the examples below, replace `{PELIQAN_HOST}` with your Peliqan host, for example `app.eu.peliqan.io`.
+
+### Create Peliqan groups and add group mappings
+
+List your Peliqan groups and their IDs:
+
+```http
+GET https://{PELIQAN_HOST}/api/groups/
+```
+
+Create a Peliqan group:
+
+```http
+POST https://{PELIQAN_HOST}/api/groups/
+{"name": "Team A"}
+```
+
+Map an Azure group to a Peliqan group. `external_group_id` is the Object ID from the group in Azure:
+
+```http
+POST https://{PELIQAN_HOST}/api/groups/{GROUP_ID}/external-mappings/
+{
+	"external_group_id": "993dbe6f-017b-4a48-a515-07ded080af37", 
+	"external_group_description": "Team A in Azure"
+}
+```
+
+List and remove the mappings of a group:
+
+```http
+GET    https://{PELIQAN_HOST}/api/groups/{GROUP_ID}/external-mappings/
+DELETE https://{PELIQAN_HOST}/api/groups/{GROUP_ID}/external-mappings/{MAPPING_ID}/
+```
+
+### Enable sub account access based on groups
+
+Turn on the feature to restrict access to sub accounts based on groups (`false` turns it off):
+
+```http
+PATCH https://{PELIQAN_HOST}/api/user/account-update/
+{"sub_account_access_by_group": true}
+```
+
+Note: this has to be performed only once, in your Peliqan parent account (partner account), you can also do this in the Peliqan UI.
+
+### Assign a sub account to a group
+
+Assign customer sub account to a group, using the customer external ID that you configured when the customer was added in Peliqan (`null` removes it from its group):
+
+```http
+PATCH https://{PELIQAN_HOST}/api/partner/sub-account/?external_id={EXTERNAL_ID}
+{"access_group_id": 12}
+```
+
+Or set the group when you create the customer sub account, by adding `"access_group_id": 12` to the body:
+
+```http
+POST https://{PELIQAN_HOST}/api/partner/sub-accounts/
+{
+  "company_name": "Wood Solutions Ltd",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john@woodsolutions.com",
+  "password": "xxx",
+  "language": "en",
+  "external_id": "wood_123",       // required, your unique customer id
+  "access_group_id": 12
+}
+```
+
+Count the customer sub accounts that aren't assigned to a Peliqan group yet, or put them all in one default group:
+
+```http
+GET  https://{PELIQAN_HOST}/api/partner/sub-accounts/without-group/
+
+POST https://{PELIQAN_HOST}/api/partner/sub-accounts/without-group/
+{"group_id": 12}
+```
+
+More info on the Peliqan Partner API:
+
+[Partner API](/whitelabel/partner-api-embed-api) 

@@ -46,8 +46,15 @@
                   "peliqan-and-power-automate"
                 ]
               },
+              {
+                "group": "User management",
+                "pages": [
+                  "user-management",
+                  "permissions",
+                  "sso-with-microsoft"
+                ]
+              },
               "excel-add-in",
-              "permissions",
               "market-place",
               "frequently-asked-questions",
               "feature-list-roadmap-and-architecture",
