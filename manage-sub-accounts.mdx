@@ -36,23 +36,29 @@ Use the "Login as" button to login into the sub account.
   alt="image"
 />
 
-<Note>
-  Every user in the partner account has access to the sub accounts via the "Login as" button, except if Support access is disabled inside the sub account.
+Every user in the partner account has access to the sub accounts via the "Login as" button, except if Support access is disabled inside the sub account or if access based on groups is enabled (see below).
 
-  Every user in the partner account can create new sub accounts.
+After logging in to the sub account with the "Login" feature, the user will be an Account Admin in the sub account: the user will have full access to all features in the sub account.
 
-  After logging in to the sub account with the "Login as" feature, the user will be an Account Admin in the sub account (full access to all features in the sub account).
+If you want users to have direct login access to sub accounts, create a user in each sub account separately. Note that logins (email addresses) have to be unique. A typical pattern is to use [john.doe+subaccount1@acme.com](mailto:john.doe+subaccount1@acme.com), [john.doe+subaccount2@acme.com](mailto:john.doe+subaccount2@acme.com) etc.
 
-  If you want users to have access to only a selection of sub accounts, create a user in each sub account separately. Note that logins (email addresses) have to be unique. A typical pattern is to use [john.doe+subaccount1@acme.com](mailto:john.doe+subaccount1@acme.com), [john.doe+subaccount2@acme.com](mailto:john.doe+subaccount2@acme.com) etc.
+When using the "Login" feature, a new user is automatically created in the sub account, with username `support+sub_account_name+sub_account_id@domain.com` (e.g. your whitelabel domain or peliqan.io), for example for customer ACME from MySaaS.com this will become `support+acme+123@mysaas.com`.
 
-  When using the "Login as" feature, a new user is automatically created in the sub account, with username `support+sub_account_name+sub_account_id@domain.com` (e.g. your whitelabel domain or peliqan.io), for example for customer ACME from MySaaS.com this will become `support+acme+123@mysaas.com`.
+For more information on creating users and roles, see:
 
-  For more information on creating users and roles, see:
+[User management](/user-management) 
 
-  [Permissions](/permissions)
-</Note>
+## Limit access to sub accounts based on groups
+
+If you want to restrict access to customer sub accounts based on groups, you need to enable this feature. The account owner or an Account admin needs to turn on “**Access based on groups”** on the **Customers** page. Go to **Settings → Customers → Access** and choose **Access based on groups**.
+
+Next, assign each customer sub account to a group: go to **Settings → Customers**, open each customer, and choose its group.
+
+Members and viewers of groups in Peliqan can now only login to sub accounts within their groups. For other sub accounts, the “Login” button is disabled. Account owners and Account admins can still login to all customer sub accounts.
 
 ## Create new sub accounts
+
+Every user in the partner account can create new sub accounts.
 
 ### From the partner account
 
