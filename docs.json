@@ -380,5 +380,112 @@
       "vscode"
     ]
   },
-  "description": "Peliqan.io - the trust layer for AI."
+  "description": "Peliqan.io - the trust layer for AI.",
+  "redirects": [
+    {
+      "source": "/en/article/reverse-etl-wrrzqh",
+      "destination": "/reverse-etl",
+      "permanent": true
+    },
+    {
+      "source": "/en/article/metadata-data-models-semantic-models-b8x09k",
+      "destination": "/metadata-data-model-semantic-model",
+      "permanent": true
+    },
+    {
+      "source": "/en/article/low-code-python-data-apps-1b2bn7b",
+      "destination": "/low-code-python-data-apps/basics-of-data-apps",
+      "permanent": true
+    },
+    {
+      "source": "/en/article/data-quality-monitoring-contracts-1q5gp03",
+      "destination": "/low-code-python-data-apps/data-quality-monitoring",
+      "permanent": true
+    },
+    {
+      "source": "/en/article/data-lineage-1azjwlp",
+      "destination": "/data-lineage",
+      "permanent": true
+    },
+    {
+      "source": "/en/article/connect-to-data-elt-asdngj",
+      "destination": "/connect-to-data",
+      "permanent": true
+    },
+    {
+      "source": "/en/article/build-ai-agents-in-peliqan-1xc6k5p",
+      "destination": "/build-ai-agents-in-peliqan",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/reporting/write-to-google-sheets",
+      "destination": "/google-sheets",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/writeback-reverse-etl-data-sync/writeback-examples-per-connector/google-sheets",
+      "destination": "/google-sheets",
+      "permanent": true
+    },
+    {
+      "source": "/data-transformations/mapping-charts-of-accounts-from-different-countries-accounting",
+      "destination": "/map-charts-of-accounts",
+      "permanent": true
+    },
+    {
+      "source": "/build-ai-agents-in-peliqan/build-ai-agents-with-n8n-and-peliqan",
+      "destination": "/build-ai-agents-with-n8n-and-peliqan",
+      "permanent": true
+    },
+    {
+      "source": "/slow-changing-dimensions",
+      "destination": "/low-code-python-data-apps/slow-changing-dimensions-history-tables",
+      "permanent": true
+    },
+    {
+      "source": "/handling-deleted-rows",
+      "destination": "/low-code-python-data-apps/etl-custom-pipelines/handling-deleted-rows",
+      "permanent": true
+    },
+    {
+      "source": "/data-quality-monitoring",
+      "destination": "/low-code-python-data-apps/data-quality-monitoring",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/data-transformations",
+      "destination": "/data-transformations",
+      "permanent": true
+    },
+    {
+      "source": "/connect-your-bi-or-db-tool/metabase",
+      "destination": "/metabase",
+      "permanent": true
+    },
+    {
+      "source": "/connect-your-bi-or-db-tool/microsoft-power-bi",
+      "destination": "/power-bi",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps",
+      "destination": "/low-code-python-data-apps/basics-of-data-apps",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol",
+      "destination": "/mcp-server",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/using-peliqans-remote-mcp",
+      "destination": "/mcp-server",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/peliqan-mcp-server",
+      "destination": "/mcp-server",
+      "permanent": true
+    }
+  ]
 }
