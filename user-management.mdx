@@ -6,7 +6,13 @@ This section describes how to create and manage users in Peliqan and other CIAM 
 
 # Create users
 
+### Normal users
+
 Account Owners and Account Admins can manage users in Peliqan under Settings > Users. Click on "Add user" and select "Create user" or "Invite by email".
+
+### Service account users
+
+Add dedicated users for specific services, for example Power BI. Create a user, and assign it to the appropriate groups. Next, create an API key for that user and use it externally, or use the dedicated data warehouse user of the service account user in Power BI or any other BI tool.
 
 # Create users via the API
 
@@ -43,3 +49,48 @@ Permissions in Peliqan are managed through groups. more info:
 Partners with multiple end-customers can create sub accounts in Peliqan for each of their customers. Users are added in sub accounts directly. More info:
 
 [Manage sub accounts](/manage-sub-accounts) 
+
+# User access across Peliqan features
+
+<table>
+  <colgroup>
+    <col width="314" />
+    <col width="373" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Peliqan feature</th>
+      <th>Authentication</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Peliqan Platform UI</td>
+      <td>Login with username & password, or login with Microsoft or Google (SSO)</td>
+    </tr>
+    <tr>
+      <td>Peliqan MCP Server</td>
+      <td>OAuth with Peliqan user login</td>
+    </tr>
+    <tr>
+      <td>Peliqan Excel add-in</td>
+      <td>Peliqan user login (login & password) or API key</td>
+    </tr>
+    <tr>
+      <td>BI tools (direct Peliqan DWH access)</td>
+      <td>Dedicated DB user per Peliqan user</td>
+    </tr>
+    <tr>
+      <td>Peliqan Data apps</td>
+      <td>Publish with access = "Peliqan users (authenticated users only)<br />Use impersonation in app.</td>
+    </tr>
+    <tr>
+      <td>Peliqan Machine apps</td>
+      <td>Publish with access = "Peliqan users (authenticated users only)<br />Use impersonation in app.</td>
+    </tr>
+    <tr>
+      <td>Sub accounts</td>
+      <td>Create users in each sub account.</td>
+    </tr>
+  </tbody>
+</table>
