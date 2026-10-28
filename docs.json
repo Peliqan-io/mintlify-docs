@@ -48,8 +48,8 @@
               },
               {
                 "group": "User management",
+                "root":  "user-management",
                 "pages": [
-                  "user-management",
                   "permissions",
                   "sso-with-microsoft"
                 ]
