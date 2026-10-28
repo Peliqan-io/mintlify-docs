@@ -33,10 +33,73 @@ RUN_CONTEXT      # Possible values: interactive, scheduled, api_handler or not s
 
 if 'RUN_CONTEXT' not in globals():
 	print("Running outside of Peliqan)
+```
 
-# Get the current logged-in user
-user = pq.__service_client__.call_backend(method="get", url=f"{pq.BACKEND_URL}/api/user/me")
-st.write(user["username"])
+# Authenticated users
+
+Get the Data App owner:
+
+```python
+# Get the Data App owner
+owner = pq.__service_client__.call_backend(method="get", url=f"{pq.BACKEND_URL}/api/user/me")
+st.write(owner["username"])
+```
+
+Impersonate the authenticated user, for published Data Apps with access = "Peliqan users" (authenticated users only):
+
+```python
+import json
+from urllib.parse import unquote
+
+def _cookie_json(cookies, name):
+    raw = cookies.get(name)
+    if not raw:
+        return None
+    try:
+        return json.loads(unquote(raw))   # cookie values are percent-encoded JSON
+    except (json.JSONDecodeError, TypeError):
+        return None
+
+def get_visitor_token():
+    cookies = st.context.cookies
+    user_ids = _cookie_json(cookies, "__secure_idx")   # ordered, URL-stable
+    if not user_ids:
+        return None
+
+    # which account the visitor views as: ?u=<index> (matches nuxt-latest /u/{idx}), default first
+    try:
+        pos = int(st.query_params.get("u", 0))
+    except (TypeError, ValueError):
+        pos = 0
+    if not (0 <= pos < len(user_ids)):
+        pos = 0
+
+    session = _cookie_json(cookies, f"__secure_u_{user_ids[pos]}")
+    token = session.get("token") if session else None
+    return token
+
+pq_visitor_token = get_visitor_token()
+if pq_visitor_token is None:
+    st.warning("You are not logged in to Peliqan.", icon=":warning:")
+    st.stop()
+else:
+    st.write("You are logged in.")
+
+    # Impersonate current logged in user, get a personal pq instance and DWH connection
+    pq_impersonated = Peliqan(pq_visitor_token)
+    db_impersonated = pq_impersonated.dbconnect(pq_impersonated.DW_NAME)
+
+    current_user = pq_impersonated.__service_client__.call_backend(method="get", url=f"{pq.BACKEND_URL}/api/user/me")
+    st.write(f"Current logged in user: %s" % current_user["username"])
+
+    owner = pq.__service_client__.call_backend(method="get", url=f"{pq.BACKEND_URL}/api/user/me")
+    st.write(f"Data app owner: %s" % owner["username"])
+
+    # Fetch data with the impersonated DWH connection, 
+    # this will fail if the current logged in user is not part of the group of the accessed schema
+    query = "SELECT * FROM some_schema.some_table"
+    rows = db_impersonated.fetch(pq_impersonated.DW_NAME, query = query)
+    
 ```
 
 # Run modes
