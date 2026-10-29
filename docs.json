@@ -340,6 +340,12 @@
           "zenvoices-getting-started-in-peliqan",
           "zoho-creator-getting-started-in-peliqan"
         ]
+      },
+      {
+        "tab": "Getting started videos",
+        "pages": [
+          "getting-started-videos"
+        ]
       }
     ]
   },
