@@ -1,0 +1,120 @@
+---
+title: "Advanced Machine configuration"
+sidebarTitle: "Advanced"
+description: "Extend your Machine's Dockerfile, add a scheduled task and check runtime limits."
+---
+
+The standard Machine project includes a Dockerfile for its frontend and Python backend. Use this page when your app needs extra system packages or a scheduled task. For creating and publishing an app, see [Peliqan Machines](/peliqan-machines).
+
+## Use a custom Dockerfile
+
+Use a custom Dockerfile when your app needs extra system packages, such as fonts or document-processing tools.
+
+1. Open **Code** and select `Dockerfile`. If your project has none, add one at the project root.
+2. Add the packages your app needs in the final runtime stage, before `USER 10000:10000`. For example, to add fonts to the standard Alpine-based starter:
+
+```dockerfile
+RUN apk add --no-cache font-dejavu
+```
+
+3. Keep the existing frontend build steps and application startup command.
+4. Save and publish, then test the app in Production.
+
+The Dockerfile builds Production only. Development uses a managed image. Custom images go through the same publishing security checks.
+
+## Add a cron job
+
+For a nightly Peliqan data sync, use a [scheduled Data App](/low-code-python-data-apps/running-apps-manual-schedule-etc). Its schedule runs independently of the Machine's web server.
+
+Use cron inside the Machine when the task belongs with the running app. For example, run your dashboard's summary-refresh script every hour:
+
+1. Add your refresh logic in `backend/refresh_summary.py` and test it in Development.
+2. Add a file named `crontab` at the project root:
+
+```text
+# Run at the start of every hour (UTC).
+0 * * * * python /app/backend/refresh_summary.py
+```
+
+3. In the Dockerfile's final runtime stage, before `USER`, add:
+
+```dockerfile
+RUN apk add --no-cache bash supercronic tini
+COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
+COPY crontab /app/crontab
+RUN supercronic -test /app/crontab
+ENV TZ=UTC
+ENTRYPOINT ["/sbin/tini", "-g", "--", "/app/entrypoint.sh"]
+```
+
+4. Add the `entrypoint.sh` below. Keep the starter's existing `CMD ["python", "backend/run.py", "start"]` so the web app starts alongside the scheduler.
+5. Save and publish. Cron starts in Production; test the Python script manually in Development.
+
+<Accordion title="entrypoint.sh — start the web app and scheduler together">
+  This script stops the container if either process exits and forwards shutdown signals to both. Peliqan AI can add these files to your existing project.
+
+  ```bash
+  #!/usr/bin/env bash
+  set -u
+  
+  shutdown() {
+    trap '' TERM INT QUIT
+    kill -TERM 0 2>/dev/null || true
+    wait || true
+  }
+  trap 'shutdown; exit 0' TERM INT QUIT
+  
+  supercronic -no-reap /app/crontab &
+  "$@" &
+  
+  status=0
+  wait -n || status=$?
+  shutdown
+  # Both processes are meant to stay running.
+  if [ "$status" -eq 0 ]; then status=1; fi
+  exit "$status"
+  ```
+</Accordion>
+
+The Dockerfile installs the scheduler during the build; the entrypoint starts it when the app runs. Jobs use the Machine's environment variables. Keep credentials in the Machine settings.
+
+Cron runs only while the app is running. Restarts can miss jobs, and publishing can briefly run two copies. Make your task safe to retry.
+
+## CPU and memory
+
+Choose Production memory in **Settings** or **Publish**, within your account's available pool.
+
+| Memory shown in the UI | Memory limit | CPU limit |
+| --- | --- | --- |
+| 1 GB | 1 GiB | 0.5 vCPU |
+| 2 GB | 2 GiB | 1 vCPU |
+| 3 GB | 3 GiB | 1.5 vCPU |
+| 4 GB | 4 GiB | 2 vCPU |
+
+CPU values are maximum limits. Applying a memory change restarts the app; exceeding its memory limit can also cause a restart.
+
+## Operating system and network
+
+- **Linux:** Development uses Alpine Linux with Python 3.12 and Node.js. Production uses your Dockerfile's Linux image, built for `linux/amd64`.
+- **Runtime:** keep user `10000:10000` and HTTP on `0.0.0.0:8080`. The root filesystem is read-only; use `/tmp` for temporary output.
+- **Inbound:** users open the app over HTTPS. Other ports exposed in the Dockerfile are not publicly accessible.
+
+| Outbound connection | Default access |
+| --- | --- |
+| Public HTTPS services on port `443` | Allowed |
+| Configured Peliqan warehouse connections | Allowed as configured |
+| Private network addresses | Restricted |
+| Other outbound ports | Restricted |
+
+<Note>
+  If an integration needs another connection path, contact [Peliqan Support](mailto:support@peliqan.io).
+</Note>
+
+## Project limits
+
+Source projects support up to 1,000 files, 10 MiB per file and 25 MiB in total. ZIP imports can be up to 50 MiB compressed. Exclude installed dependencies, generated output and secret files.
+
+## More info
+
+- [Peliqan Machines](/peliqan-machines)
+- [Running Data Apps on a schedule](/low-code-python-data-apps/running-apps-manual-schedule-etc)

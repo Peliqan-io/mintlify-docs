@@ -223,7 +223,13 @@
           {
             "group": "Platform and APIs",
             "pages": [
-              "peliqan-machines",
+              {
+                "group": "Peliqan Machines",
+                "root": "peliqan-machines",
+                "pages": [
+                  "peliqan-machines/advanced"
+                ]
+              },
               "vibe-coding-apps-peliqan-as-backend/how-to-integrate-with-the-peliqan-oauth2-server",
               "permission-layer-for-ai-agents",
               "publish-apis",
