@@ -10,7 +10,7 @@ You can use Microsoft Power Automate in combination with Peliqan, for example to
 
 # Example 1: read data from the Peliqan data warehouse, evaluate and send alerts to MS Teams
 
-In the below example we build a Flow in Power Automate that runs on a schedule. The flow fetches data from a view (or table) in the Peliqan data warehouse. It loops over the rows and checks the value for one column. If the value is higher than a treshold, an alert is sent to Microsoft Teams.
+In the below example we build a Flow in Power Automate that runs on a schedule. The flow fetches data from a view (or table) in the Peliqan data warehouse. It loops over the rows and checks the value for one column. If the value is higher than a threshold, an alert is sent to Microsoft Teams.
 
 In the example below we monitor a table with invoices and if the invoice amount (invoice_total) is higher than 100.000, we send out the alert.
 
@@ -34,7 +34,7 @@ Create a scheduled flow in Power Automate:
 
 ### Step 3: Get rows from a table or view (query) in Peliqan
 
-In the flow, add a block “Get Rows” and choose a table or view from the Peliqan data warehouse. In the exampe below we have selected [chargebee.top](http://chargebee.top)\_invoices:
+In the flow, add a block “Get Rows” and choose a table or view from the Peliqan data warehouse. In the example below we have selected [chargebee.top](http://chargebee.top)\_invoices:
 
 <img
   src="/images/Connect your BI, DB tool or iPaaS/Peliqan and MS Power Automate/power_automate_get_rows.png"

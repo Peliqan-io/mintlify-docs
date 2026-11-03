@@ -117,7 +117,7 @@ With the Peliqan federated query engine, queries on the Exact Online data can be
 
 ## Configure custom sync frequency for selected tables
 
-We've set the default sync frequency for the Exact Online connector to every 6hours due to the heavy rate limits Exact Online imposes.
+We've set the default sync frequency for the Exact Online connector to every 6 hours due to the heavy rate limits Exact Online imposes.
 
 <img
   src="/images/Exact Online - Getting started in Peliqan/Untitled 4.png"
@@ -126,7 +126,7 @@ We've set the default sync frequency for the Exact Online connector to every 6ho
   style={{ width:"56%" }}
 />
 
-However for many cases it is required to have a higher sync frequency for a specific set of tables: e.g. TransactionLines. With the Peliqan data activation library you con configure a more frequent sync for desired tables:
+However for many cases it is required to have a higher sync frequency for a specific set of tables: e.g. TransactionLines. With the Peliqan data activation library you can configure a more frequent sync for desired tables:
 
 <img
   src="/images/Exact Online - Getting started in Peliqan/Untitled 5.png"
@@ -270,7 +270,7 @@ With document_update endpoint we can easily update the document object details a
 
 ### Upserting a Document
 
-"document_upsert" method allows users to add or update an object if the document with provided unique document name is present. In the below example, we performed upsert on document with "Subject" as serachfield that represents document name, which first searches for document with name = "327_INV/2024/00003", and once it founds the object it updates the document details.
+"document_upsert" method allows users to add or update an object if the document with provided unique document name is present. In the below example, we performed upsert on document with "Subject" as searchfield that represents document name, which first searches for document with name = "327_INV/2024/00003", and once it finds the object it updates the document details.
 
 <img
   src="/images/Exact Online - Getting started in Peliqan/Untitled 14.png"
