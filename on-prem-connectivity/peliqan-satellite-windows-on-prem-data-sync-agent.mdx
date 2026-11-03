@@ -41,6 +41,105 @@ GRANT SELECT ALL USER SECURABLES TO [peliqan];
 
 After installing, you'll see 5 tabs: **Source**, **Target**, **Settings**, **Logs**, and **Manage pipelines**. Visit the tabs one by one to configure the agent.
 
+# Supported sources
+
+<table>
+  <colgroup>
+    <col width="290" />
+    <col width="202" />
+    <col width="214" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Supported sources</th>
+      <th>Type</th>
+      <th>Underlying database</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Supported source applications**</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Exact Venice</td>
+      <td>Accounting software</td>
+      <td>Actian Zen DB</td>
+    </tr>
+    <tr>
+      <td>Adsolut</td>
+      <td>Accounting software</td>
+      <td>SQL Server</td>
+    </tr>
+    <tr>
+      <td>Expert/M</td>
+      <td>Accounting software</td>
+      <td>SQL Server</td>
+    </tr>
+    <tr>
+      <td>Winbooks</td>
+      <td>Accounting software</td>
+      <td>DBF</td>
+    </tr>
+    <tr>
+      <td>Fuelguard</td>
+      <td>Other</td>
+      <td>Microsoft Access</td>
+    </tr>
+    <tr>
+      <td>Omnicasa</td>
+      <td>Real-estate software</td>
+      <td>SQL Server</td>
+    </tr>
+    <tr>
+      <td>Plenion</td>
+      <td>ERP</td>
+      <td>SQL Server</td>
+    </tr>
+    <tr>
+      <td>KPD</td>
+      <td>ERP</td>
+      <td>Oracle</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>**Supported source databases**</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>SQL Server</td>
+      <td>DB</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Oracle</td>
+      <td>DB</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Microsoft Access</td>
+      <td>DB</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Actian Zen DB</td>
+      <td>DB</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DBF</td>
+      <td>DB</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
 # Configuration for specific data sources
 
 Use Peliqan Satellite to sync data from your on-prem software, for example accounting software installed on your own computer.
@@ -81,13 +180,15 @@ Create a Computer/System DSN.
 
 Select “ODBC” as the source type and fill in all the details of the Actian Zen database.
 
-### Sage Bob 50
-
-Coming soon, contact [support](mailto:support@peliqan.io) for more info.
-
 ### Winbooks
 
-Coming soon, contact [support](mailto:support@peliqan.io) for more info.
+1. Locate the Winbooks data folder: the folder that holds one subfolder per "dossier", each containing the `.dbf` files. Make sure the computer running Peliqan Satellite can read this folder.
+2. Select **"Winbooks (DBF)"** as the source type.
+3. In **"DBF folder path"**, enter the full path of the Winbooks data folder, or use **Browse**. Use a local path (e.g. `D:\Winbooks\Data`) or a network path (e.g. `\\server\winbooks\data`). Don't use a mapped drive letter such as `W:\`: scheduled syncs run as a Windows service, which doesn't see mapped drives.
+4. Select **"Sync all tables (DBF files) including all subfolders"** to include every dossier. Choose **"Sync all tables (DBF files) of one folder"** only if you want a single dossier, and then enter that dossier's folder as the path.
+5. When all subfolders are synced, all dossiers are merged automatically: the dossier prefix is removed from each table name, so the same table from every dossier ends up in one target table. Each row includes the dossier it came from.
+6. No username, password, or database/schema/table keywords are needed for Winbooks.
+7. If the data folder is on a network share, the Peliqan Satellite service needs read access to it. Either give the server's computer account read rights on the share, or set the service to run as a Windows user who has access (services.msc → Peliqan Satellite → Log On).
 
 ### Other
 
