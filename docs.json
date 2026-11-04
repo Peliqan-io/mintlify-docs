@@ -500,5 +500,10 @@
       "destination": "/mcp-server",
       "permanent": true
     }
-  ]
+  ],
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-PCG8NS1HD9"
+    }
+  }
 }
