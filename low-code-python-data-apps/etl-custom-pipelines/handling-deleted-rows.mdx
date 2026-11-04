@@ -6,11 +6,11 @@ description: "Learn how to handle rows that were deleted in the source system bu
 
 A regular ETL pipeline cannot detect if records were deleted in the source. This means that when a record is deleted in a source, it will remain in the DWH. Depending on how the API of the source works, there are various ways to handle rows that were deleted in the source.
 
-# Soft deletes
+## Soft deletes
 
 Some APIs have a field "is deleted" or "is archived" or similar, which is set to True when a record is deleted. In this case you will find a column with the same name in the DWH. Filtering on this column allows you to exclude deleted rows.
 
-# API provides a list of deleted records
+## API provides a list of deleted records
 
 In rare occasions, the API will have an endpoint to retrieve a list of deleted records. If this is the case, it's possible to delete records in the DWH based on the list from the API.
 
@@ -18,13 +18,13 @@ The DWH will have a table of deleted row IDs. Use a scheduled Python script to d
 
 For example the [Exact Online connector](/connect-to-data/getting-started-with-exact-online-connector-in-peliqan) uses this method.
 
-# Webhooks
+## Webhooks
 
 Some platforms can send out Webhooks when specific events occur, such as deleting a record. In that case, you can set up Webhooks and send them to Peliqan. Peliqan will receive webhooks and store them in a table in the DWH. Use a Python script to delete records in the DWH based on incoming webhooks. More info:
 
 [Incoming webhooks](/incoming-webhooks)
 
-# Script to delete rows
+## Script to delete rows
 
 The following low-code Python script will delete rows in a table in the DWH, when the id is no longer in existence in the source SaaS application.
 
@@ -85,7 +85,7 @@ The following low-code Python script will delete rows in a table in the DWH, whe
   ```
 </Accordion>
 
-# Full Resync
+## Full Resync
 
 When you perform a Full Resync on a connection in Peliqan, the pipelines will be reset. All tables in the DWH will be made empty and all data will be re-synced. Doing a Full Resync can be used as a way to make sure that deleted rows are no longer in the DWH.
 

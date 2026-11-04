@@ -12,7 +12,7 @@ Situation (1) can be solved by keeping track of what was processed, so that even
 
 Both situation (1) and (2) can also be solved by doing a “lookup” to check if the record exists in the destination, this is a more robust solution to avoid duplicates.
 
-# Doing a real-time lookup
+## Doing a real-time lookup
 
 You can do a realtime lookup in the destination using the `findone()` function, example:
 
@@ -33,7 +33,7 @@ else:
   hs.add("contact", name = "New name", city = "NY")
 ```
 
-# Upsert
+## Upsert
 
 The above pattern is called an upsert, and is available as one function for some connectors. The upsert will try to find an existing record first, if it finds it, it will update and otherwise it will add a new record:
 
@@ -41,7 +41,7 @@ The above pattern is called an upsert, and is available as one function for some
 hs.upsert("contact", searchterm = "john@acme.com", name = "New name", city = "NY")
 ```
 
-# Doing a lookup in a synced table in the data warehouse
+## Doing a lookup in a synced table in the data warehouse
 
 The realtime lookup in the destination can be costly, it makes an API call for each record and some APIs have strict usage limits (e.g. maximum number of calls per day).
 

@@ -6,7 +6,7 @@ description: "Complete reference guide for building Peliqan Data apps using the 
 
 Data apps are interactive apps, built in single-file Python scripts, to run on Peliqan. This page provides a Reference for building Data apps.
 
-# Data apps on the Peliqan platform
+## Data apps on the Peliqan platform
 
 Peliqan is an all-in-one data platform with a wide range of components, that can be controlled and used from within Data apps using Peliqan’s `pq` module:
 
@@ -17,11 +17,11 @@ Peliqan is an all-in-one data platform with a wide range of components, that can
 - Data replication
 - Python IDE and runtime to develop, test, host, schedule & publish Data apps
 
-# Peliqan pq module
+## Peliqan pq module
 
 The `pq` module exposes Peliqan’s low-code data-centric and data pipeline functions. The `pq` module is automatically available in Peliqan when you write Python code in Data apps and can be used in your local IDE by doing `pip install peliqan` and using `import peliqan as pq` in your code.
 
-# Constants
+## Constants
 
 ```python
 pq.DW_NAME       # Name of default data warehouse (database) in the current account, also name of the default data warehouse connection
@@ -35,7 +35,7 @@ if 'RUN_CONTEXT' not in globals():
 	print("Running outside of Peliqan)
 ```
 
-# Authenticated users
+## Authenticated users
 
 Get the Data App owner:
 
@@ -102,7 +102,7 @@ else:
     
 ```
 
-# Run modes
+## Run modes
 
 Data apps can run locally on a computer (external to Peliqan) or inside the Peliqan platform.
 
@@ -116,7 +116,7 @@ Streamlit functions such as `st.text()`, `st.write()`, `st.json()`, `st.table()`
 
 Print statements are written to the log file of each run, visible in Peliqan.
 
-# Data warehouse, databases and tables
+## Data warehouse, databases and tables
 
 ## Connect to data warehouse or DB
 
@@ -198,7 +198,7 @@ dbconn.write('schema_name', 'table_name', [{'id': 1, 'name': 'John'}], object_sc
 dbconn.execute('db_name', query='TRUNCATE TABLE schema_name.table_name')
 ```
 
-# Federated query engine Trino
+## Federated query engine Trino
 
 ## Connect Trino
 
@@ -218,7 +218,7 @@ rows = trinoconn.fetch('db_name', query='SELECT * FROM catalog.schema.table_name
 df = trinoconn.fetch('db_name', 'schema_name', 'table_name', df=True)
 ```
 
-# Writeback (SaaS APIs)
+## Writeback (SaaS APIs)
 
 Writeback functions are wrappers for the APIs of connected SaaS applications.
 
@@ -273,7 +273,7 @@ More info:
 
 [Writeback to SaaS APIs](/low-code-python-data-apps/writeback-reverse-etl-data-sync) 
 
-# SFTP
+## SFTP
 
 ## Connect SFTP
 
@@ -293,7 +293,7 @@ result = sftpconn.dir('.')
 result = sftpconn.read_file('./file.json')
 ```
 
-# State
+## State
 
 State is stored and maintained across app runs. For session-state (within the scope of a single run), use Streamlit’s session state: `st.session_state()`.
 
@@ -365,7 +365,7 @@ state = get_state()
 
 Note: when running a Data App outside of Peliqan, by default `pq.get_state()` and `pq.set_state(state)` will read and write the state locally in a temporary file. The above code however, shares the state with a Data App running on Peliqan. Make sure that `PELIQAN_INTERFACE_ID` is set as a local environment variable, with the id of the Data App on Peliqan.
 
-# Metadata
+## Metadata
 
 ## List databases
 
@@ -578,7 +578,7 @@ result = pq.__service_client__.call_backend(method='patch', url=url, expected_st
 st.write(result)
 ```
 
-# Pipelines
+## Pipelines
 
 ## Run pipeline
 
@@ -620,7 +620,7 @@ pq.get_pipeline_runs(source_connection_id)
 pq.get_pipeline_logs(pipeline_run_id)
 ```
 
-# Secret store
+## Secret store
 
 Store credential and other secrets securely (in Peliqan > Connections > Add connection > Secret Store).
 
@@ -628,7 +628,7 @@ Store credential and other secrets securely (in Peliqan > Connections > Add conn
 pq.get_secret(secret_name_or_id)
 ```
 
-# Refresh
+## Refresh
 
 A refresh updates the metadata in Peliqan for a connected database, meaning getting an up to date list of e.g. tables in a database.
 
@@ -650,7 +650,7 @@ pq.refresh_schema(database_name = 'dw_12345', schema_name = 'CRM', is_async = Fa
 pq.refresh_table(database_name = 'dw_12345', schema_name = 'CRM', table_name = 'customers', is_async = False)
 ```
 
-# Sub accounts
+## Sub accounts
 
 Manage sub accounts from a parent (partner) account.
 
@@ -704,7 +704,7 @@ result = pq.get_subaccount_token(external_id='1234124-134412')
 result = pq.get_subaccount_info(account_id=1234)
 ```
 
-# General
+## General
 
 ## Generic API call to Peliqan backend
 
@@ -723,7 +723,7 @@ kwargs={
 pq.__service_client__.call_backend(method=method, url=url, expected_status_code=200, **kwargs)
 ```
 
-# Useful code snippets
+## Useful code snippets
 
 Code to run data apps locally (outside of Peliqan) as well as on Peliqan, without any required code changes:
 

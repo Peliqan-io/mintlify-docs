@@ -4,7 +4,7 @@ sidebarTitle: "Peliqan Satellite"
 description: "Peliqan Satellite is a Windows agent you install on an on-prem server to copy data from SQL Server or ODBC sources into your Peliqan data warehouse."
 ---
 
-# What is Peliqan Satellite
+## What is Peliqan Satellite
 
 ### On-prem agent
 
@@ -14,7 +14,7 @@ Peliqan Satellite is a Windows agent you install on an on-prem server. It reads 
 
 Each **pipeline** is one source configuration → one target schema. You can run several pipelines side by side. One source configuration can capture data from one schema in one database or it can capture data from multiple databases. Use multiple pipelines if you have different source configurations or a different target configuration.
 
-# Preparing the source database(s)
+## Preparing the source database(s)
 
 Create a dedicated database user on the source DB server, with read-only access. Use e.g. “peliqan” as the username.
 
@@ -34,14 +34,14 @@ GRANT SELECT ALL USER SECURABLES TO [peliqan];
 
 `CONNECT ANY DATABASE` lets the agent connect to every database on the instance, present and future. `SELECT ALL USER SECURABLES` lets it read from every table/view it can connect to.
 
-# Installing the agent
+## Installing the agent
 
 1. Download the installer: [https://peliqan.io/winagent/latest/PeliqanSatellite-win-x64.msi](https://peliqan.io/winagent/latest/PeliqanSatellite-win-x64.msi)
 2. Run it and follow the steps in the Windows installer.
 
 After installing, you'll see 5 tabs: **Source**, **Target**, **Settings**, **Logs**, and **Manage pipelines**. Visit the tabs one by one to configure the agent.
 
-# Supported sources
+## Supported sources
 
 <table>
   <colgroup>
@@ -140,7 +140,7 @@ After installing, you'll see 5 tabs: **Source**, **Target**, **Settings**, **Log
   </tbody>
 </table>
 
-# Configuration for specific data sources
+## Configuration for specific data sources
 
 Use Peliqan Satellite to sync data from your on-prem software, for example accounting software installed on your own computer.
 
@@ -194,7 +194,7 @@ Select “ODBC” as the source type and fill in all the details of the Actian Z
 
 Add a DB user for Peliqan, on the DB used by your on-prem software.
 
-# Source tab — where the data comes from
+## Source tab — where the data comes from
 
 ## SQL Server
 
@@ -302,7 +302,7 @@ Also in this mode:
 - **Merge all source tables based on name** — same-named tables across different databases get merged into one target table, with the source DB/schema added as extra columns. This is what Expert/M, Adsolut etc. use, since they create one DB per customer/dossier but the table structure is identical across dossiers.
 - **Create separate tables for each source DB** — keeps every source database's tables completely separate in the target, with the DB/schema prepended to the table name instead.
 
-# Target tab — where the data goes
+## Target tab — where the data goes
 
 Get the connection details from your Peliqan account, under **Connections** → your data warehouse's connection card. For additional security, ask [Peliqan support](/contact-support) for a dedicated DB user scoped to write access on just one target schema, rather than reusing a shared admin user.
 
@@ -362,7 +362,7 @@ For an external Bigquery data warehouse (not provisioned by Peliqan), make sure 
 - **`roles/bigquery.dataEditor`**: granted at dataset or project level
 - **`roles/bigquery.jobUser`**: granted at the project level since jobs (queries) run at this level
 
-# Settings tab — schedule and options
+## Settings tab — schedule and options
 
 <img
   src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/settings-tab.png"
@@ -381,7 +381,7 @@ Settings tab
 
 **Sync now** / **Stop** trigger or cancel a run for this pipeline immediately, independent of the schedule.
 
-# Logs tab — see what happened
+## Logs tab — see what happened
 
 <img
   src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/logs-tab.png"
@@ -392,7 +392,7 @@ Logs tab showing a completed run
 
 Every run adds log lines as it progresses. Filter by free-text search or toggle **Errors only**. **Open log folder** jumps straight to the raw log files on disk if you need to send them to support.
 
-# Manage pipelines tab — running more than one pipeline
+## Manage pipelines tab — running more than one pipeline
 
 <img
   src="/images/On-prem connectivity/Peliqan Satellite - Windows on-prem Data sync Agen/manage-pipelines-new.png"
@@ -417,7 +417,7 @@ Each pipeline is one source configuration → to one target schema, with its own
 
 This is a warning only — it won't block you from saving — but treat it as something to fix immediately, not something to ignore. Give each pipeline its own schema/dataset.
 
-# Advanced: setting up many pipelines at once by editing config.json directly
+## Advanced: setting up many pipelines at once by editing config.json directly
 
 If you need to set up a large number of near-identical pipelines (e.g. one per end-customer dossier, each just pointing at a different DSN with a different target schema), clicking through the UI once per pipeline doesn't scale well. There's a faster path:
 
@@ -465,7 +465,7 @@ A few things that make this genuinely practical, not just theoretically possible
 
 **To apply:** stop the Peliqan Satellite service, replace `config.json`, start it again (or just reopen the desktop app — either picks up the file fresh). Always keep a backup of the previous file until you've confirmed the new one works.
 
-# FAQ
+## FAQ
 
 **What are the alternatives to this for on-prem connectivity?**
 
@@ -487,13 +487,13 @@ No — it only ever runs `SELECT` queries and never takes locks on tables.
 
 No — each pipeline has exactly one source and one target; there's no such thing as two simultaneous targets for one pipeline. If you need the same data in two places, or two different sources feeding the same kind of target, that's two separate pipelines — just make sure they don't share the same target schema/dataset (see the warning above).
 
-# Current limitations
+## Current limitations
 
 - No incremental sync — every run does a full truncate + reload.
 - Supported sources: SQL Server and ODBC (covers on-prem accounting/ERP software such as Expert/M, Adsolut, Plenion, Exact Venice).
 - Supported targets: Postgres and BigQuery.
 
-# Releases
+## Releases
 
 **v1.8 Release Notes**
 

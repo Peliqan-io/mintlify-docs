@@ -10,7 +10,7 @@ Note: MS Query and Power Query (with DB connection) are only available in Excel 
   As an alternative, you can also use the Peliqan [Excel add-in](/excel-add-in)
 </Note>
 
-# Enable ODBC in Excel (Legacy)
+## Enable ODBC in Excel (Legacy)
 
 In Excel > File > Options > Data: enable legacy data import wizards, see screenshot below:
 
@@ -19,7 +19,7 @@ In Excel > File > Options > Data: enable legacy data import wizards, see screens
   alt="excel options legacy data.png"
 />
 
-# Install Postgres ODBC driver on Windows
+## Install Postgres ODBC driver on Windows
 
 Download the Postgres ODBC driver:
 
@@ -27,7 +27,7 @@ Download the Postgres ODBC driver:
 
 Choose the [64 bit version (X64)](https://ftp.postgresql.org/pub/odbc/releases/REL-17_00_0006/psqlodbc_x64.msi) for recent computers.
 
-# Add a DSN
+## Add a DSN
 
 Open ODBC Database Administrator on Windows (64 bit version if you are using a recent computer). Add a User DSN, choose PostgreSQL Unicode:
 
@@ -45,7 +45,7 @@ Add the connection details of your Peliqan data warehouse:
 
 Use “allow” for SSL Mode.
 
-# Add a connection in Excel
+## Add a connection in Excel
 
 In Excel, go to Data > Get Data > From Other Sources > ODBC > Select your DSN.
 
