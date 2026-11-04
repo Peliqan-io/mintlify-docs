@@ -36,7 +36,7 @@ GRANT SELECT ALL USER SECURABLES TO [peliqan];
 
 # Installing the agent
 
-1. Download the installer: [https://peliqan.io/winagent/latest/PeliqanSatellite-win-x64.msi](https://peliqan.io/winagent/latest/PeliqanSatellite-win-x64.msi)
+1. [Click here to download the installer](https://github.com/Peliqan-io/downloads/releases/download/d/PeliqanSatellite-latest-win-x64.msi)
 2. Run it and follow the steps in the Windows installer.
 
 After installing, you'll see 5 tabs: **Source**, **Target**, **Settings**, **Logs**, and **Manage pipelines**. Visit the tabs one by one to configure the agent.
@@ -325,13 +325,40 @@ Target tab configured for Postgres
 
 Get the connection details from your Peliqan account, under **Connections** → your data warehouse's connection card.
 
-| Field | What to put |
-| --- | --- |
-| Hostname / Port / Username / Password | From your Peliqan connection card |
-| SSL mode | Usually `Prefer` |
-| Database name | The Postgres database (from your connection card) |
-| Schema name | The schema this pipeline writes to, **must be unique per pipeline** (see the warning below) |
-| Table name prefix | Optional — prepended to every target table name |
+<table>
+  <colgroup>
+    <col width="319" />
+    <col width="387" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>What to put</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hostname / Port / Username / Password</td>
+      <td>From your Peliqan connection card</td>
+    </tr>
+    <tr>
+      <td>SSL mode</td>
+      <td>Usually `Prefer`</td>
+    </tr>
+    <tr>
+      <td>Database name</td>
+      <td>The Postgres database (from your connection card)</td>
+    </tr>
+    <tr>
+      <td>Schema name</td>
+      <td>The schema this pipeline writes to, **must be unique per pipeline** (see the warning below)</td>
+    </tr>
+    <tr>
+      <td>Table name prefix</td>
+      <td>Optional — prepended to every target table name</td>
+    </tr>
+  </tbody>
+</table>
 
 ## BigQuery data warehouse
 
@@ -350,12 +377,36 @@ You can copy the details of your Peliqan Bigquery data warehouse from the Connec
 
 Target tab configured for BigQuery
 
-| Field | What to put |
-| --- | --- |
-| Service-account key (JSON) | Paste the full JSON key. |
-| Region | The BigQuery dataset's region, e.g. `EU` |
-| Project | The GCP project ID |
-| Dataset ID | The BigQuery dataset, **must be unique per pipeline** (see warning below) |
+<table>
+  <colgroup>
+    <col width="234" />
+    <col width="471" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>What to put</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Service-account key (JSON)</td>
+      <td>Paste the full JSON key.</td>
+    </tr>
+    <tr>
+      <td>Region</td>
+      <td>The BigQuery dataset's region, e.g. `EU`</td>
+    </tr>
+    <tr>
+      <td>Project</td>
+      <td>The GCP project ID</td>
+    </tr>
+    <tr>
+      <td>Dataset ID</td>
+      <td>The BigQuery dataset, **must be unique per pipeline** (see warning below)</td>
+    </tr>
+  </tbody>
+</table>
 
 For an external Bigquery data warehouse (not provisioned by Peliqan), make sure to create an IAM user with following roles:
 
@@ -371,13 +422,40 @@ For an external Bigquery data warehouse (not provisioned by Peliqan), make sure 
 
 Settings tab
 
-| Setting | What it does |
-| --- | --- |
-| Sync frequency | Hourly, every N hours, daily, or weekly |
-| Sync start time (UTC) | Anchor time for daily/weekly schedules, in UTC, not converted from your local time |
-| Scheduled sync enabled | Turns the _scheduled_ runs on/off. "Sync now" always works regardless of this setting. |
-| Push config.json to target | Writes a redacted copy of this pipeline's config to a `__config` table on the target, tagged with the pipeline's id and name, so you can audit what's configured for a given pipeline over time. Secrets (passwords, keys, connection strings) are always replaced with `***` before this is written. |
-| Push logs to target | Writes per-run log lines to a `__logs` table on the target |
+<table>
+  <colgroup>
+    <col width="212" />
+    <col width="494" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sync frequency</td>
+      <td>Hourly, every N hours, daily, or weekly</td>
+    </tr>
+    <tr>
+      <td>Sync start time (UTC)</td>
+      <td>Anchor time for daily/weekly schedules, in UTC, not converted from your local time</td>
+    </tr>
+    <tr>
+      <td>Scheduled sync enabled</td>
+      <td>Turns the _scheduled_ runs on/off. "Sync now" always works regardless of this setting.</td>
+    </tr>
+    <tr>
+      <td>Push config.json to target</td>
+      <td>Writes a redacted copy of this pipeline's config to a `__config` table on the target, tagged with the pipeline's id and name, so you can audit what's configured for a given pipeline over time. Secrets (passwords, keys, connection strings) are always replaced with `***` before this is written.</td>
+    </tr>
+    <tr>
+      <td>Push logs to target</td>
+      <td>Writes per-run log lines to a `__logs` table on the target</td>
+    </tr>
+  </tbody>
+</table>
 
 **Sync now** / **Stop** trigger or cancel a run for this pipeline immediately, independent of the schedule.
 
@@ -495,7 +573,17 @@ No — each pipeline has exactly one source and one target; there's no such thin
 
 # Releases
 
-**v1.8 Release Notes**
+**v1.9 Oracle, MS Access**
+
+- Added a native Oracle source (Oracle 19c and newer).
+- Added support for Microsoft Access via ODBC.
+- Resolved duplicate rows in BigQuery after server interruptions.
+- Resolved sync failures for accented column names, similar column names, and SQL Server time zone columns.
+- Views without an "id" column are now synced.
+- Added health reporting from the agent to Peliqan.
+- The agent now checks for new version, automatic installation of updates will follow in a later version.
+
+**v1.8 Winbooks, BigQuery target improvements** 
 
 - Added beta support for syncing multiple WinBooks/DBF dossier folders in a single pipeline, including parent and subfolder details in the source columns.
 - Resolved issue when syncing tables with the same name across different source DBs.
