@@ -61,7 +61,74 @@ result = conn.add('email_with_attachment', email)
 st.json(result) # for debugging only, see result of sending email to Postmark
 ```
 
-## Send email with CSV or PDF as attachment
+### Send email with PDF file as attachment
+
+```text
+  import base64
+
+  with open("/path/to/file.pdf", "rb") as f:
+      file_content = f.read()
+      base64_attachment = base64.b64encode(file_content).decode("ascii")
+
+      email_with_attachment = {
+          "from": "no-reply@acme.com",
+          "to": "john@acme.com",
+          "subject": "Test email with PDF attachment from Peliqan using Postmark",
+          "text": "Please find your PDF attached.",
+          "html": "Please find your <b>PDF</b> attached.",
+          "attachment_name": "my_file.pdf",
+          "attachment_content_base64": base64_attachment,
+          "attachment_contenttype": "application/pdf"
+      }
+      postmark_api = pq.connect('Postmark')
+      result = postmark_api.add('email_with_attachment', email_with_attachment)
+      st.json(result)
+```
+
+### Send email based on a Postmark template
+
+```python
+email = {
+      "from": "no-reply@acme.com",
+      "to": "john@acme.com",
+      "templateid": 12345,
+      "templatefields": {
+          "name": "Jane",
+          "sender_name": "ACME"
+      }
+  }
+  postmark_api = pq.connect('Postmark')
+  result = postmark_api.add('email_with_template', email)
+  st.json(result)
+```
+
+### Send email based on a Postmark template, including a file attachment
+
+```python
+import base64
+
+with open("/path/to/file.pdf", "rb") as f:
+      file_content = f.read()
+      base64_attachment = base64.b64encode(file_content).decode("ascii")
+
+      email = {
+          "from": "no-reply@acme.com",
+          "to": "john@acme.com",
+          "templateid": 12345,
+          "templatefields": {
+              "name": "Jane",
+              "sender_name": "ACME"
+          },
+          "attachment_name": "my_file.pdf",
+          "attachment_content_base64": base64_attachment,
+          "attachment_contenttype": "application/pdf"
+      }
+      postmark_api = pq.connect('Postmark')
+      result = postmark_api.add('email_with_template_and_attachment', email)
+      st.write(result)
+```
+
+## Send email with CSV or PDF data report as attachment
 
 See the Alerting & Messaging section for examples on how to send out CSV files with data from a Peliqan table:
 
