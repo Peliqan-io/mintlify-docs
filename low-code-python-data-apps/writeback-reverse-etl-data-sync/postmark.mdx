@@ -128,6 +128,42 @@ with open("/path/to/file.pdf", "rb") as f:
       st.write(result)
 ```
 
+### Send raw email
+
+This gives you full control over the payload, for example to send multiple file attachments.
+
+```python
+import base64
+
+base64_attachment1 = base64.b64encode(file_content1).decode("ascii")
+base64_attachment1 = base64.b64encode(file_content2).decode("ascii")
+
+email = {
+    "From": "no-reply@peliqan.io",
+    "To": "niko@peliqan.io",
+    "TemplateId": 12345,
+    "TemplateModel": {
+        "name": "Jane",
+        "sender_name": "Peliqan"
+    },
+    "Attachments": [
+        {
+            "Name": "myfile1.pdf",
+            "Content": base64_attachment1,
+            "ContentType": "application/pdf"
+        },
+        {
+            "Name": "myfile2.pdf",
+            "Content": base64_attachment2,
+            "ContentType": "application/pdf"
+        }
+    ],
+}
+postmark_api = pq.connect('Postmark')
+result = postmark_api.add('email_raw', email)
+st.json(result)
+```
+
 ## Send email with CSV or PDF data report as attachment
 
 See the Alerting & Messaging section for examples on how to send out CSV files with data from a Peliqan table:
