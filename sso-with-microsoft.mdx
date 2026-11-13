@@ -12,7 +12,7 @@ Partners with sub accounts in Peliqan can restrict access to sub accounts based 
 - **A Peliqan Account owner or Account admin:** steps 5-9 (Setup in Peliqan)
 - **Everyone on your team:** step 10 (Sign in to Peliqan with Microsoft)
 
-# Setup in Azure
+## Setup in Azure
 
 _This needs to be performed by your Azure administrator._
 
@@ -26,7 +26,7 @@ _This needs to be performed by your Azure administrator._
 
 **Step 4.** Optional, for group mapping: open each group and copy its **Object ID**. You will need these in Peliqan to map Azure groups to Peliqan groups. See below.
 
-# Setup in Peliqan
+## Setup in Peliqan
 
 _This can only be performed by a Peliqan Account owner or Account admin._
 
@@ -60,24 +60,24 @@ Members and viewers of groups in Peliqan can now only login to customer sub acco
 
 [Manage sub accounts](/manage-sub-accounts) 
 
-# Peliqan login with Microsoft Azure
+## Peliqan login with Microsoft Azure
 
 **Step 10.** _(Everyone on your team)_ Sign in to Peliqan **with Microsoft**. The user is added to the mapped Peliqan groups on login, based on its Azure groups.
 
-# Adding a new group later
+## Adding a new group later
 
 1. _Your Azure admin:_ Assign the new group to **Peliqan SSO** (step 3 above).
 2. _A Peliqan Account owner or Account admin:_ Add a mapping with its Object ID (step 6 above).
 
 If people aren't being added to a group in Peliqan, the usual reason is that the group isn't assigned to the “Peliqan SSO” Enterprise Application in Azure.
 
-# Good to know
+## Good to know
 
 - **Only assigned groups work.** Peliqan only sees groups assigned to Peliqan SSO in Azure.
 - **Changes apply at the next sign-in.** If someone leaves a group in Azure, they lose access to the mapped Peliqan group the next time they sign in to Peliqan. When someone leaves your company, also deactivate the user in Peliqan so that it takes effect immediately.
 - **API scripts:** a script runs as the user who owns its API token. If that user is a member, the script can only reach customers in their groups.
 
-# Peliqan API - automate provisioning of users with Microsoft SSO
+## Peliqan API - automate provisioning of users with Microsoft SSO
 
 _Provisioning of Peliqan users with Microsoft SSO can be automated with the Peliqan API, for example from a script. Use the API token of a Peliqan Account owner or Account admin._
 

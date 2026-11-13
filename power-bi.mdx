@@ -1,5 +1,6 @@
 ---
 title: "Power BI"
+description: "Connect Power BI to the Peliqan data warehouse (Postgres) with DirectQuery, and fix common errors such as the Npgsql 4.0.10 driver and SSL certificate errors."
 ---
 
 In Peliqan, go to Connections, find the Data Warehouse tile and copy/paste your connection details:
@@ -22,7 +23,7 @@ Use these settings in Microsoft Power BI to connect:
 - **Database name**: same as the user name
 - **SSL**: enabled
 
-# Step by step
+## Step by step
 
 In Power BI, click on “Get Data” and then “More” or “Get data from another source”.
 
@@ -66,7 +67,7 @@ You can now build charts in Power BI:
   alt="MS Power BI build charts.png"
 />
 
-# Troubleshooting
+## Troubleshooting
 
 ### Error “Please install Npgsql version 4.0.10.0 or earlier”
 

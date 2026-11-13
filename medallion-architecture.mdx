@@ -6,7 +6,7 @@ The **Medallion architecture** is a data design pattern used in data platforms t
 
 Peliqan fully supports building up a Medallion architecture, as described in this article.
 
-# The layers
+## The layers
 
 ### Bronze
 
@@ -37,7 +37,7 @@ Business ready data:
 
 This layer serves **dashboards, ML features, reporting, AI Chatbots and AI Agents**
 
-# How to implement a Medallion architecture in Peliqan
+## How to implement a Medallion architecture in Peliqan
 
 Data transformations are implemented in Peliqan using a combination of SQL queries and low-code Python scripts. Both can be implemented with the support of Peliqan’s AI Data Engineer.
 
@@ -50,7 +50,7 @@ SQL queries are typically grouped in a schema called “Silver” and “Gold”
 Example using schema’s, the ELT target schemas are the bronze layer:
 
 <img
-  src="/images/Metadata, Data models & Semantic models/Building a Medallion architecture/Screenshot_2026-03-11_at_16.14.02.png"
+  src={"/images/Metadata, Data models & Semantic models/Building a Medallion architecture/Screenshot_2026-03-11_at_16.14.02.png"}
   alt="Bronze, Silver and Gold layers organized as schemas"
   style={{ width:"34%" }}
 />
@@ -60,7 +60,7 @@ However, you can also use Peliqan’s labels to group queries into Bronze, Silve
 Example using labels:
 
 <img
-  src="/images/Metadata, Data models & Semantic models/Building a Medallion architecture/Screenshot_2026-03-11_at_16.10.33.png"
+  src={"/images/Metadata, Data models & Semantic models/Building a Medallion architecture/Screenshot_2026-03-11_at_16.10.33.png"}
   alt="Queries grouped into Bronze, Silver and Gold layers with labels"
   style={{ width:"46%" }}
 />

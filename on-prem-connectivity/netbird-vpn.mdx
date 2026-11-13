@@ -6,7 +6,7 @@ description: "Peliqan supports self-service activation of the NetBird VPN, a sec
 
 Peliqan supports self-service activation of the NetBird VPN, a secure software-only VPN that establishes a peer to peer mesh connection between your on-prem server and the Peliqan data cloud. Once the VPN tunnel is active, you can add e.g. a database connection in Peliqan, using the local IP address of your server.
 
-# About NetBird
+## About NetBird
 
 NetBird is an open-source, secure, peer-to-peer private network built on top of WireGuard. It enables encrypted connections between devices across different networks without the need for complex VPN setups or static IPs. Ideal for secure connectivity to internal services, NetBird simplifies private networking using a modern control plane.
 
@@ -28,7 +28,7 @@ NetBird uses a centralized management service (self-hosted or cloud) to coordina
 
 More info: [https://www.netbird.io/](https://www.netbird.io/)
 
-# Peliqan NetBird VPN setup guide
+## Peliqan NetBird VPN setup guide
 
 This guide applies to installing the NetBird client on both Windows servers and Linux servers.
 
@@ -148,7 +148,7 @@ Once Peliqan Support confirms that the VPN is active: in Peliqan go to Connectio
   alt="image"
 />
 
-# Troubleshooting
+## Troubleshooting
 
 If needed, run the command `netbird status` and check if the response includes `Signal:connected`.
 
@@ -157,7 +157,7 @@ If needed, run the command `netbird status` and check if the response includes `
   alt="image"
 />
 
-# Connect to an on-prem SQL Server (Windows server)
+## Connect to an on-prem SQL Server (Windows server)
 
 Make sure TCP/IP is enabled in your SQL Server Configuration Manager:
 
@@ -166,7 +166,7 @@ Make sure TCP/IP is enabled in your SQL Server Configuration Manager:
   alt="image"
 />
 
-# Running the VPN client on a separate machine
+## Running the VPN client on a separate machine
 
 If you run the VPN Client (NetBird) on the same machine as your local on-prem DB (or other data source), you can directly connect from the Peliqan Cloud to the on-prem resource, using the IP address of the VPN network and the correct port of the DB:
 
