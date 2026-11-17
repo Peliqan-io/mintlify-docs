@@ -185,6 +185,211 @@ Use one of the following MCP URLs:
   ```
 </Accordion>
 
+<Accordion title="Setup in MS 365 as Federated Connector">
+  # Create an OAuth app in your Peliqan account
+
+  Ask [Peliqan Support](mailto:support@peliqan.io) to enable adding OAuth apps in your Peliqan account.
+
+  Create an OAuth app under Settings → OAuth apps.
+
+  ![1 Peliqan O Auth App](/images/1-Peliqan-OAuth-app.png "1 Peliqan O Auth App")
+
+  <table>
+    <colgroup>
+      <col width="195" />
+      <col width="409" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Setting</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Name</td>
+        <td>e.g. "MS 365 Federated MCP Connector"</td>
+      </tr>
+      <tr>
+        <td>Developer name</td>
+        <td>Use your own company name</td>
+      </tr>
+      <tr>
+        <td>Redirect URI</td>
+        <td>`https://teams.microsoft.com/api/platform/v1.0/oAuthRedirect`</td>
+      </tr>
+      <tr>
+        <td>Client type</td>
+        <td>Confidential client</td>
+      </tr>
+      <tr>
+        <td>Scopes</td>
+        <td>Enable the scope you want to include</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <img
+    src="/images/2-Peliqan-OAuth-app-credentials.png"
+    alt="2 Peliqan O Auth App Credentials"
+    title="2 Peliqan O Auth App Credentials"
+    style={{ width:"55%" }}
+  />
+
+  Copy the Client ID and Client Secret.
+
+  # Register an OAuth client in Teams Developer portal
+
+  [https://dev.teams.microsoft.com/tools](https://dev.teams.microsoft.com/tools) → OAuth client registration
+
+  ![3 Tools](/images/3-Tools.png "3 Tools")
+
+  Click on Register Client:
+
+  ![4 Register Client](/images/4-register-client.png "4 Register Client")
+
+  ![5 Client Details](/images/5-client-details.png "5 Client Details")
+
+  <img
+    src="/images/6-oauth-settings.png"
+    alt="6 Oauth Settings"
+    title="6 Oauth Settings"
+    style={{ width:"59%" }}
+  />
+
+  <table>
+    <colgroup>
+      <col width="199" />
+      <col width="398" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Setting</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Base URL</td>
+        <td>`https://mcp.eu.peliqan.io`</td>
+      </tr>
+      <tr>
+        <td>Client ID</td>
+        <td>From the Peliqan OAuth app create above</td>
+      </tr>
+      <tr>
+        <td>Client Secret</td>
+        <td>From the Peliqan OAuth app created above</td>
+      </tr>
+      <tr>
+        <td>Authorization endpoint</td>
+        <td>`https://app.eu.peliqan.io/oauth2/authorize`</td>
+      </tr>
+      <tr>
+        <td>Token endpoint</td>
+        <td>`https://app.eu.peliqan.io/api/oauth2/token/`</td>
+      </tr>
+      <tr>
+        <td>Refresh endpoint</td>
+        <td>`https://app.eu.peliqan.io/api/oauth2/token/`</td>
+      </tr>
+      <tr>
+        <td>Scope (\*)</td>
+        <td>openid, email, data:read, schema:read, query:execute, connections:read</td>
+      </tr>
+    </tbody>
+  </table>
+
+  (\*) Add all scopes from your Peliqan OAuth app that you want to include.
+
+  Click save, and copy the OAuth client registration ID:
+
+  ![7 O Auth Client Registration ID](/images/7-OAuth-client-registration-ID.png "7 O Auth Client Registration ID")
+
+  # Add a Copilot Connector in MS 365 Admin center
+
+  [https://admin.cloud.microsoft](https://admin.cloud.microsoft) → Copilot → Connectors
+
+  <img
+    src="/images/8-M365-admin-center.png"
+    alt="8 M365 Admin Center"
+    title="8 M365 Admin Center"
+    style={{ width:"39%" }}
+  />
+
+  Connectors → Gallery → Made by your org → Add.
+
+  ![9 Gallery > Created By Your Org](/images/9-Gallery--created-by-your-org.png "9 Gallery &gt; Created By Your Org")
+
+  Connect to MCP Server → Add.
+
+  ![10 Custom Connector > MCP](/images/10-Custom-Connector--MCP.png "10 Custom Connector &gt; MCP")
+
+  ![11 MCP > Authorize](/images/11-MCP--Authorize.png "11 MCP &gt; Authorize")
+
+  <table>
+    <colgroup>
+      <col width="201" />
+      <col width="392" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Setting</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Name</td>
+        <td>Peliqan MCP</td>
+      </tr>
+      <tr>
+        <td>Description</td>
+        <td>Peliqan MCP</td>
+      </tr>
+      <tr>
+        <td>MCP endpoint URL</td>
+        <td>`https://mcp.eu.peliqan.io/mcp`</td>
+      </tr>
+      <tr>
+        <td>Authentication type</td>
+        <td>`OAuth 2.0`</td>
+      </tr>
+      <tr>
+        <td>Reference ID</td>
+        <td>OAuth client registration ID from the above step</td>
+      </tr>
+    </tbody>
+  </table>
+
+  Click on Authorize. You will be redirected to Peliqan. Click on "Allow access".
+
+  ![12 Peliqan Authorize Access](/images/12-Peliqan-authorize-access.png "12 Peliqan Authorize Access")
+
+  Next, click on Create to finalize the creation of the MCP Server in MS 365 Admin Center. Wait 1 minute. Check the status of the connector under "Your connectors":
+
+  ![14 Connector Ready](/images/14-Connector-ready.png "14 Connector Ready")
+
+  # Add a source in Copilot
+
+  In Copilot go to Settings → Sources.
+
+  <img
+    src="/images/15-Copilot-settings.png"
+    alt="15 Copilot Settings"
+    title="15 Copilot Settings"
+    style={{ width:"55%" }}
+  />
+
+  ![16 Sources](/images/16-Sources.png "16 Sources")
+
+  Search for Peliqan MCP, click on "Connect".
+
+  ![17 Connect](/images/17-Connect.png "17 Connect")
+
+  Now you can use this source in Copilot.
+</Accordion>
+
 <Accordion title="Setup in other MCP Clients">
   Check your client's documentation on how to add an MCP Server. You can use any MCP-compatible AI client that supports HTTPS transport, and connect using the Peliqan MCP Server URL:
 
