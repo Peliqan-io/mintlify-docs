@@ -44,17 +44,11 @@ owner = pq.owner()
 st.write(f"This Data App was created by %s" % owner["username"])
 ```
 
-Get the logged in user:
+Get the logged in user, for published Data Apps with access = "Peliqan users" (authenticated users only):
 
 ```python
 logged_in_user = pq.logged_in_user()
 st.write(f"Welcome %s" % logged_in_user["username"])
-
-pq_impersonated = pq.as_logged_in_user()
-if pq_impersonated:
-    dbconn_impersonated = pq_impersonated.dbconnect(pq.DW_NAME)
-    rows = dbconn_impersonated.fetch(pq_impersonated.DW_NAME, query='SELECT * FROM chargebee.customers LIMIT 3')
-    st.write(rows)
 ```
 
 Impersonate the authenticated user, for published Data Apps with access = "Peliqan users" (authenticated users only):
