@@ -396,6 +396,26 @@
   "description": "Peliqan.io - the trust layer for AI.",
   "redirects": [
     {
+      "source": "/odoo-getting-started-in-peliqan",
+      "destination": "/low-code-python-data-apps/writeback-reverse-etl-data-sync/odoo",
+      "permanent": true
+    },
+    {
+      "source": "/for-partners/manage-sub-accounts",
+      "destination": "/manage-sub-accounts",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/writeback-reverse-etl-data-sync/data-sync-and-data-imports/parent-child-relations",
+      "destination": "/parent-child-relations",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/writeback-reverse-etl-data-sync/making-raw-api-calls",
+      "destination": "/raw-api-calls",
+      "permanent": true
+    },
+    {
       "source": "/connect-your-bi-or-db-tool/tableau",
       "destination": "/tableau",
       "permanent": true
