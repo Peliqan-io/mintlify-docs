@@ -396,6 +396,11 @@
   "description": "Peliqan.io - the trust layer for AI.",
   "redirects": [
     {
+      "source": "/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan/build-a-custom-mcp-server-on-peliqan-with-google-oauth",
+      "destination": "/custom-mcp-with-o-auth",
+      "permanent": true
+    },
+    {
       "source": "/en/article/reverse-etl-wrrzqh",
       "destination": "/reverse-etl",
       "permanent": true
