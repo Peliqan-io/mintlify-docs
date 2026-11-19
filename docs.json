@@ -396,6 +396,31 @@
   "description": "Peliqan.io - the trust layer for AI.",
   "redirects": [
     {
+      "source": "/connect-your-bi-or-db-tool/tableau",
+      "destination": "/tableau",
+      "permanent": true
+    },
+    {
+      "source": "/connect-your-bi-or-db-tool/looker-studio",
+      "destination": "/looker-studio",
+      "permanent": true
+    },
+    {
+      "source": "/connect-your-bi-or-db-tool/aws-quicksight",
+      "destination": "/aws-quick-sight",
+      "permanent": true
+    },
+    {
+      "source": "/connect-your-bi-or-db-tool/apache-superset",
+      "destination": "/apache-superset",
+      "permanent": true
+    },
+    {
+      "source": "/low-code-python-data-apps/writeback-reverse-etl-data-sync/incremental-processing",
+      "destination": "/incremental-processing",
+      "permanent": true
+    },
+    {
       "source": "/low-code-python-data-apps/by-protocol-rest-webhooks-mqtt/mcp-model-context-protocol/build-a-remote-mcp-server-on-peliqan/build-a-custom-mcp-server-on-peliqan-with-google-oauth",
       "destination": "/custom-mcp-with-o-auth",
       "permanent": true
