@@ -6,7 +6,7 @@ description: "You can configure webhooks from ELT pipelines running in Peliqan, 
 
 You can configure webhooks from ELT pipelines running in Peliqan, to receive events when pipelines completed, failed etc. This is useful in combination with [embedding](/whitelabel/embedding) and the [Partner API](/whitelabel/partner-api-embed-api), to integrate Peliqan's ELT connectivity into your own platform.
 
-# Configuration
+## Configuration
 
 Navigate to **Settings > API Token & Webhooks > Outbound Webhooks** to set up your endpoint to receive webhook events from Peliqan pipelines.
 
@@ -28,7 +28,7 @@ openssl rand -hex 32
 
 > **Subscriptions:** Event subscriptions default to **all events**. You can restrict to a specific subset as well in the UI
 
-# Event Types
+## Event Types
 
 ### Connection Events
 
@@ -62,7 +62,7 @@ Fired by Peliqan's pipeline runner as a sync progresses from start to a terminal
 
 **Typical event sequence for a normal scheduled run:** `pipeline_run_started` > `pipeline_run_completed`
 
-# Payload
+## Payload
 
 Every webhook event sends a JSON body with the following shape:
 
@@ -92,7 +92,7 @@ Every webhook event sends a JSON body with the following shape:
 | `run_source` | `string or null` | `MANUAL`, `SCHEDULER`, `SCRIPT`, or `SALTEDGE_REFRESH` |
 | `metadata` | `object` | `{}` for pipeline events; `{"connectortype": {...}}` for connector-specific events |
 
-# HTTP Headers
+## HTTP Headers
 
 Every request includes the following headers:
 
@@ -104,7 +104,7 @@ X-Peliqan-Timestamp: 1741839600
 X-Peliqan-Signature: sha256=3d9e2f1a...   (only when a secret is configured)
 ```
 
-# Signature Verification
+## Signature Verification
 
 When a signing secret is configured, Peliqan computes:
 
@@ -170,7 +170,7 @@ HMAC-SHA256(secret, "{unix_timestamp}.{canonical_json}")
   ```
 </Accordion>
 
-# Response & Retry
+## Response & Retry
 
 Your endpoint must return a **2xx status code** within **10 seconds**. Any non-2xx response or network error (connection refused, DNS failure, TLS error, timeout) is treated as a failure.
 
@@ -204,7 +204,7 @@ Re-enable via **Settings > API Token & Webhooks > Outbound Webhooks > Re-enable*
 
 > **Call log retention:** The most recent **500** `WebhookCall` records are kept per account. Older entries are trimmed automatically after each delivery.
 
-# Idempotency
+## Idempotency
 
 Retries and the occasional duplicate delivery mean your endpoint may receive the same event more than once.
 

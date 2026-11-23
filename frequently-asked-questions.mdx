@@ -1,22 +1,24 @@
 ---
 title: "Frequently asked questions"
 sidebarTitle: "FAQ"
-description: "Get answers to common questions about Peliqan, including what it is, how connectors work, and how data storage and GDPR compliance are handled."
+description: "Answers to common questions about Peliqan: what it is, connectors, using Peliqan with ChatGPT, Claude or Copilot, Data Apps vs Peliqan Machines, data storage and GDPR."
 ---
 
 ## General
 
 ### What is Peliqan?
 
-Peliqan is an all-in-one data platform that provides direct data access to a wide range of data sources including databases, data warehouses and SaaS business applications. Peliqan provides one-click ETL pipelines from 100+ sources. Peliqan has a built-in data warehouse or you can use your own (Snowflake, BigQuery, Redshift, SQL Server etc.). Peliqan combines magical SQL with low-code Python to get work done fast, including setting up BI, data activation, data syncs (reverse ETL), publishing and embedding data apps and more.
+Peliqan is the trusted data layer behind your BI, AI agents and MCP servers. It is an all-in-one data platform that provides direct data access to databases, data warehouses and SaaS business applications. Peliqan provides one-click ETL pipelines from 300+ sources. Peliqan has a built-in data warehouse or you can use your own (Snowflake, BigQuery, Redshift, SQL Server, Microsoft Fabric etc.). Peliqan combines magical SQL with low-code Python to get work done fast, including setting up BI, data activation, data syncs (reverse ETL), publishing and embedding data apps, AI access through MCP and building business apps.
 
 ### Is Peliqan a BI tool?
 
 Peliqan is not a BI tool but it has several built-in features to visualize data. You can deploy e.g. Metabase or Superset from the Peliqan market place, you can connect your [favorite BI tool](/connect-your-bi-or-db-tool) (e.g. MS Power BI, Tableau, Qlik) or you can make a dashboard or interactive data app, using Streamlit in Peliqan's [built-in low-code Python scripting environment](/low-code-python-data-apps/basics-of-data-apps).
 
+You can also ask questions about your data in ChatGPT, Claude or Copilot through the [Peliqan MCP Server](/mcp-server).
+
 ### Can I connect to on-premise data sources?
 
-Yes, Peliqan provides an on-prem agent that you can install to sync data from local sources (e.g. a DB) to Peliqan's data warehouse.
+Yes. There are several options: Peliqan Satellite, a Windows agent that copies data from SQL Server or ODBC databases to Peliqan's data warehouse; a VPN tunnel (NetBird, site-to-site IPSec and others), set up together with Peliqan Support; or IP whitelisting on your firewall. See [On-prem connectivity](/on-prem-connectivity).
 
 ### Can Peliqan be deployed on premise?
 
@@ -26,13 +28,13 @@ Yes, Peliqan is cloud-agnostic, runs on Kubernetes and can be deployed inside yo
 
 ### What is a connector and which connectors are available in Peliqan?
 
-Connectors allow Peliqan to access data from a source. Peliqan has connectors for databases, data warehouses and for SaaS business applications such as CRM systems (Salesforce, Hubspot etc.), ERP systems (Odoo, Unleashed ERP etc.) and many other business applications.
+Connectors allow Peliqan to access data from a source. Peliqan has connectors for databases, data warehouses and for SaaS business applications such as CRM systems (Salesforce, Hubspot etc.), ERP and accounting systems (Odoo, Exact Online, AFAS etc.) and many other business applications.
 
-[Click here for a full list of connectors](https://peliqan.io/connectors).
+See the [full list of connectors](https://peliqan.io/connectors).
 
 ### What if I need a connector to a specific data source?
 
-The Peliqan connector can add new connectors in 2 business days at a fixed low one-time setup price. [Contact support](https://peliqan.io/contact) for more details.
+The Peliqan connector team can add new connectors in 2 weeks at a fixed low one-time setup price. [Contact support](https://peliqan.io/contact) for more details.
 
 For databases: please provide the name of the database system you want to connect, optionally including a test account.
 
@@ -43,6 +45,16 @@ For SaaS sources: Peliqan can work with any type of API (REST, SOAP Webservices,
 - Do you want to read data only or also perform write-back?
 - Link to API documentation
 - If possible, test credentials to the API
+
+## AI and apps
+
+### Can I use Peliqan with ChatGPT, Claude or Copilot?
+
+Yes. Add the Peliqan MCP Server in ChatGPT, Claude, Gemini, Microsoft Copilot or any other MCP client. You can then ask questions about your business data and work with your business apps from the chat. Setup steps: [Peliqan MCP Server](/mcp-server).
+
+### What is the difference between Data Apps and Peliqan Machines?
+
+Data Apps are single-file Python scripts, written in the Peliqan editor. Use them to build dashboards, interactive forms, automations, APIs and internal MCP servers. Peliqan Machines are for building business applications: multi-file web apps in any language or framework, usually built with a coding agent such as Claude Code. Both use Peliqan for business data and writeback. More info: [Data Apps](/data-apps) and [Peliqan Machines](/peliqan-machines).
 
 ## Security & compliance
 

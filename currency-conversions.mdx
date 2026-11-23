@@ -8,7 +8,7 @@ When you have transactions, invoices or bookings in multiple currencies, it’s 
   The challenge is to convert currencies with the **_exchange rate of the day of the transaction_**.
 </Warning>
 
-# Step 1: import exchange rates
+## Step 1: import exchange rates
 
 Go to Connections, and add a connection to one of the currency exchange rates connectors, for example Norway Bank (Norges bank).
 
@@ -19,7 +19,7 @@ This will sync a table into your account with exchange rates:
   alt="Exchange rates table"
 />
 
-# Step 2: join your transactions with the exchange rates
+## Step 2: join your transactions with the exchange rates
 
 Write a query that joins your transactions on the currency exchange rates.
 
@@ -43,7 +43,7 @@ ON transactions.currencycode = rate_currency AND transactions.date = rate_date
   alt="Query joining transactions with exchange rates"
 />
 
-# Step 3: check the result
+## Step 3: check the result
 
 Double check if any converted amounts are missing:
 
