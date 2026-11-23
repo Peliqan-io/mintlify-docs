@@ -51,7 +51,8 @@
                 "root":  "user-management",
                 "pages": [
                   "permissions",
-                  "sso-with-microsoft"
+                  "sso-with-microsoft",
+                  "sso-with-microsoft-own-azure-app"
                 ]
               },
               "excel-add-in",
