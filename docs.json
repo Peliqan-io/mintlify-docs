@@ -232,7 +232,7 @@
                 ]
               },
               "vibe-coding-apps-peliqan-as-backend/how-to-integrate-with-the-peliqan-oauth2-server",
-              "permission-layer-for-ai-agents",
+              "row-level-security",
               "publish-apis",
               "peliqan-api",
               "incoming-webhooks"
