@@ -93,7 +93,7 @@ For a custom production build, add a `Dockerfile` at the project root. See [Adva
 
 ## Connect to Peliqan data
 
-Open **Connectivity to Peliqan backend** to review or change the Machine's connection. A group admin manages these settings.
+Open **Connectivity** to review or change the Machine's connection. A group admin manages these settings.
 
 Choose the table access your app needs:
 
@@ -149,7 +149,7 @@ Store external API credentials and other runtime settings under **Settings > Env
 
 Values are stored encrypted. Existing values are not displayed again. Replace a value if you need to change it.
 
-Variables managed by Peliqan, such as `PQ_API_CREDENTIALS`, are read-only. Configure these through **Connectivity to Peliqan backend**. Platform variables and browser-public prefixes, such as `PORT` and `VITE_`, are reserved.
+Variables managed by Peliqan, such as `PQ_API_CREDENTIALS`, are read-only. Configure these through **Connectivity**. Platform variables and browser-public prefixes, such as `PORT` and `VITE_`, are reserved.
 
 <Warning>
   Keep secrets out of frontend code, source files and Docker images. Frontend code is delivered to the user's browser. Set runtime secrets in the Machine settings and read them from the backend.
