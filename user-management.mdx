@@ -38,6 +38,19 @@ Account Owners and Account Admins can enable and disable different login options
 
 For example if you want to enforce login with Microsoft, turn off login with password and turn off Google SSO.
 
+## Limit access per user
+
+Account Owners and Account Admins can turn off parts of Peliqan for a specific user. Go to Settings > Users, edit the user and use the switches in the **Access** section:
+
+- **Allow login to Peliqan platform**: when off, the user can only open the apps shared with them.
+- **Allow login to Data Apps**: lets this user open data apps.
+- **Allow login to PQ Machines**: lets this user sign in to Machines.
+- **Allow MCP**: lets this user connect MCP clients.
+- **Allow DWH access (e.g. BI tools)**: lets this user see their data warehouse password.
+- **Allow API (includes Excel add-in)**: lets this user use personal API keys, database tokens and the Excel add-in.
+
+All switches are on by default. The account owner always keeps platform access. Account Admins can turn switches off for other users, but only the account owner can turn a switch back on for an Account Admin.
+
 ## Permissions
 
 Permissions in Peliqan are managed through groups. more info:
